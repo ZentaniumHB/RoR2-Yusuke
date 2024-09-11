@@ -4,6 +4,7 @@ using RoR2;
 using RoR2.UI;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
@@ -14,6 +15,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
+        private MultiTracking targetTrack;
+        private bool isTrackingOn;
 
         public override void OnEnter()
         {
@@ -26,23 +29,26 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             chargeDuration = baseChargeDuration;
 
+
         }
 
         public override void OnExit()
         {
             base.OnExit();
-            
+
+
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
 
+
             chargeIncrement = chargeLimit / baseChargeDuration * Time.fixedDeltaTime; // takes 'chargeDuration' seconds to get to chargeLimit
             if (!isMaxCharge) chargeValue += chargeIncrement;
             //totalCharge = Mathf.Lerp(0.0f, chargeLimit, fixedAge / baseChargeDuration);
             totalCharge = Mathf.Clamp(chargeValue, 0.0f, chargeLimit);
-            if (!isMaxCharge) Log.Info($"Spirit shotgun charge: " + totalCharge);
+            //if (!isMaxCharge) Log.Info($"Spirit shotgun charge: " + totalCharge);
 
 
             if (fixedAge >= chargeDuration)
@@ -100,6 +106,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected virtual EntityState SpiritNextState()
         {
+            
             return new FireShotgun
             {
                 charge = totalCharge,
@@ -109,10 +116,10 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected virtual EntityState DoubleNextState()
         {
-            return new SpiritGunDouble
+            return new FireShotgun
             {
                 charge = totalCharge,
-                isMaxCharge = isMaxCharge
+                //isMaxCharge = isMaxCharge
             };
         }
 

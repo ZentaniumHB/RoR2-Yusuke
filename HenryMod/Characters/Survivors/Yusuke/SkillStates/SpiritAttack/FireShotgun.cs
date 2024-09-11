@@ -30,7 +30,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private float pelletRadius = 8f;
         private bool hasScanned;
-        private List<HurtBox> targets;
+        public List<HurtBox> targets;
 
         public override void OnEnter()
         {

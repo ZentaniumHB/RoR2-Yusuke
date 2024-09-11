@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using YusukeMod.Modules.BaseStates;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -122,7 +123,7 @@ namespace YusukeMod.Survivors.Yusuke
         {
             AddHitboxes();
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
-            //bodyPrefab.AddComponent<HuntressTrackerComopnent>();
+            //bodyPrefab.AddComponent<Tracking>();
             //anything else here
         }
 
@@ -284,7 +285,7 @@ namespace YusukeMod.Survivors.Yusuke
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon0"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritShotgun)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(MultiTracking)),
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
