@@ -14,8 +14,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
     {
         public static Color Green = new Color(0.0f, 0.5f, 0f, 1f);
 
-        public float maxTrackingDistance = 24;
-        public float maxTrackingAngle = 24f;
+        public float maxTrackingDistance = 90f;
+        public float maxTrackingAngle = 90f;
 
         private GameObject trackingPrefab;
         private Indicator indicator;
@@ -25,6 +25,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
         private float trackerUpdateFrequency = 10f;
 
         public List<HurtBox> targetsList;
+        public HurtBox previousHurtBox;
         private Dictionary<HurtBox, IndicatorInfo> targetIndicators;
         private BullseyeSearch search;
 
@@ -71,15 +72,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             trackerUpdateStopwatch += Time.fixedDeltaTime;
             if (trackerUpdateStopwatch >= 1f / trackerUpdateFrequency)
             {
-                Log.Info("NEEDS TO BE CLEANED");
+                //Log.Info("NEEDS TO BE CLEANED");
                 trackerUpdateStopwatch = 0f;
-                CleanTargetsList();
+
+                CleanTargetsList(previousHurtBox);
                 SearchForTarget(out var currentTarget);
 
                 if ((bool)currentTarget)
                 {
                     AddTagToEnemy(currentTarget);
-                    //CheckIfVisible(currentTarget);
+                    previousHurtBox = currentTarget; // this is used for the clean target, checking if hurtbox is in range
                 }
 
             }
@@ -117,7 +119,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             return IsKeyDownAuthority();
         }
 
-        private void CleanTargetsList()
+        private void CleanTargetsList(HurtBox previousHurtBox)
         {
             Log.Info("Number of targets marked: " + targetsList.Count);
             Log.Info("Number of targets Indicators: " + targetIndicators.Count);
@@ -129,6 +131,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 {
                     // Enemy is most likely dead, remove tag 
                     RemoveTagOnEnemy(i);
+                }
+
+                if (previousHurtBox)
+                {
+                    Log.Info("previousHurtbox exists,checking range");
+                    UpdateScan(out List<HurtBox> currentlist);
+                    if (!currentlist.Contains(previousHurtBox))
+                    {
+                        Log.Info("previousHurtbox no longer in range, removing");
+                        RemoveTagOnEnemy(i);
+                    }
+                    else
+                    {
+                        Log.Info("previousHurtbox still in range");
+                    }
+
+
                 }
                    
             }
@@ -147,20 +166,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             
         }
 
-        private void CheckIfVisible(HurtBox hurtBox) 
-        {
-            int num = 0;
-
-            foreach (HurtBox result in search.GetResults())
-            {
-                if (result != hurtBox)
-                {
-                    RemoveTagOnEnemy(num);
-                }
-                num++;
-            }
-
-        }
 
         private void AddTagToEnemy(HurtBox hurtBox)
         {
@@ -219,6 +224,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                     
             }
             currentHurtbox = null;
+
+
+        }
+
+        public void UpdateScan(out List<HurtBox> currentList)
+        {
+
+            Ray aimRay = GetAimRay();
+            search.teamMaskFilter = TeamMask.all;
+            search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
+            search.filterByLoS = true;
+            search.searchOrigin = aimRay.origin;
+            search.searchDirection = aimRay.direction;
+            search.sortMode = BullseyeSearch.SortMode.Distance;
+            search.maxDistanceFilter = maxTrackingDistance;
+            search.maxAngleFilter = maxTrackingAngle;
+            search.RefreshCandidates();
+            search.FilterOutGameObject(base.gameObject);
+            
+            currentList = search.GetResults().ToList<HurtBox>();
+            return ;
 
 
         }
