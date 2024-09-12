@@ -14,18 +14,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
     {
         public static Color Green = new Color(0.0f, 0.5f, 0f, 1f);
 
-        public float maxTrackingDistance = 90f;
-        public float maxTrackingAngle = 90f;
+        public float maxTrackingDistance = 30f;
+        public float maxTrackingAngle = 30f;
 
         private GameObject trackingPrefab;
         private Indicator indicator;
         
-
         private float trackerUpdateStopwatch;
-        private float trackerUpdateFrequency = 10f;
+        private float trackerUpdateFrequency = 20f;
 
         public List<HurtBox> targetsList;
-        public HurtBox previousHurtBox;
+        public List<HurtBox> previousHurtBoxes = new List<HurtBox>();
         private Dictionary<HurtBox, IndicatorInfo> targetIndicators;
         private BullseyeSearch search;
 
@@ -75,13 +74,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 //Log.Info("NEEDS TO BE CLEANED");
                 trackerUpdateStopwatch = 0f;
 
-                CleanTargetsList(previousHurtBox);
+                CleanTargetsList(previousHurtBoxes);
                 SearchForTarget(out var currentTarget);
 
-                if ((bool)currentTarget)
+                if (currentTarget.Count > 0)
                 {
                     AddTagToEnemy(currentTarget);
-                    previousHurtBox = currentTarget; // this is used for the clean target, checking if hurtbox is in range
+                    //previousHurtBoxes = currentTarget; // this is used for the clean target, checking if hurtbox is in range
+
+                    
+                    Log.Info("Length of previousHurtBoxes (AFTER POINTING): " + previousHurtBoxes.Count);
+                    Log.Info("The currentTarget AFTER THE POINTER WAS DONE: " + currentTarget.Count);
                 }
 
             }
@@ -119,10 +122,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             return IsKeyDownAuthority();
         }
 
-        private void CleanTargetsList(HurtBox previousHurtBox)
+        private void CleanTargetsList(List<HurtBox> previousHurtBoxes)
         {
             Log.Info("Number of targets marked: " + targetsList.Count);
             Log.Info("Number of targets Indicators: " + targetIndicators.Count);
+
+            if(previousHurtBoxes.Count == 0)
+            {
+                Log.Info("Length of previousHurtBoxes: 0");
+            }
+            else
+            {
+                Log.Info("Length of previousHurtBoxes: " + previousHurtBoxes.Count);
+            }
+
+            
+
             for (int i = targetsList.Count - 1; i >= 0; i--)
             {
                 
@@ -131,20 +146,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 {
                     // Enemy is most likely dead, remove tag 
                     RemoveTagOnEnemy(i);
+                    
                 }
 
-                if (previousHurtBox)
+                if (previousHurtBoxes.Count > 0)
                 {
+
                     Log.Info("previousHurtbox exists,checking range");
                     UpdateScan(out List<HurtBox> currentlist);
-                    if (!currentlist.Contains(previousHurtBox))
+                    if (!currentlist.Contains(previousHurtBoxes[i]))
                     {
-                        Log.Info("previousHurtbox no longer in range, removing");
+                       //previousHurtbox no longer in range, removing
                         RemoveTagOnEnemy(i);
+                        
                     }
                     else
                     {
-                        Log.Info("previousHurtbox still in range");
+                        //previousHurtbox still in range
                     }
 
 
@@ -156,32 +174,57 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
         private void RemoveTagOnEnemy(int i)
         {
             HurtBox key = targetsList[i];
+
             targetsList.RemoveAt(i);
+            previousHurtBoxes.RemoveAt(i);
             if(targetIndicators.TryGetValue(key, out var value))
             {
+                //removes the target on them
                 value.indicator.active = false;
                 targetIndicators.Remove(key);
 
             }
-            
+
+
+            Log.Info("Number of targets marked (AFTER DELETION): " + targetsList.Count);
+            Log.Info("Number of targets Indicators (AFTER DELETION): " + targetIndicators.Count);
+            Log.Info("Length of previousHurtBoxes (AFTER DELETION): " + previousHurtBoxes.Count);
+
         }
 
 
-        private void AddTagToEnemy(HurtBox hurtBox)
+        private void AddTagToEnemy(List<HurtBox> hurtBox)
         {
-            
-            // if the target hitbox doesn't exist in the list already, add tag.
-            if (!targetIndicators.TryGetValue(hurtBox, out var value))
+
+            Log.Info("Number of targets marked (BEFORE ADDING): " + targetsList.Count);
+            Log.Info("Number of targets Indicators (BEFORE ADDING): " + targetIndicators.Count);
+            Log.Info("Length of previousHurtBoxes (BEFORE ADDING): " + previousHurtBoxes.Count);
+
+            foreach (HurtBox box in hurtBox)
             {
-                targetsList.Add(hurtBox);
-                // Enemy does not exist - adding tag 
-                IndicatorInfo indicatorInfo = default(IndicatorInfo);
-                indicatorInfo.indicator = new ShotgunPelletIndicator(base.gameObject, LegacyResourcesAPI.Load<GameObject>("Prefabs/EngiMissileTrackingIndicator"));
-                value = indicatorInfo;  // the image that is shown on the enemy
-                value.indicator.targetTransform = hurtBox.transform;
-                value.indicator.active = true;
+                // if the target hitbox doesn't exist in the list already, add tag.
+                if (!targetIndicators.TryGetValue(box, out var value))
+                {
+                    // Enemy does not exist - adding tag 
+                    targetsList.Add(box);
+                    IndicatorInfo indicatorInfo = default(IndicatorInfo);
+                    indicatorInfo.indicator = new ShotgunPelletIndicator(base.gameObject, LegacyResourcesAPI.Load<GameObject>("Prefabs/EngiMissileTrackingIndicator"));
+                    value = indicatorInfo;  // the image that is shown on the enemy
+                    value.indicator.targetTransform = box.transform;
+                    value.indicator.active = true;
+                    // add the hurtbox to the previousList, that will be used when updating the scan.
+                    previousHurtBoxes.Add(box);
+                }
+                // still add them to the list 
+                targetIndicators[box] = value;
+                
+
             }
-            targetIndicators[hurtBox] = value;
+
+            Log.Info("Number of targets marked (AFTER ADDING): " + targetsList.Count);
+            Log.Info("Number of targets Indicators (AFTER ADDING): " + targetIndicators.Count);
+            Log.Info("Length of previousHurtBoxes (AFTER ADDING): " + previousHurtBoxes.Count);
+
         }
 
 
@@ -198,7 +241,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
 
 
-        public void SearchForTarget(out HurtBox currentHurtbox)
+        public void SearchForTarget(out List<HurtBox> currentHurtbox)
         {
 
             Ray aimRay = GetAimRay();
@@ -213,17 +256,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             search.RefreshCandidates();
             search.FilterOutGameObject(base.gameObject);
             // for everything that was found
+
+            List<HurtBox> totalEnemies = new List<HurtBox>();
             foreach (HurtBox result in search.GetResults())
             {
                 // if it has a healthbar and they are alive
                 if ((bool)result.healthComponent && result.healthComponent.alive)
                 {
-                    currentHurtbox = result;
-                    return;
+                    totalEnemies.Add(result);
+                    
                 }
                     
             }
-            currentHurtbox = null;
+            
+            currentHurtbox = totalEnemies;
+            return;
 
 
         }
