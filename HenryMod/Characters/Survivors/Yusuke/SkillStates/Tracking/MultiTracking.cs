@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking.NetworkSystem;
+using UnityEngine.UIElements.UIR;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 {
@@ -22,6 +23,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
         
         private float trackerUpdateStopwatch;
         private float trackerUpdateFrequency = 20f;
+        public int pelletCounter = 12;
+
+        private bool hasMaxSoundPlayed;
+        public static string hitSoundString = "HenryRoll";
 
         public List<HurtBox> targetsList;
         public List<HurtBox> previousHurtBoxes = new List<HurtBox>();
@@ -31,14 +36,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
         private struct IndicatorInfo
         {
-            public int refCount;
+            //public int refCount;
 
             public ShotgunPelletIndicator indicator;
         }
 
         private class ShotgunPelletIndicator : Indicator
         {
-            public int pelletCount;
+            //public int pelletCount;
 
 
             public ShotgunPelletIndicator(GameObject owner, GameObject visualizerPrefab)
@@ -86,6 +91,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                     Log.Info("Length of previousHurtBoxes (AFTER POINTING): " + previousHurtBoxes.Count);
                     Log.Info("The currentTarget AFTER THE POINTER WAS DONE: " + currentTarget.Count);
                 }
+                
 
             }
 
@@ -182,6 +188,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 //removes the target on them
                 value.indicator.active = false;
                 targetIndicators.Remove(key);
+                if(hasMaxSoundPlayed)
+                    hasMaxSoundPlayed = false;
 
             }
 
@@ -202,21 +210,35 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
             foreach (HurtBox box in hurtBox)
             {
-                // if the target hitbox doesn't exist in the list already, add tag.
-                if (!targetIndicators.TryGetValue(box, out var value))
+                if(targetsList.Count != pelletCounter)
                 {
-                    // Enemy does not exist - adding tag 
-                    targetsList.Add(box);
-                    IndicatorInfo indicatorInfo = default(IndicatorInfo);
-                    indicatorInfo.indicator = new ShotgunPelletIndicator(base.gameObject, LegacyResourcesAPI.Load<GameObject>("Prefabs/EngiMissileTrackingIndicator"));
-                    value = indicatorInfo;  // the image that is shown on the enemy
-                    value.indicator.targetTransform = box.transform;
-                    value.indicator.active = true;
-                    // add the hurtbox to the previousList, that will be used when updating the scan.
-                    previousHurtBoxes.Add(box);
+                    // if the target hitbox doesn't exist in the list already, add tag.
+                    if (!targetIndicators.TryGetValue(box, out var value))
+                    {
+                        // Enemy does not exist - adding tag 
+                        targetsList.Add(box);
+                        IndicatorInfo indicatorInfo = default(IndicatorInfo);
+                        indicatorInfo.indicator = new ShotgunPelletIndicator(base.gameObject, LegacyResourcesAPI.Load<GameObject>("Prefabs/EngiMissileTrackingIndicator"));
+                        value = indicatorInfo;  // the image that is shown on the enemy
+                        value.indicator.targetTransform = box.transform;
+                        value.indicator.active = true;
+                        // add the hurtbox to the previousList, that will be used when updating the scan.
+                        previousHurtBoxes.Add(box);
+                    }
+                    // still add them to the list 
+                    targetIndicators[box] = value;
                 }
-                // still add them to the list 
-                targetIndicators[box] = value;
+                else
+                {
+                    if (!hasMaxSoundPlayed)
+                    {
+                        Util.PlaySound(hitSoundString, gameObject);
+                        hasMaxSoundPlayed = true;
+                    }
+                    
+                    Log.Info("Max pellets reached");
+                }
+                
                 
 
             }
