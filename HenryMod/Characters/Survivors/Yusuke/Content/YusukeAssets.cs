@@ -182,7 +182,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             // settings for the appearance
             ProjectileController spiritgunAesthetics = spiritGunPiercePrefab.GetComponent<ProjectileController>();
-            //spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+            //spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");      // Prefabs/ProjectileGhosts/FMJGhost
 
             // speed and duration
             ProjectileSimple spiritGunSpeed = spiritGunPiercePrefab.GetComponent<ProjectileSimple>();
