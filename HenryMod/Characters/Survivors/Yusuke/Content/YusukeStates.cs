@@ -16,10 +16,15 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(ChargeSpiritGunMega));
             Modules.Content.AddEntityState(typeof(ChargeSpiritShotgun));
             Modules.Content.AddEntityState(typeof(MultiTracking));
+            Modules.Content.AddEntityState(typeof(ChargeSpiritWave));
 
 
             Modules.Content.AddEntityState(typeof(FireSpiritShotgun));
             Modules.Content.AddEntityState(typeof(FireSpiritMega));
+            Modules.Content.AddEntityState(typeof(ChargeSpiritWave));
+            Modules.Content.AddEntityState(typeof(Shoot));
+            Modules.Content.AddEntityState(typeof(SpiritWave));
+
 
             Modules.Content.AddEntityState(typeof(Roll));
 
