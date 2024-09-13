@@ -328,7 +328,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationStateMachineName = "Body",
                 interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
 
-                baseRechargeInterval = 4f,
+                baseRechargeInterval = 5f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
@@ -481,6 +481,44 @@ namespace YusukeMod.Survivors.Yusuke
         private void AddHooks()
         {
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
+            On.RoR2.GlobalEventManager.OnHitEnemy += GlobalEventManager_OnHitEnemy;
+            On.RoR2.GlobalEventManager.OnCharacterDeath += GlobalEventManager_OnCharacterDeath;
+
+        }
+
+        private void GlobalEventManager_OnCharacterDeath(On.RoR2.GlobalEventManager.orig_OnCharacterDeath orig, GlobalEventManager self, DamageReport damageReport)
+        {
+            orig(self, damageReport);
+            if(damageReport.attackerBody != null && damageReport.attacker != null && damageReport != null)
+            {
+
+                if (damageReport.victim)
+                {
+                    //Killed eneny was found check what attack killed them through damageType
+                    if(damageReport.damageInfo.damageType == DamageType.BypassArmor)
+                    {
+                        // Enemy was killed by shotgun as it's the only attack that has the bypassArmor, so find and replenish the appropriate skills
+
+                        if (damageReport.attackerBody.skillLocator.utility.activationState.stateType == typeof(Roll))
+                        {
+                            
+                            float value = damageReport.attackerBody.skillLocator.utility.rechargeStopwatch;
+                            damageReport.attackerBody.skillLocator.utility.RunRecharge(value);
+
+                        }
+
+
+                    }
+                }
+            }
+            //throw new NotImplementedException();
+        }
+
+        private void GlobalEventManager_OnHitEnemy(On.RoR2.GlobalEventManager.orig_OnHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, GameObject victim)
+        {
+            orig(self, damageInfo, victim);
+            // do something whenever an enemy gets hit
+            //throw new NotImplementedException();
         }
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)

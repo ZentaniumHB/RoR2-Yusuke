@@ -83,6 +83,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
                 foreach(HurtBox enemy in targets)
                 {
+                    //do a check if its a max charge, it bypasses armour. If not, then regular.
                     EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
                     {
                         origin = enemy.gameObject.transform.position,
@@ -95,7 +96,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         origin = aimRay.origin,
                         damage = (damageCoefficient / damageDivision) * damageStat,
                         damageColorIndex = DamageColorIndex.Default,
-                        damageType = DamageType.Generic,
+                        damageType = DamageType.BypassArmor,
                         falloffModel = BulletAttack.FalloffModel.None,
                         maxDistance = range,
                         force = force,
