@@ -531,7 +531,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             if (sender.HasBuff(YusukeBuffs.spiritMegaSlowDebuff))
             {
-                args.moveSpeedReductionMultAdd *= 0.2f; // 80 percent movement debuff
+                args.moveSpeedReductionMultAdd += 0.8f; // 80 percent movement debuff
             }
 
 
