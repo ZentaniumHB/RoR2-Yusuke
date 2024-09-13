@@ -1,4 +1,5 @@
 ﻿using EntityStates;
+using EntityStates.Commando.CommandoWeapon;
 using R2API;
 using R2API.Utils;
 using RoR2;
@@ -8,6 +9,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking.NetworkSystem;
 using UnityEngine.UIElements.UIR;
+using YusukeMod.SkillStates;
+using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 {
@@ -97,7 +100,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
             if (!IsKeyDown() && isAuthority)
             {
-                outer.SetNextStateToMain();
+                outer.SetNextState(Shotgun());
                 return;
 
             }
@@ -122,6 +125,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             }*/
 
         }
+
+        protected virtual EntityState Shotgun()
+        {
+            return new FireSpiritShotgun
+            {
+                charge = 100,
+                targets = targetsList
+            };
+        }
+
 
         protected virtual bool IsKeyDown()
         {
@@ -318,6 +331,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
         }
 
+        
         public override void OnExit()
         {
             // clearing completely

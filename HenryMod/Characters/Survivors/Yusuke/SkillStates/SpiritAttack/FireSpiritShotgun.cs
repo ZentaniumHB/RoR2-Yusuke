@@ -6,10 +6,11 @@ using RoR2.Projectile;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq.JsonPath;
+using UnityEngine.UIElements;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
-    public class FireShotgun : BaseSkillState
+    public class FireSpiritShotgun : BaseSkillState
     {
         public static float damageCoefficient = YusukeStaticValues.gunDamageCoefficient;
         public static float procCoefficient = 1f;
@@ -19,7 +20,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public static float force = 800f;
         public static float recoil = 3f;
         public static float range = 256f;
+
         public static GameObject tracerEffectPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerLunarWispMinigun"); //"Prefabs/Effects/Tracers/TracerGoldGat"
+        public GameObject spiritImpactEffect = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/FireworkExplosion"); //YusukeAssets.spiritGunExplosionEffect;
 
         private float duration;
         private float fireTime;
@@ -27,10 +30,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private string muzzleString;
         public float charge;
 
-
-        private float pelletRadius = 8f;
-        private bool hasScanned;
         public List<HurtBox> targets;
+        private int damageDivision;
 
         public override void OnEnter()
         {
@@ -54,7 +55,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             if (fixedAge >= fireTime)
             {
-                Scan();
                 Fire();
             }
 
@@ -65,47 +65,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
         }
 
-        private void Scan()
-        {
-            if (!hasScanned)
-            {
-                hasScanned = true;
-                Ray aimRay = GetAimRay();
-                BullseyeSearch search = new BullseyeSearch
-                {
-                    teamMaskFilter = TeamMask.GetEnemyTeams(base.GetTeam()),
-                    filterByLoS = false,
-                    searchOrigin = transform.position,
-                    searchDirection = aimRay.direction,
-                    sortMode = BullseyeSearch.SortMode.Distance,
-                    maxDistanceFilter = pelletRadius,
-                    maxAngleFilter = 20f
-                };
-
-                search.RefreshCandidates();
-                search.FilterOutGameObject(gameObject);
-                targets = search.GetResults().ToList<HurtBox>();
-
-            }
-
-            int enemyCount = 0;
-            foreach (HurtBox singularTarget in targets)
-            {
-                if (singularTarget)
-                {
-
-                    
-                }
-
-            }
-
-            Log.Info("Enemies found: " + enemyCount);
-
-
-
-
-
-        }
+        
 
         private void Fire()
         {
@@ -119,46 +79,21 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
                 Ray aimRay = GetAimRay();
 
-                /*BullseyeSearch search = new BullseyeSearch
-                {
-                    teamMaskFilter = TeamMask.GetEnemyTeams(base.GetTeam()),
-                    filterByLoS = false,
-                    searchOrigin = transform.position,
-                    searchDirection = aimRay.direction,
-                    sortMode = BullseyeSearch.SortMode.Distance,
-                    maxDistanceFilter = pelletRadius,
-                    maxAngleFilter = 90f
-                };
+                damageDivision = targets.Count;
 
-                search.RefreshCandidates();
-                search.FilterOutGameObject(gameObject);
-
-                List<HurtBox> target = search.GetResults().ToList<HurtBox>();
-                int enemyCount = 0;
-                foreach (HurtBox singularTarget in target)
+                foreach(HurtBox enemy in targets)
                 {
-                    if (singularTarget)
+                    EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
                     {
-                        enemyCount++;
-                    }
-
-                }
-
-                Log.Info("Enemies found: " + enemyCount);*/
-
-                if (isAuthority)
-                {
-                    
-                    //AddRecoil(-1f * recoil, -2f * recoil, -0.5f * recoil, 0.5f * recoil);
-
-                    
-
-                    /*new BulletAttack
+                        origin = enemy.gameObject.transform.position,
+                        scale = 8f
+                    }, transmit: true);
+                    new BulletAttack
                     {
                         bulletCount = 1,
-                        aimVector = aimRay.direction,
+                        aimVector = enemy.gameObject.transform.position - transform.position,
                         origin = aimRay.origin,
-                        damage = damageCoefficient * damageStat,
+                        damage = (damageCoefficient / damageDivision) * damageStat,
                         damageColorIndex = DamageColorIndex.Default,
                         damageType = DamageType.Generic,
                         falloffModel = BulletAttack.FalloffModel.None,
@@ -182,8 +117,15 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         spreadYawScale = 1f,
                         queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
                         hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
-                    }.Fire();*/
+                        
+                    }.Fire();
+
+                    
+
                 }
+                
+
+                
             }
         }
 

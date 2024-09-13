@@ -15,8 +15,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
-        private MultiTracking targetTrack;
-        private bool isTrackingOn;
 
         public override void OnEnter()
         {
@@ -107,7 +105,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         protected virtual EntityState SpiritNextState()
         {
             
-            return new FireShotgun
+            return new FireSpiritShotgun
             {
                 charge = totalCharge,
                 
@@ -116,7 +114,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected virtual EntityState DoubleNextState()
         {
-            return new FireShotgun
+            return new FireSpiritShotgun
             {
                 charge = totalCharge,
                 //isMaxCharge = isMaxCharge

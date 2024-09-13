@@ -41,7 +41,7 @@ namespace YusukeMod.SkillStates
 
             barrageStopWatch = 0f;
 
-            this.duration = FireShotgun.baseDuration / this.attackSpeedStat;
+            this.duration = FireSpiritShotgun.baseDuration / this.attackSpeedStat;
             this.fireTime = 0.2f * this.duration;  // delay before the shot
             characterDirection.turnSpeed = 2000f;
             base.characterBody.SetAimTimer(2f);

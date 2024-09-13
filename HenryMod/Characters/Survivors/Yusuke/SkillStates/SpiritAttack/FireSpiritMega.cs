@@ -89,7 +89,7 @@ namespace YusukeMod.SkillStates
                 if (base.isAuthority)
                 {
                     Ray aimRay = base.GetAimRay();
-                    base.AddRecoil(-1f * FireShotgun.recoil, -2f * FireShotgun.recoil, -0.5f * FireShotgun.recoil, 0.5f * FireShotgun.recoil);
+                    base.AddRecoil(-1f * FireSpiritShotgun.recoil, -2f * FireSpiritShotgun.recoil, -0.5f * FireSpiritShotgun.recoil, 0.5f * FireSpiritShotgun.recoil);
                     
 
                     DamageType value = (DamageType.AOE);

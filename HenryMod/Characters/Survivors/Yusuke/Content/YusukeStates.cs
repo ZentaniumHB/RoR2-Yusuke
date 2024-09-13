@@ -18,7 +18,7 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(MultiTracking));
 
 
-            Modules.Content.AddEntityState(typeof(FireShotgun));
+            Modules.Content.AddEntityState(typeof(FireSpiritShotgun));
             Modules.Content.AddEntityState(typeof(FireSpiritMega));
 
             Modules.Content.AddEntityState(typeof(Roll));
