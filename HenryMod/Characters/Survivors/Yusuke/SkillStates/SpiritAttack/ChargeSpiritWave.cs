@@ -42,7 +42,7 @@ namespace YusukeMod.SkillStates
             if (!isMaxCharge) chargeValue += chargeIncrement;
             //totalCharge = Mathf.Lerp(0.0f, chargeLimit, fixedAge / baseChargeDuration);
             totalCharge = Mathf.Clamp(chargeValue, 0.0f, chargeLimit);
-            if (!isMaxCharge) Log.Info($"Spirit gun charge: " + totalCharge);
+            if (!isMaxCharge) Log.Info($"Spirit wave charge: " + totalCharge);
 
 
             if (fixedAge >= chargeDuration)
@@ -93,7 +93,7 @@ namespace YusukeMod.SkillStates
 
         protected virtual EntityState SpiritWaveState()
         {
-            return new SpiritGunDouble
+            return new SpiritWave
             {
                 charge = totalCharge,
                 isMaxCharge = isMaxCharge

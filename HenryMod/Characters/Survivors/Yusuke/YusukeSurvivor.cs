@@ -11,6 +11,7 @@ using UnityEngine;
 
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -290,7 +291,7 @@ namespace YusukeMod.Survivors.Yusuke
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
                 baseRechargeInterval = 5f,
-                baseMaxStock = 4,
+                baseMaxStock = 2,
 
                 rechargeStock = 1,
                 requiredStock = 1,
@@ -310,6 +311,8 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSecondarySkills(bodyPrefab, secondarySkillDef2);
+
+
         }
 
         private void AddUtiitySkills()
@@ -348,6 +351,43 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySkillDef1);
+
+
+            SkillDef utilitySkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeSpiritWave",
+                skillNameToken = YUSUKE_PREFIX + "UTILITY_WAVE_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "UTILITY_WAVE_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritWave)),
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 5f,
+                baseMaxStock = 2,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            Skills.AddUtilitySkills(bodyPrefab, utilitySkillDef2);
+
+
         }
 
         private void AddSpecialSkills()
@@ -495,9 +535,9 @@ namespace YusukeMod.Survivors.Yusuke
                 if (damageReport.victim)
                 {
                     //Killed eneny was found check what attack killed them through damageType
-                    if(damageReport.damageInfo.damageType == DamageType.BypassArmor)
+                    if(damageReport.damageInfo.damageType == DamageType.SlowOnHit)
                     {
-                        // Enemy was killed by shotgun as it's the only attack that has the bypassArmor, so find and replenish the appropriate skills
+                        // Enemy was killed by shotgun as it's the only attack that has the SlowOnHit type, so find and replenish the appropriate skills
 
                         if (damageReport.attackerBody.skillLocator.utility.activationState.stateType == typeof(Roll))
                         {

@@ -62,6 +62,10 @@ namespace YusukeMod.Survivors.Yusuke
             #region Utility
             Language.Add(prefix + "UTILITY_ROLL_NAME", "Roll");
             Language.Add(prefix + "UTILITY_ROLL_DESCRIPTION", "Roll a short distance, gaining <style=cIsUtility>300 armor</style>. <style=cIsUtility>You cannot be hit during the roll.</style>");
+
+
+            Language.Add(prefix + "UTILITY_WAVE_NAME", "Spirit Wave");
+            Language.Add(prefix + "UTILITY_WAVE_DESCRIPTION", "Big punch dealing <style=cIsUtility>x ammount</style>. <style=cIsUtility> Slow movement. </style>");
             #endregion
 
             #region Special
