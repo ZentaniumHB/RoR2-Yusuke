@@ -152,6 +152,7 @@ namespace YusukeMod.SkillStates
 
             if (collision)
             {
+                
                 float decelerateValue = 0.2f; // 50f  // 
                 characterMotor.velocity = new Vector3(decelerateValue, decelerateValue, decelerateValue);
             }
@@ -171,6 +172,8 @@ namespace YusukeMod.SkillStates
                     return;
                 }
 
+
+
             }
         }
 
@@ -179,6 +182,7 @@ namespace YusukeMod.SkillStates
         {
             base.OnExit();
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
+            indicator.active = true;
 
         }
 
