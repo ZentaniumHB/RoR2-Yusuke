@@ -182,7 +182,7 @@ namespace YusukeMod.SkillStates
         {
             base.OnExit();
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
-            indicator.active = true;
+            indicator.active = false;
 
         }
 
