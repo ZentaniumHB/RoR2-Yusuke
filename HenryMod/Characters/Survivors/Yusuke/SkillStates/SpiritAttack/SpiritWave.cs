@@ -1,8 +1,10 @@
 ﻿using EntityStates;
 using RoR2;
 using RoR2.Projectile;
+using System.Linq;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
@@ -29,15 +31,21 @@ namespace YusukeMod.SkillStates
         private float minDuration = 0.3f;
         private float maxDuration = 0.8f;
 
+        public float maxTrackingDistance = 4f;
+        public float maxTrackingAngle = 80f;
+
+
         private bool collision;
+        private BullseyeSearch search = new BullseyeSearch();
+        private HurtBox target;
+        private Indicator indicator;
+        public GameObject targetIcon;
+
+
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
 
         private Vector3 previousPosition;
-
-        //public float dashSpeed { get; private set; }
-
-
 
         public override void OnEnter()
         {
@@ -60,6 +68,7 @@ namespace YusukeMod.SkillStates
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
 
+            
 
 
         }
@@ -94,10 +103,31 @@ namespace YusukeMod.SkillStates
             //dashSpeed = UpdateDashSpeed(characterMotor.velocity);
 
             UpdateDashSpeed(chargedMaxSpeed, chargedFinalSpeed);
-            Log.Info("dashSpeed: " + dashSpeed);
+            //Log.Info("dashSpeed: " + dashSpeed);
+
+            if (target)
+            {
+                Log.Info("Target found.");
+                if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
+                {
+                    Log.Info("creating indicator.");
+
+                    if (targetIcon == null)
+                    {
+                        targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
+                    }
+                    indicator = new Indicator(gameObject, targetIcon);
+
+                    Log.Info("locating indicator.");
+                    indicator.targetTransform = target.transform;
+                    indicator.active = true;
+                    collision = true;
+                }   
+            }
 
             if (!collision)
             {
+                SearchForTarget();
                 characterBody.isSprinting = true;
                 if (characterDirection) characterDirection.forward = forwardDirection;
                 if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
@@ -109,13 +139,12 @@ namespace YusukeMod.SkillStates
                     float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
                     vector = forwardDirection * d;
 
-                    Log.Info("vector: " + vector);
                     characterMotor.velocity = vector;
                 }
                 previousPosition = transform.position;
             }
-
            
+
 
             if (isAuthority && fixedAge >= duration)
             {
@@ -135,6 +164,23 @@ namespace YusukeMod.SkillStates
         public override InterruptPriority GetMinimumInterruptPriority()
         {
             return InterruptPriority.PrioritySkill;
+        }
+
+
+        private void SearchForTarget()
+        {
+            search.teamMaskFilter = TeamMask.all;
+            search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
+            search.filterByLoS = true;
+            search.searchOrigin = transform.position;
+            search.searchDirection = forwardDirection;
+            search.sortMode = BullseyeSearch.SortMode.Distance;
+            search.maxDistanceFilter = maxTrackingDistance;
+            search.maxAngleFilter = maxTrackingAngle;
+            search.RefreshCandidates();
+            search.FilterOutGameObject(gameObject);
+
+            target = search.GetResults().FirstOrDefault();
         }
     }
 
