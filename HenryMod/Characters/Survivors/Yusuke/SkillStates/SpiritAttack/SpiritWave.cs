@@ -34,6 +34,9 @@ namespace YusukeMod.SkillStates
         public float maxTrackingDistance = 4f;
         public float maxTrackingAngle = 80f;
 
+        public float actionStopwatch = 0.0f;
+        public float actionTimeDuration = 0.8f;
+
 
         private bool collision;
         private BullseyeSearch search = new BullseyeSearch();
@@ -107,10 +110,12 @@ namespace YusukeMod.SkillStates
 
             if (target)
             {
-                Log.Info("Target found.");
+                actionStopwatch += Time.fixedDeltaTime;
+                Log.Info("Action timer: "+ actionStopwatch);
+                //Log.Info("Target found.");
                 if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                 {
-                    Log.Info("creating indicator.");
+                    //Log.Info("creating indicator.");
 
                     if (targetIcon == null)
                     {
@@ -118,10 +123,11 @@ namespace YusukeMod.SkillStates
                     }
                     indicator = new Indicator(gameObject, targetIcon);
 
-                    Log.Info("locating indicator.");
+                    //Log.Info("locating indicator.");
                     indicator.targetTransform = target.transform;
                     indicator.active = true;
                     collision = true;
+
                 }   
             }
 
@@ -143,13 +149,28 @@ namespace YusukeMod.SkillStates
                 }
                 previousPosition = transform.position;
             }
+
+            if (collision)
+            {
+                float decelerateValue = 0.2f; // 50f  // 
+                characterMotor.velocity = new Vector3(decelerateValue, decelerateValue, decelerateValue);
+            }
            
 
 
             if (isAuthority && fixedAge >= duration)
             {
-                outer.SetNextStateToMain();
-                return;
+                if (!collision)
+                {
+                    outer.SetNextStateToMain();
+                    return;
+                }
+
+                if(collision && actionStopwatch >= actionTimeDuration) {
+                    outer.SetNextStateToMain();
+                    return;
+                }
+
             }
         }
 
