@@ -4,6 +4,7 @@ using RoR2.Projectile;
 using System.Linq;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
@@ -31,8 +32,8 @@ namespace YusukeMod.SkillStates
         private float minDuration = 0.3f;
         private float maxDuration = 0.8f;
 
-        public float maxTrackingDistance = 4f;
-        public float maxTrackingAngle = 80f;
+        public float maxTrackingDistance = 6f;
+        public float maxTrackingAngle = 60f;
 
         public float actionStopwatch = 0.0f;
         public float actionTimeDuration = 0.8f;
@@ -43,6 +44,10 @@ namespace YusukeMod.SkillStates
         private HurtBox target;
         private Indicator indicator;
         public GameObject targetIcon;
+        private KnockbackController knockbackController;
+        private Vector3 vector;
+        private bool vectorPrint;
+ 
 
 
 
@@ -54,6 +59,8 @@ namespace YusukeMod.SkillStates
         {
             base.OnEnter();
 
+            knockbackController = new KnockbackController();
+
             duration = Mathf.Lerp(minDuration, maxDuration, charge);
             forwardDirection = GetAimRay().direction;
 
@@ -64,9 +71,12 @@ namespace YusukeMod.SkillStates
 
             if (characterMotor && characterDirection)
             {
+
+
                 characterMotor.velocity = forwardDirection * dashSpeed;
                 
             }
+
 
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
@@ -83,7 +93,7 @@ namespace YusukeMod.SkillStates
 
         private void UpdateDashSpeed(float max, float final)
         {
-            dashSpeed = moveSpeedStat * Mathf.Lerp(max, final, fixedAge / duration);
+            dashSpeed = (moveSpeedStat * 1.2f) * Mathf.Lerp(max, final, fixedAge / duration);
         }
 
         private float GetChargedMax(float charge)
@@ -111,7 +121,7 @@ namespace YusukeMod.SkillStates
             if (target)
             {
                 actionStopwatch += Time.fixedDeltaTime;
-                Log.Info("Action timer: "+ actionStopwatch);
+                //Log.Info("Action timer: "+ actionStopwatch);
                 //Log.Info("Target found.");
                 if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                 {
@@ -123,10 +133,22 @@ namespace YusukeMod.SkillStates
                     }
                     indicator = new Indicator(gameObject, targetIcon);
 
-                    //Log.Info("locating indicator.");
+                    // add controller to the enemy that is marked
+                    knockbackController =  target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
+                    knockbackController.moveID = 1;
+                    knockbackController.knockbackDirection = characterMotor.velocity;
+                    Log.Info("VELOCITY WAS SET FOR ENEMY BY PLAYER");
+
+                    Log.Info("Transferred velocity: " + characterMotor.velocity);
+                    Vector3 fr = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
+                    knockbackController.knockbackDirection = forwardDirection;
+                    knockbackController.knockbackSpeed = dashSpeed;
+                    knockbackController.pivotTransform = characterBody.transform;
                     indicator.targetTransform = target.transform;
                     indicator.active = true;
+
                     collision = true;
+
 
                 }   
             }
@@ -141,11 +163,17 @@ namespace YusukeMod.SkillStates
                 Vector3 normalized = (transform.position - previousPosition).normalized;
                 if (characterMotor && characterDirection && normalized != Vector3.zero)
                 {
-                    Vector3 vector = normalized * dashSpeed;
+                    vector = normalized * dashSpeed;
                     float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
                     vector = forwardDirection * d;
 
+
                     characterMotor.velocity = vector;
+                    if (!vectorPrint)
+                    {
+                      
+                        Log.Info("Player vector:  "+vector);
+                    }
                 }
                 previousPosition = transform.position;
             }
@@ -155,6 +183,11 @@ namespace YusukeMod.SkillStates
                 
                 float decelerateValue = 0.2f; // 50f  // 
                 characterMotor.velocity = new Vector3(decelerateValue, decelerateValue, decelerateValue);
+                if (!vectorPrint) {
+                    Log.Info("VELOCITY WAS DECREASED FOR PLAYER");
+                    vectorPrint = true;
+                }
+
             }
            
 
@@ -182,7 +215,8 @@ namespace YusukeMod.SkillStates
         {
             base.OnExit();
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
-            indicator.active = false;
+            if(target)
+                indicator.active = false;
 
         }
 
@@ -196,7 +230,7 @@ namespace YusukeMod.SkillStates
         {
             search.teamMaskFilter = TeamMask.all;
             search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
-            search.filterByLoS = true;
+            search.filterByLoS = false;
             search.searchOrigin = transform.position;
             search.searchDirection = forwardDirection;
             search.sortMode = BullseyeSearch.SortMode.Distance;
