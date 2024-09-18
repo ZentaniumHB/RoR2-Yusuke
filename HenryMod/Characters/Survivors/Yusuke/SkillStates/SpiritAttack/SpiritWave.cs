@@ -1,6 +1,8 @@
 ﻿using EntityStates;
 using RoR2;
 using RoR2.Projectile;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using YusukeMod;
@@ -32,8 +34,10 @@ namespace YusukeMod.SkillStates
         private float minDuration = 0.3f;
         private float maxDuration = 0.8f;
 
-        public float maxTrackingDistance = 6f;
+        public float maxTrackingDistance = 10f;
         public float maxTrackingAngle = 60f;
+
+        // orig  6 and 60
 
         public float actionStopwatch = 0.0f;
         public float actionTimeDuration = 0.8f;
@@ -41,14 +45,14 @@ namespace YusukeMod.SkillStates
 
         private bool collision;
         private BullseyeSearch search = new BullseyeSearch();
+        private SphereSearch bodySearch = new SphereSearch();
         private HurtBox target;
+        public List<Collider> bodyList;
+        private bool isBodyFound;
         private Indicator indicator;
         public GameObject targetIcon;
         private KnockbackController knockbackController;
         private Vector3 vector;
-        private bool vectorPrint;
- 
-
 
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
@@ -62,6 +66,7 @@ namespace YusukeMod.SkillStates
             knockbackController = new KnockbackController();
 
             duration = Mathf.Lerp(minDuration, maxDuration, charge);
+            Log.Info("Duration: " + duration);
             forwardDirection = GetAimRay().direction;
 
             chargedMaxSpeed = GetChargedMax(charge);
@@ -120,37 +125,37 @@ namespace YusukeMod.SkillStates
 
             if (target)
             {
-                actionStopwatch += Time.fixedDeltaTime;
-                //Log.Info("Action timer: "+ actionStopwatch);
-                //Log.Info("Target found.");
-                if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
+                SearchForPhysicalBody();
+                if (isBodyFound)
                 {
-                    //Log.Info("creating indicator.");
-
-                    if (targetIcon == null)
+                    actionStopwatch += Time.fixedDeltaTime;
+                    if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                     {
-                        targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
+                        //Log.Info("creating indicator.");
+
+                        if (targetIcon == null)
+                        {
+                            targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
+                        }
+                        indicator = new Indicator(gameObject, targetIcon);
+
+                        // add controller to the enemy that is marked
+                        knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
+                        knockbackController.moveID = 1;
+                        knockbackController.knockbackDirection = characterMotor.velocity;
+
+                        Vector3 fr = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
+                        knockbackController.knockbackDirection = forwardDirection;
+                        knockbackController.knockbackSpeed = dashSpeed;
+                        knockbackController.pivotTransform = characterBody.transform;
+                        indicator.targetTransform = target.transform;
+                        indicator.active = true;
+
+                        collision = true;
+
                     }
-                    indicator = new Indicator(gameObject, targetIcon);
-
-                    // add controller to the enemy that is marked
-                    knockbackController =  target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
-                    knockbackController.moveID = 1;
-                    knockbackController.knockbackDirection = characterMotor.velocity;
-                    Log.Info("VELOCITY WAS SET FOR ENEMY BY PLAYER");
-
-                    Log.Info("Transferred velocity: " + characterMotor.velocity);
-                    Vector3 fr = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
-                    knockbackController.knockbackDirection = forwardDirection;
-                    knockbackController.knockbackSpeed = dashSpeed;
-                    knockbackController.pivotTransform = characterBody.transform;
-                    indicator.targetTransform = target.transform;
-                    indicator.active = true;
-
-                    collision = true;
-
-
-                }   
+                }
+                   
             }
 
             if (!collision)
@@ -169,11 +174,7 @@ namespace YusukeMod.SkillStates
 
 
                     characterMotor.velocity = vector;
-                    if (!vectorPrint)
-                    {
-                      
-                        Log.Info("Player vector:  "+vector);
-                    }
+
                 }
                 previousPosition = transform.position;
             }
@@ -183,10 +184,7 @@ namespace YusukeMod.SkillStates
                 
                 float decelerateValue = 0.2f; // 50f  // 
                 characterMotor.velocity = new Vector3(decelerateValue, decelerateValue, decelerateValue);
-                if (!vectorPrint) {
-                    Log.Info("VELOCITY WAS DECREASED FOR PLAYER");
-                    vectorPrint = true;
-                }
+
 
             }
            
@@ -211,11 +209,12 @@ namespace YusukeMod.SkillStates
         }
 
 
+
         public override void OnExit()
         {
             base.OnExit();
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
-            if(target)
+            if(target && isBodyFound)
                 indicator.active = false;
 
         }
@@ -228,6 +227,7 @@ namespace YusukeMod.SkillStates
 
         private void SearchForTarget()
         {
+
             search.teamMaskFilter = TeamMask.all;
             search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
             search.filterByLoS = false;
@@ -240,6 +240,30 @@ namespace YusukeMod.SkillStates
             search.FilterOutGameObject(gameObject);
 
             target = search.GetResults().FirstOrDefault();
+        }
+
+
+        private void SearchForPhysicalBody()
+        {
+            
+            Collider[] capturedBody = Physics.OverlapSphere(transform.position, 2f, LayerIndex.entityPrecise.mask);
+            List<Collider> capturedColliders = capturedBody.ToList();
+
+            foreach (Collider result in capturedColliders)
+            {
+                HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
+                if (capturedHurtbox == target)
+                {
+                    isBodyFound = true;
+
+                }
+                else
+                {
+                    Log.Info("not the same box");
+                }
+
+            }
+
         }
     }
 

@@ -124,6 +124,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                     motor.velocity = knockbackVelocity / 2f;
                 }
 
+                if(!body && body.isFlying)
+                {
+                    //motor.velocity
+                }
+
             }
 
             previousPosition = currentPosition;
