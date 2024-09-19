@@ -91,7 +91,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 }
 
                 // prevent any disturbence when altering knockback
-                if (rigidMotor)
+                if (rigidMotor && !body.isFlying)
                 {
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
@@ -105,7 +105,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 {
                     if (body.isFlying)
                     {
-
+                        //rigidbody.useGravity = true;
+                        
                     }
                         
                 }
@@ -120,23 +121,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             }
 
             Vector3 currentPosition = transform.position;
+
             Vector3 knockbackVelocity = knockbackDirection * knockbackSpeed;
 
             if (motor && direction)
             {
 
-                if (body.isBoss || body.isChampion)
+                if (body.isBoss || body.isChampion && !body.isFlying)
                 {
                     motor.velocity = knockbackVelocity / 3f;
                 }
-                else
+                else 
                 {
-                    motor.velocity = knockbackVelocity / 2f;
-                }
+                    if (!body.isFlying)
+                    {
+                        motor.velocity = knockbackVelocity / 2f;
+                    }
+                    else
+                    {
+                        //rigidMotor.moveVector = knockbackVelocity / 2f;
+                        Vector3 knockBackFlying = (transform.position - pivotTransform.position).normalized;
+                        rigidMotor.moveVector = knockBackFlying * knockbackSpeed;
+                    }
 
-                if(!body && body.isFlying)
-                {
-                    
                 }
 
             }
@@ -164,7 +171,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             if (modelTransform) modelTransform.rotation = originalRotation;
             if (direction) direction.enabled = true;
             if (motor) motor.disableAirControlUntilCollision = false;
-
+            if (body.isFlying) rigidbody.useGravity = false;
             Destroy(this); 
         }
 

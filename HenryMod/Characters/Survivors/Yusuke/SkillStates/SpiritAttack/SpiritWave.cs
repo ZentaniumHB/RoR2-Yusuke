@@ -5,6 +5,7 @@ using RoR2.Projectile;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace YusukeMod.SkillStates
         private float minDuration = 0.3f;
         private float maxDuration = 0.8f;
 
-        public float maxTrackingDistance = 10f;
+        public float maxTrackingDistance = 12f;
         public float maxTrackingAngle = 60f;
 
         public float actionStopwatch = 0.0f;
@@ -73,10 +74,17 @@ namespace YusukeMod.SkillStates
         private Vector3 vector;
         private OverlapAttack attack;
 
+        //physic sphere and indicator
+        private float sphereRadius = 3f;
+        private float distanceAhead = 2f;
+
+        private Transform punchIndication;
+        private Transform punchIndicationCenter;
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
 
         private Vector3 previousPosition;
+
 
         public override void OnEnter()
         {
@@ -151,6 +159,7 @@ namespace YusukeMod.SkillStates
 
             if (target)
             {
+                Debug.Log("Enemy scanned, finding body");
                 SearchForPhysicalBody();
                 if (isBodyFound)
                 {
@@ -206,14 +215,20 @@ namespace YusukeMod.SkillStates
             }
 
             if (collision)
-            {
+            {                
                 if (isAuthority)
                 {
                     if (hasPunched)
                     {
+                        Vector3 sphereCenter = transform.position + transform.forward * distanceAhead;
+                        if (punchIndication) Destroy(punchIndication.gameObject);
+
+                        punchIndication = UnityEngine.Object.Instantiate<GameObject>(EntityStates.Huntress.ArrowRain.areaIndicatorPrefab).transform;
+                        punchIndication.localScale = Vector3.one * sphereRadius;
+
+                        punchIndication.transform.position = sphereCenter;            ////punchIndicationCenterransform.position = sphereCenter;
                         //need to do attack Authority thing...
                         OnHitEnemyAuthority();
-
                     }
                     
                 }
@@ -274,6 +289,8 @@ namespace YusukeMod.SkillStates
                     impactSound = impactSound
                 };
 
+                // maybe add an bullet attack that can apply force to flying enemy but no damage and no effect?
+
                 attack.Fire();
                 hasPunched = true;
             }
@@ -300,7 +317,7 @@ namespace YusukeMod.SkillStates
 
             search.teamMaskFilter = TeamMask.all;
             search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
-            search.filterByLoS = false;
+            search.filterByLoS = true;
             search.searchOrigin = transform.position;
             search.searchDirection = forwardDirection;
             search.sortMode = BullseyeSearch.SortMode.Distance;
@@ -315,8 +332,12 @@ namespace YusukeMod.SkillStates
 
         private void SearchForPhysicalBody()
         {
-            
-            Collider[] capturedBody = Physics.OverlapSphere(transform.position, 2f, LayerIndex.entityPrecise.mask);
+
+
+            Vector3 sphereCenter = transform.position + transform.forward;
+
+
+            Collider[] capturedBody = Physics.OverlapSphere(sphereCenter, sphereRadius, LayerIndex.entityPrecise.mask);
             List<Collider> capturedColliders = capturedBody.ToList();
 
             foreach (Collider result in capturedColliders)
@@ -329,14 +350,15 @@ namespace YusukeMod.SkillStates
                 }
                 else
                 {
-                    //Log.Info("not the same box");
+                    
                 }
 
             }
 
         }
 
-        
+
+
     }
 
 }
