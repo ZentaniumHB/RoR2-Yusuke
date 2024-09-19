@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using YusukeMod;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
@@ -163,6 +164,7 @@ namespace YusukeMod.SkillStates
                 SearchForPhysicalBody();
                 if (isBodyFound)
                 {
+                    Log.Info("Proceeding...punch!");
                     ThrowPunch();
                     actionStopwatch += Time.fixedDeltaTime;
                     if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
@@ -329,6 +331,35 @@ namespace YusukeMod.SkillStates
             target = search.GetResults().FirstOrDefault();
         }
 
+        private bool AlternativeSearch(HurtBox closestHurtbox)
+        {
+            // used to check if there is another enemy that might be closer than the enemy that wsa previously scanned
+            search.teamMaskFilter = TeamMask.all;
+            search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
+            search.filterByLoS = true;
+            search.searchOrigin = transform.position;
+            search.searchDirection = forwardDirection;
+            search.sortMode = BullseyeSearch.SortMode.Distance;
+            search.maxDistanceFilter = maxTrackingDistance;
+            search.maxAngleFilter = maxTrackingAngle;
+            search.RefreshCandidates();
+            search.FilterOutGameObject(gameObject);
+
+            foreach (HurtBox enemy in search.GetResults())
+            {
+                if(enemy == closestHurtbox)
+                {
+                    Log.Info("New enemy found, new target!");
+                    target = enemy;
+                    return true;
+                }
+
+            }
+
+            return false;
+
+        }
+
 
         private void SearchForPhysicalBody()
         {
@@ -343,14 +374,20 @@ namespace YusukeMod.SkillStates
             foreach (Collider result in capturedColliders)
             {
                 HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
-                if (capturedHurtbox == target)
-                {
-                    isBodyFound = true;
 
-                }
-                else
+                if(capturedHurtbox)
                 {
-                    
+                    if (capturedHurtbox == target)
+                    {
+                        isBodyFound = true;
+
+                    }
+                    else
+                    {
+                        
+                        if(AlternativeSearch(capturedHurtbox)) isBodyFound = true;
+                    }
+
                 }
 
             }
