@@ -167,6 +167,7 @@ namespace YusukeMod.SkillStates
                     Log.Info("Proceeding...punch!");
                     ThrowPunch();
                     actionStopwatch += Time.fixedDeltaTime;
+
                     if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                     {
 
@@ -189,6 +190,10 @@ namespace YusukeMod.SkillStates
                         indicator.active = true;
 
                         collision = true;
+
+                    }
+                    else
+                    {
 
                     }
                 }
@@ -222,14 +227,6 @@ namespace YusukeMod.SkillStates
                 {
                     if (hasPunched)
                     {
-                        Vector3 sphereCenter = transform.position + transform.forward * distanceAhead;
-                        if (punchIndication) Destroy(punchIndication.gameObject);
-
-                        punchIndication = UnityEngine.Object.Instantiate<GameObject>(EntityStates.Huntress.ArrowRain.areaIndicatorPrefab).transform;
-                        punchIndication.localScale = Vector3.one * sphereRadius;
-
-                        punchIndication.transform.position = sphereCenter;            ////punchIndicationCenterransform.position = sphereCenter;
-                        //need to do attack Authority thing...
                         OnHitEnemyAuthority();
                     }
                     
@@ -237,7 +234,7 @@ namespace YusukeMod.SkillStates
 
                 if (inputBank.jump.justPressed)
                 {
-                    actionStopwatch = actionTimeDuration;
+                    actionStopwatch = actionTimeDuration+1;
                 }
 
             }
