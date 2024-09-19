@@ -77,10 +77,6 @@ namespace YusukeMod.SkillStates
 
         //physic sphere and indicator
         private float sphereRadius = 3f;
-        private float distanceAhead = 2f;
-
-        private Transform punchIndication;
-        private Transform punchIndicationCenter;
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
 
@@ -300,8 +296,11 @@ namespace YusukeMod.SkillStates
         {
             base.OnExit();
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
-            if(target && isBodyFound)
-                indicator.active = false;
+            if (target && isBodyFound)
+            {
+                if(indicator != null) indicator.active = false;
+            }
+
 
         }
 
@@ -313,47 +312,58 @@ namespace YusukeMod.SkillStates
 
         private void SearchForTarget()
         {
+            if (!hasPunched)
+            {
+                search.teamMaskFilter = TeamMask.all;
+                search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
+                search.filterByLoS = true;
+                search.searchOrigin = transform.position;
+                search.searchDirection = forwardDirection;
+                search.sortMode = BullseyeSearch.SortMode.Distance;
+                search.maxDistanceFilter = maxTrackingDistance;
+                search.maxAngleFilter = maxTrackingAngle;
+                search.RefreshCandidates();
+                search.FilterOutGameObject(gameObject);
 
-            search.teamMaskFilter = TeamMask.all;
-            search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
-            search.filterByLoS = true;
-            search.searchOrigin = transform.position;
-            search.searchDirection = forwardDirection;
-            search.sortMode = BullseyeSearch.SortMode.Distance;
-            search.maxDistanceFilter = maxTrackingDistance;
-            search.maxAngleFilter = maxTrackingAngle;
-            search.RefreshCandidates();
-            search.FilterOutGameObject(gameObject);
+                target = search.GetResults().FirstOrDefault();
+            }
 
-            target = search.GetResults().FirstOrDefault();
         }
 
         private bool AlternativeSearch(HurtBox closestHurtbox)
         {
             // used to check if there is another enemy that might be closer than the enemy that wsa previously scanned
-            search.teamMaskFilter = TeamMask.all;
-            search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
-            search.filterByLoS = true;
-            search.searchOrigin = transform.position;
-            search.searchDirection = forwardDirection;
-            search.sortMode = BullseyeSearch.SortMode.Distance;
-            search.maxDistanceFilter = maxTrackingDistance;
-            search.maxAngleFilter = maxTrackingAngle;
-            search.RefreshCandidates();
-            search.FilterOutGameObject(gameObject);
-
-            foreach (HurtBox enemy in search.GetResults())
+            if(!hasPunched)
             {
-                if(enemy == closestHurtbox)
+                search.teamMaskFilter = TeamMask.all;
+                search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
+                search.filterByLoS = true;
+                search.searchOrigin = transform.position;
+                search.searchDirection = forwardDirection;
+                search.sortMode = BullseyeSearch.SortMode.Distance;
+                search.maxDistanceFilter = maxTrackingDistance;
+                search.maxAngleFilter = maxTrackingAngle;
+                search.RefreshCandidates();
+                search.FilterOutGameObject(gameObject);
+
+                foreach (HurtBox enemy in search.GetResults())
                 {
-                    Log.Info("New enemy found, new target!");
-                    target = enemy;
-                    return true;
+                    if (enemy == closestHurtbox)
+                    {
+                        Log.Info("New enemy found, new target!");
+                        target = enemy;
+                        return true;
+                    }
+
                 }
 
+                return false;
+            }
+            else
+            {
+                return false;
             }
 
-            return false;
 
         }
 
