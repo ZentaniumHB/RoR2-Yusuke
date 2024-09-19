@@ -31,7 +31,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
         private bool grabPosition;
         private Vector3 previousPosition;
 
-
+        private Collider collider;
+        private SphereCollider sphereCollider;
+        private CapsuleCollider capsuleCollider;
 
         public int moveID; // used to check what move they were hit by (it will alter their rotations and speed)
         public bool setDirection;
@@ -44,6 +46,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             rigidMotor = gameObject.GetComponent<RigidbodyMotor>();
             modelLocator = this.GetComponent<ModelLocator>();
             rigidbody = gameObject.GetComponent<Rigidbody>();
+
+
+            collider = gameObject.GetComponent<Collider>();
+            sphereCollider = gameObject.GetComponent<SphereCollider>();
+            capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
 
 
             if (modelLocator)
@@ -96,7 +103,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 }
                 if(body)
                 {
-                    //if(body.isFlying)
+                    if (body.isFlying)
+                    {
+
+                    }
                         
                 }
             }
@@ -126,7 +136,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
 
                 if(!body && body.isFlying)
                 {
-                    //motor.velocity
+                    
                 }
 
             }
@@ -158,6 +168,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             Destroy(this); 
         }
 
+    
 
     }
 }

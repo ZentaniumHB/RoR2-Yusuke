@@ -1,13 +1,17 @@
 ﻿using EntityStates;
 using RoR2;
+using RoR2.Audio;
 using RoR2.Projectile;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using YusukeMod;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
@@ -37,10 +41,24 @@ namespace YusukeMod.SkillStates
         public float maxTrackingDistance = 10f;
         public float maxTrackingAngle = 60f;
 
-        // orig  6 and 60
-
         public float actionStopwatch = 0.0f;
         public float actionTimeDuration = 0.8f;
+
+        // attack settings
+
+        protected DamageType damageType = DamageType.Stun1s;
+        protected float damageCoefficient = 8f;
+        protected float procCoefficient = 1f;
+        protected float pushForce = 350f;
+        protected Vector3 bonusForce = Vector3.zero;
+        protected string hitboxGroupName = "SwordGroup";
+        public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
+        protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
+        private bool hasPunched;
+
+        // animation settings
+        protected Animator animator;
+        protected float hitStopDuration = 0.012f;
 
 
         private bool collision;
@@ -48,11 +66,12 @@ namespace YusukeMod.SkillStates
         private SphereSearch bodySearch = new SphereSearch();
         private HurtBox target;
         public List<Collider> bodyList;
-        private bool isBodyFound;
+        private bool isBodyFound = false;
         private Indicator indicator;
         public GameObject targetIcon;
         private KnockbackController knockbackController;
         private Vector3 vector;
+        private OverlapAttack attack;
 
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
@@ -62,7 +81,7 @@ namespace YusukeMod.SkillStates
         public override void OnEnter()
         {
             base.OnEnter();
-
+            animator = GetModelAnimator();
             knockbackController = new KnockbackController();
 
             duration = Mathf.Lerp(minDuration, maxDuration, charge);
@@ -76,7 +95,6 @@ namespace YusukeMod.SkillStates
 
             if (characterMotor && characterDirection)
             {
-
 
                 characterMotor.velocity = forwardDirection * dashSpeed;
                 
@@ -123,15 +141,23 @@ namespace YusukeMod.SkillStates
             UpdateDashSpeed(chargedMaxSpeed, chargedFinalSpeed);
             //Log.Info("dashSpeed: " + dashSpeed);
 
+/*            hitPauseTimer -= Time.deltaTime;
+
+            if (hitPauseTimer <= 0f && inHitPause)
+            {
+                RemoveHitstop();
+            }*/
+
+
             if (target)
             {
                 SearchForPhysicalBody();
                 if (isBodyFound)
                 {
+                    ThrowPunch();
                     actionStopwatch += Time.fixedDeltaTime;
                     if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                     {
-                        //Log.Info("creating indicator.");
 
                         if (targetIcon == null)
                         {
@@ -181,10 +207,21 @@ namespace YusukeMod.SkillStates
 
             if (collision)
             {
-                
-                float decelerateValue = 0.2f; // 50f  // 
-                characterMotor.velocity = new Vector3(decelerateValue, decelerateValue, decelerateValue);
+                if (isAuthority)
+                {
+                    if (hasPunched)
+                    {
+                        //need to do attack Authority thing...
+                        OnHitEnemyAuthority();
 
+                    }
+                    
+                }
+
+                if (inputBank.jump.justPressed)
+                {
+                    actionStopwatch = actionTimeDuration;
+                }
 
             }
            
@@ -208,7 +245,40 @@ namespace YusukeMod.SkillStates
             }
         }
 
+        private void OnHitEnemyAuthority()
+        {
 
+            float decelerationValue = 0.2f;
+            characterMotor.velocity = new Vector3(decelerationValue, decelerationValue, decelerationValue);
+
+        }
+
+        public void ThrowPunch()
+        {
+            if (!hasPunched)
+            {
+
+                attack = new OverlapAttack
+                {
+                    damageType = damageType,
+                    attacker = gameObject,
+                    inflictor = gameObject,
+                    teamIndex = GetTeam(),
+                    damage = damageCoefficient * damageStat,
+                    procCoefficient = procCoefficient,
+                    hitEffectPrefab = hitEffectPrefab,
+                    forceVector = bonusForce,
+                    pushAwayForce = pushForce,
+                    hitBoxGroup = FindHitBoxGroup(hitboxGroupName),
+                    isCrit = RollCrit(),
+                    impactSound = impactSound
+                };
+
+                attack.Fire();
+                hasPunched = true;
+            }
+            
+        }
 
         public override void OnExit()
         {
@@ -259,12 +329,14 @@ namespace YusukeMod.SkillStates
                 }
                 else
                 {
-                    Log.Info("not the same box");
+                    //Log.Info("not the same box");
                 }
 
             }
 
         }
+
+        
     }
 
 }
