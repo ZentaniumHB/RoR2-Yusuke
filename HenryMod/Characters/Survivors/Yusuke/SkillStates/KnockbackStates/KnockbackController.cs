@@ -145,6 +145,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                         motor.velocity = finalKnockBack / 2f;
 
                     }
+
                 }
             }
 
@@ -167,13 +168,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
         private void Recover()
         {
             // reset everything back to "normal"
-            if (modelLocator) modelLocator.enabled = true;
-            if (modelTransform) modelTransform.rotation = originalRotation;
-            if (direction) direction.enabled = true;
-            if (motor) motor.disableAirControlUntilCollision = false;
-            if (body.isFlying) rigidbody.useGravity = false;
-            if (wasAttackGrounded)
-                if (body.isFlying) motor.useGravity = true;
+
+            if (body.isFlying)
+            {
+                if (modelLocator) modelLocator.enabled = true;
+                if (modelTransform) modelTransform.rotation = originalRotation;
+                if (direction) direction.enabled = true;
+                if (motor) motor.disableAirControlUntilCollision = false;
+            }
+            
             Destroy(this); 
         }
 

@@ -363,7 +363,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritWave)),
                 activationStateMachineName = "Weapon",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 2,

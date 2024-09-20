@@ -50,6 +50,8 @@ namespace YusukeMod.SkillStates
         public float actionTimeDuration = 0.8f;
 
 
+        private Vector3 prevMovementVector;
+
         // attack settings
 
         private OverlapAttack attack;
@@ -122,6 +124,7 @@ namespace YusukeMod.SkillStates
 
             if (isGrounded)
             {
+                prevMovementVector = characterMotor.velocity;
                 vector = forwardDirection * dashSpeed;
                 characterMotor.enabled = false;
                 characterDirection.enabled = false;
@@ -285,6 +288,7 @@ namespace YusukeMod.SkillStates
 
             if (collision)
             {
+                // check if they are in the correct state to do a follow up
 
                 if (isAuthority)
                 {
@@ -299,8 +303,9 @@ namespace YusukeMod.SkillStates
                         return;
                     }
 
-                    if (inputBank.skill3.down)
+                    if (inputBank.jump.down)
                     {
+                        
                         actionStopwatch = actionTimeDuration + 1;
                     }
 
@@ -401,6 +406,7 @@ namespace YusukeMod.SkillStates
         public override void OnExit()
         {
             base.OnExit();
+            characterMotor.disableAirControlUntilCollision = false;
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             if (target && isBodyFound)
             {
@@ -411,6 +417,7 @@ namespace YusukeMod.SkillStates
             {
                 characterMotor.enabled = true;
                 characterDirection.enabled = true;
+                characterMotor.velocity = prevMovementVector;
             }
         }
 
