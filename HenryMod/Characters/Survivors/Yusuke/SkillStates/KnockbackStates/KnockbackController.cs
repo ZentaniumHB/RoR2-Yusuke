@@ -28,8 +28,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
 
         private float knockbackDuration = 1f;
         private float knockbackStopwatch;
+        private Vector3 knockbackVelocity;
         private bool grabPosition;
         private Vector3 previousPosition;
+        public bool wasAttackGrounded;
+        public float liftedFromGroundAmount = 30f;
+        public Vector3 finalKnockBack;
 
         private Collider collider;
         private SphereCollider sphereCollider;
@@ -100,11 +104,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                         rigidbody.velocity = Vector3.zero;
                     }
                 }
-                if(body)
-                {
 
 
-                }
             }
 
             // timer for duration
@@ -116,27 +117,35 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             }
 
             Vector3 currentPosition = transform.position;
-
-            Vector3 knockbackVelocity = knockbackDirection * knockbackSpeed;
+            knockbackVelocity = knockbackDirection * knockbackSpeed;
+            
 
             if (motor && direction)
             {
+                motor.Motor.ForceUnground();
+                if (wasAttackGrounded)
+                {
+                    finalKnockBack = new Vector3(knockbackVelocity.x, Mathf.Max(motor.velocity.y, liftedFromGroundAmount), knockbackVelocity.z);
+
+                }
+                else
+                {
+                    finalKnockBack = new Vector3(knockbackVelocity.x, knockbackVelocity.y + Mathf.Max(motor.velocity.y, 1f), knockbackVelocity.z);
+                }
+
 
                 if (body.isBoss || body.isChampion && !body.isFlying)
                 {
-                    motor.velocity = knockbackVelocity / 3f;
+                    motor.velocity = finalKnockBack / 3f;
                 }
                 else 
                 {
                     if (!body.isFlying)
                     {
+                        motor.velocity = finalKnockBack / 2f;
 
-                        motor.velocity = knockbackVelocity / 2f;
                     }
-
-
                 }
-
             }
 
             previousPosition = currentPosition;
@@ -163,6 +172,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             if (direction) direction.enabled = true;
             if (motor) motor.disableAirControlUntilCollision = false;
             if (body.isFlying) rigidbody.useGravity = false;
+            if (wasAttackGrounded)
+                if (body.isFlying) motor.useGravity = true;
             Destroy(this); 
         }
 

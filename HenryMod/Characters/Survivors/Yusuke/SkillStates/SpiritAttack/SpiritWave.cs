@@ -49,6 +49,7 @@ namespace YusukeMod.SkillStates
         public float actionStopwatch = 0.0f;
         public float actionTimeDuration = 0.8f;
 
+
         // attack settings
 
         private OverlapAttack attack;
@@ -84,11 +85,8 @@ namespace YusukeMod.SkillStates
 
         //physic sphere 
         private float sphereRadius = 3f;
-
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
-
         private Vector3 previousPosition;
-
         private ModelLocator modelLocator;
 
 
@@ -109,6 +107,7 @@ namespace YusukeMod.SkillStates
 
             if (!isGrounded)
             {
+                characterBody.isSprinting = true;
                 if (characterMotor && characterDirection)
                 {
 
@@ -123,6 +122,7 @@ namespace YusukeMod.SkillStates
 
             if (isGrounded)
             {
+                vector = forwardDirection * dashSpeed;
                 characterMotor.enabled = false;
                 characterDirection.enabled = false;
                 groundedVersion = true;
@@ -208,10 +208,14 @@ namespace YusukeMod.SkillStates
                         knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
                         knockbackController.moveID = 1;
 
-                        if(!isGrounded) 
-                        knockbackController.knockbackDirection = characterMotor.velocity;
+                        if (groundedVersion)
+                        {
+                            if (!collision) Log.Info("Ground version!");
+                            knockbackController.wasAttackGrounded = true;
+                        }
 
                         knockbackController.knockbackDirection = forwardDirection;
+
                         knockbackController.knockbackSpeed = dashSpeed;
                         knockbackController.pivotTransform = characterBody.transform;
                         indicator.targetTransform = target.transform;
@@ -247,34 +251,34 @@ namespace YusukeMod.SkillStates
                         Quaternion targetRotation = Quaternion.LookRotation(vector, Vector3.up);
 
                         characterBody.transform.rotation = targetRotation;*/
-
-
                     }
-                    else
-                    {
-                        Log.Info("no modellocator..");
-                    }
+                    
 
                 }
 
 
+                if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
+
+                Vector3 normalized = (transform.position - previousPosition).normalized;
+                if (characterMotor && characterDirection && normalized != Vector3.zero)
+                {
+                    vector = normalized * dashSpeed;
+                    float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
+                    vector = forwardDirection * d;
+
+
+                }
+
+                // if false move char
                 if (!groundedVersion)
                 {
-                    characterBody.isSprinting = true;
-                    if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
-
-                    Vector3 normalized = (transform.position - previousPosition).normalized;
-                    if (characterMotor && characterDirection && normalized != Vector3.zero)
-                    {
-                        vector = normalized * dashSpeed;
-                        float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
-                        vector = forwardDirection * d;
-
-
-                        characterMotor.velocity = vector;
-
-                    }
+                    characterMotor.velocity = vector;
                     previousPosition = transform.position;
+
+                }
+                else
+                {
+                    characterMotor.velocity = Vector3.zero;
                 }
 
             }
@@ -412,7 +416,7 @@ namespace YusukeMod.SkillStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Frozen;
         }
 
 
@@ -482,12 +486,11 @@ namespace YusukeMod.SkillStates
                 Vector3 sphereCenter = transform.position + transform.forward;
                 Collider[] capturedBody;
 
-                if (!isGrounded) 
+                if (groundedVersion) 
                 {
                     sphereRadius = 8f;
                     Vector3 sphereLoc = new Vector3(sphereCenter.x, sphereCenter.y + 5f, sphereCenter.z);
                     capturedBody = Physics.OverlapSphere(sphereLoc, sphereRadius, LayerIndex.entityPrecise.mask);
-
                 }
                 else
                 {
