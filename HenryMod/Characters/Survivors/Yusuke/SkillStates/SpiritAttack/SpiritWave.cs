@@ -63,6 +63,7 @@ namespace YusukeMod.SkillStates
         private bool hasPunched;
         private GameObject _;
         private bool hasFlyingBulletFired;
+        private bool groundedVersion;
 
 
         // animation settings
@@ -106,18 +107,26 @@ namespace YusukeMod.SkillStates
 
             UpdateDashSpeed(chargedMaxSpeed, chargedFinalSpeed);
 
-            if (characterMotor && characterDirection)
+            if (!isGrounded)
             {
+                if (characterMotor && characterDirection)
+                {
 
-                characterMotor.velocity = forwardDirection * dashSpeed;
-                
+                    characterMotor.velocity = forwardDirection * dashSpeed;
+
+                }
+
+
+                Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
+                previousPosition = transform.position - b;
             }
 
-
-            Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
-            previousPosition = transform.position - b;
-
-
+            if (isGrounded)
+            {
+                characterMotor.enabled = false;
+                characterDirection.enabled = false;
+                groundedVersion = true;
+            }
 
         }
 
@@ -150,6 +159,7 @@ namespace YusukeMod.SkillStates
             base.FixedUpdate();
             //dashSpeed = UpdateDashSpeed(characterMotor.velocity);
 
+            characterMotor.disableAirControlUntilCollision = true;
             UpdateDashSpeed(chargedMaxSpeed, chargedFinalSpeed);
             //Log.Info("dashSpeed: " + dashSpeed);
 
@@ -197,9 +207,10 @@ namespace YusukeMod.SkillStates
                         // add controller to the enemy that is marked
                         knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
                         knockbackController.moveID = 1;
+
+                        if(!isGrounded) 
                         knockbackController.knockbackDirection = characterMotor.velocity;
 
-                        Vector3 fr = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
                         knockbackController.knockbackDirection = forwardDirection;
                         knockbackController.knockbackSpeed = dashSpeed;
                         knockbackController.pivotTransform = characterBody.transform;
@@ -218,7 +229,6 @@ namespace YusukeMod.SkillStates
             if (!collision)
             {
                 SearchForTarget();
-                characterBody.isSprinting = true;
 
                 if (characterDirection)
                 {
@@ -246,21 +256,26 @@ namespace YusukeMod.SkillStates
                     }
 
                 }
-                if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
 
-                Vector3 normalized = (transform.position - previousPosition).normalized;
-                if (characterMotor && characterDirection && normalized != Vector3.zero)
+
+                if (!groundedVersion)
                 {
-                    vector = normalized * dashSpeed;
-                    float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
-                    vector = forwardDirection * d;
+                    characterBody.isSprinting = true;
+                    if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
+
+                    Vector3 normalized = (transform.position - previousPosition).normalized;
+                    if (characterMotor && characterDirection && normalized != Vector3.zero)
+                    {
+                        vector = normalized * dashSpeed;
+                        float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
+                        vector = forwardDirection * d;
 
 
-                    characterMotor.velocity = vector;
+                        characterMotor.velocity = vector;
 
+                    }
+                    previousPosition = transform.position;
                 }
-                previousPosition = transform.position;
-
 
             }
 
@@ -388,7 +403,11 @@ namespace YusukeMod.SkillStates
                 if(indicator != null) indicator.active = false;
             }
 
-
+            if (groundedVersion)
+            {
+                characterMotor.enabled = true;
+                characterDirection.enabled = true;
+            }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
@@ -461,9 +480,20 @@ namespace YusukeMod.SkillStates
             if (!isBodyFound)
             {
                 Vector3 sphereCenter = transform.position + transform.forward;
+                Collider[] capturedBody;
 
+                if (!isGrounded) 
+                {
+                    sphereRadius = 8f;
+                    Vector3 sphereLoc = new Vector3(sphereCenter.x, sphereCenter.y + 5f, sphereCenter.z);
+                    capturedBody = Physics.OverlapSphere(sphereLoc, sphereRadius, LayerIndex.entityPrecise.mask);
 
-                Collider[] capturedBody = Physics.OverlapSphere(sphereCenter, sphereRadius, LayerIndex.entityPrecise.mask);
+                }
+                else
+                {
+                    capturedBody = Physics.OverlapSphere(sphereCenter, sphereRadius, LayerIndex.entityPrecise.mask);
+                }
+
                 List<Collider> capturedColliders = capturedBody.ToList();
 
                 foreach (Collider result in capturedColliders)
