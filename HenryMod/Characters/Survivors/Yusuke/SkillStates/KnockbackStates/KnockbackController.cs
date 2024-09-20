@@ -70,11 +70,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 }
             }
 
-            /*if (this.rigidMotor)
-            {
-
-
-            }*/
 
         }
 
@@ -86,6 +81,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
 
                 if (motor)
                 {
+                    Log.Info("motor exists");
                     motor.disableAirControlUntilCollision = true;
                     previousPosition = transform.position;
                 }
@@ -93,22 +89,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 // prevent any disturbence when altering knockback
                 if (rigidMotor && !body.isFlying)
                 {
+                    Log.Info("rigidMotor exists and not flying");
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
                     if (rigidbody)
                     {
+                        Log.Info("cont -> rigidBody exists and not flying");
+
                         rigidbody.position = transform.position;
                         rigidbody.velocity = Vector3.zero;
                     }
                 }
                 if(body)
                 {
-                    if (body.isFlying)
-                    {
-                        //rigidbody.useGravity = true;
-                        
-                    }
-                        
+
+
                 }
             }
 
@@ -135,14 +130,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
                 {
                     if (!body.isFlying)
                     {
+
                         motor.velocity = knockbackVelocity / 2f;
                     }
-                    else
-                    {
-                        //rigidMotor.moveVector = knockbackVelocity / 2f;
-                        Vector3 knockBackFlying = (transform.position - pivotTransform.position).normalized;
-                        rigidMotor.moveVector = knockBackFlying * knockbackSpeed;
-                    }
+
 
                 }
 

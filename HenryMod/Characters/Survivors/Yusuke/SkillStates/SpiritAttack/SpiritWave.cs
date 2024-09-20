@@ -16,11 +16,14 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace YusukeMod.SkillStates
 {
     public class SpiritWave : BaseSkillState
     {
+
+        //dash calculations and stopwatches
         public float charge;
         public bool isMaxCharge;
         private Vector3 forwardDirection;
@@ -48,6 +51,7 @@ namespace YusukeMod.SkillStates
 
         // attack settings
 
+        private OverlapAttack attack;
         protected DamageType damageType = DamageType.Stun1s;
         protected float damageCoefficient = 8f;
         protected float procCoefficient = 1f;
@@ -57,15 +61,17 @@ namespace YusukeMod.SkillStates
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
         private bool hasPunched;
+        private GameObject _;
+        private bool hasFlyingBulletFired;
+
 
         // animation settings
         protected Animator animator;
         protected float hitStopDuration = 0.012f;
 
-
+        // targeting and knockback
         private bool collision;
         private BullseyeSearch search = new BullseyeSearch();
-        private SphereSearch bodySearch = new SphereSearch();
         private HurtBox target;
         public List<Collider> bodyList;
         private bool isBodyFound = false;
@@ -73,14 +79,16 @@ namespace YusukeMod.SkillStates
         public GameObject targetIcon;
         private KnockbackController knockbackController;
         private Vector3 vector;
-        private OverlapAttack attack;
 
-        //physic sphere and indicator
+
+        //physic sphere 
         private float sphereRadius = 3f;
 
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
 
         private Vector3 previousPosition;
+
+        private ModelLocator modelLocator;
 
 
         public override void OnEnter()
@@ -109,7 +117,6 @@ namespace YusukeMod.SkillStates
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
 
-            
 
 
         }
@@ -156,16 +163,30 @@ namespace YusukeMod.SkillStates
 
             if (target)
             {
-                Debug.Log("Enemy scanned, finding body");
+                if(!isBodyFound) Debug.Log("Enemy scanned, finding body");
                 SearchForPhysicalBody();
                 if (isBodyFound)
                 {
-                    Log.Info("Proceeding...punch!");
+                    if (!collision) Log.Info("Proceeding...punch!");
                     ThrowPunch();
                     actionStopwatch += Time.fixedDeltaTime;
 
                     if ((bool)target.healthComponent && target.healthComponent.alive && !collision)
                     {
+
+                        CharacterBody body = target.healthComponent.body;
+                        if (body)
+                        {
+                            if (body.isFlying)
+                            {
+                                if (!hasFlyingBulletFired)
+                                {
+                                    hasFlyingBulletFired = true;
+                                    FireBulletForFlying();
+
+                                }
+                            }
+                        }
 
                         if (targetIcon == null)
                         {
@@ -188,10 +209,8 @@ namespace YusukeMod.SkillStates
                         collision = true;
 
                     }
-                    else
-                    {
+                    
 
-                    }
                 }
                    
             }
@@ -200,7 +219,33 @@ namespace YusukeMod.SkillStates
             {
                 SearchForTarget();
                 characterBody.isSprinting = true;
-                if (characterDirection) characterDirection.forward = forwardDirection;
+
+                if (characterDirection)
+                {
+                    characterDirection.forward = forwardDirection;
+                    characterDirection.moveVector = forwardDirection;
+                    // rotate the characters model so it looks better visually
+                    modelLocator = characterBody.GetComponent<ModelLocator>();
+                    Transform modelTransform = modelLocator.transform;
+
+                    if (modelTransform)
+                    {
+
+                        // alter the rotation stuff
+
+                        /*Vector3 vector = new Vector3(0f, forwardDirection.y * 0f);
+                        Quaternion targetRotation = Quaternion.LookRotation(vector, Vector3.up);
+
+                        characterBody.transform.rotation = targetRotation;*/
+
+
+                    }
+                    else
+                    {
+                        Log.Info("no modellocator..");
+                    }
+
+                }
                 if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dodgeFOV, 60f, fixedAge / duration);
 
                 Vector3 normalized = (transform.position - previousPosition).normalized;
@@ -215,22 +260,31 @@ namespace YusukeMod.SkillStates
 
                 }
                 previousPosition = transform.position;
+
+
             }
 
             if (collision)
-            {                
+            {
+
                 if (isAuthority)
                 {
                     if (hasPunched)
                     {
                         OnHitEnemyAuthority();
                     }
-                    
-                }
 
-                if (inputBank.jump.justPressed)
-                {
-                    actionStopwatch = actionTimeDuration+1;
+                    if (collision && actionStopwatch >= actionTimeDuration)
+                    {
+                        outer.SetNextStateToMain();
+                        return;
+                    }
+
+                    if (inputBank.skill3.down)
+                    {
+                        actionStopwatch = actionTimeDuration + 1;
+                    }
+
                 }
 
             }
@@ -245,14 +299,47 @@ namespace YusukeMod.SkillStates
                     return;
                 }
 
-                if(collision && actionStopwatch >= actionTimeDuration) {
-                    outer.SetNextStateToMain();
-                    return;
-                }
+
 
 
 
             }
+        }
+
+        private void FireBulletForFlying()
+        {
+
+            new BulletAttack
+            {
+                bulletCount = 1,
+                aimVector = target.gameObject.transform.position - transform.position,
+                origin = transform.position,
+                damage = 0,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.Generic,
+                falloffModel = BulletAttack.FalloffModel.None,
+                maxDistance = 256f,
+                force = 1600f,                                       // this field is literally the only reason why this bullet is being used.
+                hitMask = LayerIndex.CommonMasks.bullet,
+                minSpread = 0f,
+                maxSpread = 0f,
+                isCrit = RollCrit(),
+                owner = gameObject,
+                muzzleName = "",
+                smartCollision = true,
+                procChainMask = default,
+                procCoefficient = procCoefficient,
+                radius = 0.75f,
+                sniper = false,
+                stopperMask = LayerIndex.CommonMasks.bullet,
+                weapon = null,
+                tracerEffectPrefab = _,
+                spreadPitchScale = 1f,
+                spreadYawScale = 1f,
+                queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
+                hitEffectPrefab = _,
+
+            }.Fire();
         }
 
         private void OnHitEnemyAuthority()
@@ -371,28 +458,31 @@ namespace YusukeMod.SkillStates
         private void SearchForPhysicalBody()
         {
 
-
-            Vector3 sphereCenter = transform.position + transform.forward;
-
-
-            Collider[] capturedBody = Physics.OverlapSphere(sphereCenter, sphereRadius, LayerIndex.entityPrecise.mask);
-            List<Collider> capturedColliders = capturedBody.ToList();
-
-            foreach (Collider result in capturedColliders)
+            if (!isBodyFound)
             {
-                HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
+                Vector3 sphereCenter = transform.position + transform.forward;
 
-                if(capturedHurtbox)
+
+                Collider[] capturedBody = Physics.OverlapSphere(sphereCenter, sphereRadius, LayerIndex.entityPrecise.mask);
+                List<Collider> capturedColliders = capturedBody.ToList();
+
+                foreach (Collider result in capturedColliders)
                 {
-                    if (capturedHurtbox == target)
-                    {
-                        isBodyFound = true;
+                    HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
 
-                    }
-                    else
+                    if (capturedHurtbox)
                     {
-                        
-                        if(AlternativeSearch(capturedHurtbox)) isBodyFound = true;
+                        if (capturedHurtbox == target)
+                        {
+                            isBodyFound = true;
+
+                        }
+                        else
+                        {
+
+                            if (AlternativeSearch(capturedHurtbox)) isBodyFound = true;
+                        }
+
                     }
 
                 }
