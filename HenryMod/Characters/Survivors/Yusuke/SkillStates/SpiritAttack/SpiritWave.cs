@@ -2,6 +2,7 @@
 using RoR2;
 using RoR2.Audio;
 using RoR2.Projectile;
+using RoR2.Skills;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -90,6 +91,13 @@ namespace YusukeMod.SkillStates
         public static float dodgeFOV = global::EntityStates.Commando.DodgeState.dodgeFOV;
         private Vector3 previousPosition;
         private ModelLocator modelLocator;
+
+        // skill prefix stuff
+        const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
+        private bool hasSwappedSkills;
+
+        private GenericSkill previousSecondarySkill;
+
 
 
         public override void OnEnter()
@@ -289,12 +297,13 @@ namespace YusukeMod.SkillStates
             if (collision)
             {
                 // check if they are in the correct state to do a follow up
-
+                SwitchSkills();
                 if (isAuthority)
                 {
                     if (hasPunched)
                     {
                         OnHitEnemyAuthority();
+                        
                     }
 
                     if (collision && actionStopwatch >= actionTimeDuration)
@@ -419,6 +428,10 @@ namespace YusukeMod.SkillStates
                 characterDirection.enabled = true;
                 characterMotor.velocity = prevMovementVector;
             }
+
+            // do a check for the cuff release state, then run this
+            SwitchSkillsBack();
+
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
@@ -530,6 +543,83 @@ namespace YusukeMod.SkillStates
             }
 
         }
+
+
+        private void SwitchSkills()
+        {
+            // swap the skills, if cuffs are released
+
+            
+            if (!hasSwappedSkills)
+            {
+                hasSwappedSkills = true;
+                Log.Info(skillLocator.secondary.skillNameToken);
+                Log.Info(prefix + "SECONDARY_GUN_NAME");
+                Log.Info("Swapping skills");
+                switch (skillLocator.primary.skillNameToken)
+                {
+                    case prefix + "PRIMARY_SLASH_NAME":
+                        // swap the skills out
+                        break;
+                    case prefix + "PRIMARY_GUN_NAME":
+                        // swapt the skills out
+                        break;
+                }
+                switch (skillLocator.secondary.skillNameToken)
+                {
+                    case prefix + "SECONDARY_GUN_NAME":
+                        skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                        skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                        AssignCooldown(prefix + "SECONDARY_GUN_NAME");
+                        Log.Info("Move has been changed");
+                        break;
+                    case prefix + "SECONDARY_SHOTGUN_NAME":
+                        /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        break;
+
+
+                }
+            }
+        }   
+
+        private void SwitchSkillsBack()
+        {
+            if (hasSwappedSkills)
+            {
+                hasSwappedSkills = false;
+                Log.Info(prefix + "FOLLOWUP_GUN_NAME:");
+                switch (skillLocator.primary.skillNameToken)
+                {
+                    case prefix + "PRIMARY_SLASH_NAME":
+                        // swap the skills out
+                        break;
+                    case prefix + "PRIMARY_GUN_NAME":
+                        // swapt the skills out
+                        break;
+                }
+                switch (base.skillLocator.secondary.skillNameToken)
+                {
+                    case prefix + "FOLLOWUP_GUN_NAME":
+                        base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                        break;
+                    case prefix + "FOLLOWUP_SHOTGUN_NAME":
+                        /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        break;
+
+                }
+            }
+        }
+
+
+        public void AssignCooldown(string skill)
+        {
+            skillLocator.secondary.DeductStock(1);
+            skillLocator.secondary.RunRecharge(8);
+        }
+
 
 
 

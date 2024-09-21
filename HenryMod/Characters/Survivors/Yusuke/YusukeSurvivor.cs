@@ -35,6 +35,21 @@ namespace YusukeMod.Survivors.Yusuke
         //used when registering your survivor's language tokens
         public override string survivorTokenPrefix => YUSUKE_PREFIX;
 
+
+        // loadout skills
+        internal static SkillDef primaryMelee;
+        internal static SkillDef primarySpiritGun;
+
+        internal static SkillDef secondarySpiritGun;
+        internal static SkillDef secondarySpiritShotgun;
+
+
+        // follow-up skills
+        internal static SkillDef meleeFollowUp;
+        internal static SkillDef spiritGunFollowUp;
+        internal static SkillDef spiritShotgunFollowUp;
+
+
         public override BodyInfo bodyInfo => new BodyInfo
         {
             bodyName = bodyName,
@@ -84,6 +99,8 @@ namespace YusukeMod.Survivors.Yusuke
         public override GameObject characterModelObject { get; protected set; }
         public override CharacterModel prefabCharacterModel { get; protected set; }
         public override GameObject displayPrefab { get; protected set; }
+
+
 
         public override void Initialize()
         {
@@ -160,6 +177,10 @@ namespace YusukeMod.Survivors.Yusuke
             AddSecondarySkills();
             AddUtiitySkills();
             AddSpecialSkills();
+
+            // creating follow up skills 
+            CreateFollowUpSkills();
+
         }
 
         //skip if you don't have a passive
@@ -277,6 +298,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSecondarySkills(bodyPrefab, secondarySkillDef1);
+            YusukeSurvivor.secondarySpiritGun = secondarySkillDef1;
 
             SkillDef secondarySkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
             {
@@ -311,7 +333,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSecondarySkills(bodyPrefab, secondarySkillDef2);
-
+            YusukeSurvivor.secondarySpiritShotgun = secondarySkillDef2;
 
         }
 
@@ -429,6 +451,80 @@ namespace YusukeMod.Survivors.Yusuke
 
             Skills.AddSpecialSkills(bodyPrefab, specialSkillDef1);
         }
+
+        // follow up skills being created
+        private void CreateFollowUpSkills()
+        {
+
+            YusukeSurvivor.spiritGunFollowUp = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeFollowUpSpiritGun",
+                skillNameToken = YUSUKE_PREFIX + "FOLLOWUP_GUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_GUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGun)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 30f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = false,
+                dontAllowPastMaxStocks = true,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.spiritShotgunFollowUp = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeFollowUpShotgun",
+                skillNameToken = YUSUKE_PREFIX + "FOLLOWUP_SHOTGUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_SHOTGUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(MultiTracking)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 30f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = false,
+                dontAllowPastMaxStocks = true,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            //Skills.AddSkillsToFamily(followUpSkills.skillFamily, spiritShotgunFollowUp);
+
+        }
+
+
         #endregion skills
 
         #region skins
