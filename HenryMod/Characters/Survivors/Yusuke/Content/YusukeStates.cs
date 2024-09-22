@@ -1,4 +1,5 @@
 ﻿
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke.SkillStates;
@@ -25,7 +26,9 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(Shoot));
             Modules.Content.AddEntityState(typeof(SpiritWave));
 
+            Modules.Content.AddEntityState(typeof(SpiritGunDouble));
 
+            Modules.Content.AddEntityState(typeof(SpiritGunFollowUp));
             Modules.Content.AddEntityState(typeof(Roll));
 
             Modules.Content.AddEntityState(typeof(ThrowBomb));

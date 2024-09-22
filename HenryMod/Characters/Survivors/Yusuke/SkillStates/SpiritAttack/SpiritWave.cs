@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseStates;
@@ -92,9 +93,14 @@ namespace YusukeMod.SkillStates
         private Vector3 previousPosition;
         private ModelLocator modelLocator;
 
-        // skill prefix stuff
+        // skill prefix stuff and switching
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
         private bool hasSwappedSkills;
+        private EntityStateMachine stateMachine;
+        private bool followUpActivated;
+        private bool coolDownComplete;
+        private int chosenMove;
+        private bool nextState;
 
         private GenericSkill previousSecondarySkill;
 
@@ -105,6 +111,7 @@ namespace YusukeMod.SkillStates
             base.OnEnter();
             animator = GetModelAnimator();
             knockbackController = new KnockbackController();
+            stateMachine = characterBody.GetComponent<EntityStateMachine>();
 
             duration = Mathf.Lerp(minDuration, maxDuration, charge);
             Log.Info("Duration: " + duration);
@@ -296,10 +303,11 @@ namespace YusukeMod.SkillStates
 
             if (collision)
             {
-                // check if they are in the correct state to do a follow up
-                SwitchSkills();
+
                 if (isAuthority)
                 {
+                    // check if they are in the correct state to do a follow up
+                    if (!followUpActivated) SwitchSkills();
                     if (hasPunched)
                     {
                         OnHitEnemyAuthority();
@@ -308,7 +316,10 @@ namespace YusukeMod.SkillStates
 
                     if (collision && actionStopwatch >= actionTimeDuration)
                     {
-                        outer.SetNextStateToMain();
+                        outer.SetNextState(new RevertSkills
+                        {
+                            moveID = 4
+                        });
                         return;
                     }
 
@@ -317,12 +328,43 @@ namespace YusukeMod.SkillStates
                         
                         actionStopwatch = actionTimeDuration + 1;
                     }
+                    
+                    if (!followUpActivated && inputBank.skill1.down && isAuthority)
+                    {
+                        chosenMove = 1;
+                        Log.Info("chosen move: " + chosenMove);
+                        followUpActivated = true;
+                        //SwitchSkillsBack(1);
+                        Log.Info("SP!");
+                        if (!nextState)
+                        {
+                            nextState = true;
+                            outer.SetNextState(NextFollowUpState());
+                        }
+                        return;                        
+
+                    }
+
+                    if (!followUpActivated && inputBank.skill2.down && isAuthority)
+                    {
+                        chosenMove = 2;
+                        Log.Info("chosen move: "+chosenMove);
+                        followUpActivated = true;
+                        //SwitchSkillsBack(2);
+                        Log.Info("SPIRIT GUN FOLLOW UP!!!!");
+                        if (!nextState)
+                        {
+                            nextState = true;
+                            outer.SetNextState(NextFollowUpState());
+                        }
+                        
+                        return;
+
+                    }
 
                 }
 
             }
-           
-
 
             if (isAuthority && fixedAge >= duration)
             {
@@ -333,11 +375,18 @@ namespace YusukeMod.SkillStates
                 }
 
 
-
-
-
             }
         }
+
+        protected virtual EntityState NextFollowUpState()
+        {
+            return new SpiritGunFollowUp
+            {
+                charge = charge,
+                ID = chosenMove
+            };
+        }
+
 
         private void FireBulletForFlying()
         {
@@ -415,6 +464,7 @@ namespace YusukeMod.SkillStates
         public override void OnExit()
         {
             base.OnExit();
+            Log.Info("LEAVING SPIRIT WAVE");
             characterMotor.disableAirControlUntilCollision = false;
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             if (target && isBodyFound)
@@ -429,9 +479,16 @@ namespace YusukeMod.SkillStates
                 characterMotor.velocity = prevMovementVector;
             }
 
-            // do a check for the cuff release state, then run this
-            SwitchSkillsBack();
+            // if the player made no decision then pass this value
+            if (!followUpActivated)
+            {
+                outer.SetNextState(new RevertSkills
+                {
+                    moveID = 4
+                });
+            }
 
+            
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
@@ -549,16 +606,21 @@ namespace YusukeMod.SkillStates
         {
             // swap the skills, if cuffs are released
 
-            
+            /* ID 1 == Melee
+               ID 2 == gun
+               ID 3 == ShotGun
+
+            */
+
             if (!hasSwappedSkills)
             {
                 hasSwappedSkills = true;
                 Log.Info(skillLocator.secondary.skillNameToken);
-                Log.Info(prefix + "SECONDARY_GUN_NAME");
                 Log.Info("Swapping skills");
                 switch (skillLocator.primary.skillNameToken)
                 {
                     case prefix + "PRIMARY_SLASH_NAME":
+                        // AssignCooldown(0, 1);
                         // swap the skills out
                         break;
                     case prefix + "PRIMARY_GUN_NAME":
@@ -570,12 +632,13 @@ namespace YusukeMod.SkillStates
                     case prefix + "SECONDARY_GUN_NAME":
                         skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                         skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
-                        AssignCooldown(prefix + "SECONDARY_GUN_NAME");
+                        FollowUpSettings(followUpActivated,2,2);
                         Log.Info("Move has been changed");
                         break;
                     case prefix + "SECONDARY_SHOTGUN_NAME":
                         /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                         base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        FollowUpSettings(followUpActivated, 2,3);
                         break;
 
 
@@ -583,12 +646,19 @@ namespace YusukeMod.SkillStates
             }
         }   
 
-        private void SwitchSkillsBack()
+        /*private void SwitchSkillsBack(int moveID)
         {
+
+            *//* ID 1 == Melee
+               ID 2 == gun
+               ID 3 == ShotGun
+               ID 4 == none
+            *//*
+
             if (hasSwappedSkills)
             {
                 hasSwappedSkills = false;
-                Log.Info(prefix + "FOLLOWUP_GUN_NAME:");
+                Log.Info("Checking skills to change back");
                 switch (skillLocator.primary.skillNameToken)
                 {
                     case prefix + "PRIMARY_SLASH_NAME":
@@ -601,23 +671,105 @@ namespace YusukeMod.SkillStates
                 switch (base.skillLocator.secondary.skillNameToken)
                 {
                     case prefix + "FOLLOWUP_GUN_NAME":
+                        int followUpSpiritGun = 0;
                         base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                         base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                        if(moveID != 4)
+                            if(moveID == 2)
+                                if(followUpSpiritGun == 0) FollowUpSettings(true, 2, 2);  //spirit gun was used
                         break;
                     case prefix + "FOLLOWUP_SHOTGUN_NAME":
-                        /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        int followUpShotgun = 1;
+                        *//*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*//*
+                        if (moveID != 4)
+                            if (moveID == 2)
+                                if(followUpShotgun == 1) FollowUpSettings(true, 2, 3);  //shotgun was used
                         break;
 
                 }
             }
-        }
+        }*/
 
 
-        public void AssignCooldown(string skill)
+        public void FollowUpSettings(bool isFollowUpActive, int skillSlot, int ID)
         {
-            skillLocator.secondary.DeductStock(1);
-            skillLocator.secondary.RunRecharge(8);
+            Log.Info("FollowUpActivation: " + isFollowUpActive);
+            if (skillSlot == 1) skillLocator.primary.DeductStock(1);
+            if (skillSlot == 2) skillLocator.secondary.DeductStock(1);
+
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    YusukeMain targetState = (YusukeMain)stateMachine.state;
+                    if (isFollowUpActive)
+                    {
+                        Log.Info("Starting cooldown");
+                        if (ID == 1) targetState.StartCoolDown(1);
+                        if (ID == 2) targetState.StartCoolDown(2);
+                        if (ID == 3) targetState.StartCoolDown(3);
+
+                        coolDownComplete = true;
+
+                    }
+                    else
+                    {
+                        Log.Info("Receiving interval");
+                        if (skillSlot == 1) 
+                        {
+                            Log.Info("ID Before retrieval: " + ID);
+                            if (targetState.GetInterval(ID) <= 0)
+                            {
+                                Log.Info("yes....");
+                                skillLocator.primary.AddOneStock();
+                            }
+                            else
+                            {
+                                Log.Info("NOT SMALLER THAN 0: " + targetState.GetInterval(ID));
+                                skillLocator.primary.RunRecharge(targetState.GetInterval(ID));
+                                
+                            }
+                            Log.Info("Recharged interval: " + targetState.GetInterval(ID));
+
+                        }
+
+                        if (skillSlot == 2)
+                        {
+
+                            Log.Info("ID Before retrieval: " + targetState.GetInterval(ID));
+                            if (targetState.GetInterval(ID) <= 0)
+                            {
+                                Log.Info("yes....");
+                                skillLocator.secondary.AddOneStock();
+                            }
+                            else
+                            {
+                                Log.Info("NOT SMALLER THAN 0: " + ID);
+                                skillLocator.secondary.RunRecharge(targetState.GetInterval(ID));
+
+                            }
+                            Log.Info("Recharged interval: " + targetState.GetInterval(ID));
+                        } 
+                    }
+                    
+
+                    
+                }
+                else
+                {
+                    Log.Error("This is not the YusukeMain state.");
+
+                }
+
+
+            }
+            
         }
 
 

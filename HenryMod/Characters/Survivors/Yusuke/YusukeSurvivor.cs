@@ -12,6 +12,7 @@ using UnityEngine;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -456,6 +457,7 @@ namespace YusukeMod.Survivors.Yusuke
         private void CreateFollowUpSkills()
         {
 
+
             YusukeSurvivor.spiritGunFollowUp = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "YusukeFollowUpSpiritGun",
@@ -464,20 +466,20 @@ namespace YusukeMod.Survivors.Yusuke
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGun)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SpiritGunFollowUp)),
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 30f,
+                baseRechargeInterval = 20f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
                 requiredStock = 1,
                 stockToConsume = 1,
-
+                
                 resetCooldownTimerOnUse = false,
-                fullRestockOnAssign = false,
-                dontAllowPastMaxStocks = true,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -500,7 +502,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
-                baseRechargeInterval = 30f,
+                baseRechargeInterval = 10f,
                 baseMaxStock = 1,
 
                 rechargeStock = 1,
@@ -508,8 +510,8 @@ namespace YusukeMod.Survivors.Yusuke
                 stockToConsume = 1,
 
                 resetCooldownTimerOnUse = false,
-                fullRestockOnAssign = false,
-                dontAllowPastMaxStocks = true,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
                 mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
