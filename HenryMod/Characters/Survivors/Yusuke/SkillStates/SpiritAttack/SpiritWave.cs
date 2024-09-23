@@ -398,7 +398,8 @@ namespace YusukeMod.SkillStates
             return new SpiritGunFollowUp
             {
                 charge = charge,
-                ID = chosenMove
+                ID = chosenMove,
+                target = target
             };
         }
 
@@ -407,7 +408,8 @@ namespace YusukeMod.SkillStates
             return new SpiritGunFollowUp
             {
                 charge = charge,
-                ID = chosenMove
+                ID = chosenMove,
+                target = target
             };
         }
 

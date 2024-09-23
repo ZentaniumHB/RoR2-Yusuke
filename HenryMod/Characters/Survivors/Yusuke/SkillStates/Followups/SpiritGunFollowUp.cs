@@ -21,6 +21,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public static float recoil = 3f;
         public static float range = 256f;
         public static GameObject tracerEffectPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerLunarWispMinigun"); //"Prefabs/Effects/Tracers/TracerGoldGat"
+        public GameObject spiritImpactEffect = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/FireworkExplosion"); //YusukeAssets.spiritGunExplosionEffect;
 
         private float duration;
         private float fireTime;
@@ -66,8 +67,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                     });
 
-                    
-
                 }
             }
             else
@@ -85,13 +84,57 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             {
                 hasFired = true;
 
-                
+                hasFired = true;
+
+                characterBody.AddSpreadBloom(1.5f);
+                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                Util.PlaySound("HenryShootPistol", gameObject);
+
+                Ray aimRay = GetAimRay();
+
+
+                EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
+                {
+                    origin = target.gameObject.transform.position,
+                    scale = 8f
+                }, transmit: true);
+                new BulletAttack
+                {
+                    bulletCount = 1,
+                    aimVector = target.gameObject.transform.position - transform.position,
+                    origin = aimRay.origin,
+                    damage = (charge / 2) * damageCoefficient * damageStat,
+                    damageColorIndex = DamageColorIndex.Default,
+                    damageType = DamageType.Generic,
+                    falloffModel = BulletAttack.FalloffModel.None,
+                    maxDistance = range,
+                    force = force,
+                    hitMask = LayerIndex.CommonMasks.bullet,
+                    minSpread = 0f,
+                    maxSpread = 0f,
+                    isCrit = RollCrit(),
+                    owner = gameObject,
+                    muzzleName = muzzleString,
+                    smartCollision = true,
+                    procChainMask = default,
+                    procCoefficient = procCoefficient,
+                    radius = 0.75f,
+                    sniper = false,
+                    stopperMask = LayerIndex.CommonMasks.bullet,
+                    weapon = null,
+                    tracerEffectPrefab = tracerEffectPrefab,
+                    spreadPitchScale = 1f,
+                    spreadYawScale = 1f,
+                    queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
+                    hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
+
+                }.Fire();
             }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Frozen;
         }
 
     }
