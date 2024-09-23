@@ -29,6 +29,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public float charge;
 
         public int ID;
+        public HurtBox target;
 
         public override void OnEnter()
         {

@@ -115,9 +115,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                      */
 
                     Log.Info("Starting cooldown");
-                    if (ID == 1) targetState.StartCoolDown(1);
-                    if (ID == 2) targetState.StartCoolDown(2);
-                    if (ID == 3) targetState.StartCoolDown(3);
+                    if (ID == 1) targetState.StartCoolDown(skillSlot,1);
+                    if (ID == 2) targetState.StartCoolDown(skillSlot,2);
+                    if (ID == 3) targetState.StartCoolDown(skillSlot,3);
 
                     switchSkills = true;
                 }

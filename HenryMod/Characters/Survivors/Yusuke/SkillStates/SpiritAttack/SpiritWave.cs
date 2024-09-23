@@ -102,6 +102,11 @@ namespace YusukeMod.SkillStates
         private int chosenMove;
         private bool nextState;
 
+        private Type currentStateType;
+        private int equipedPrimarySlot;
+        private int equipedSecondarySlot;
+
+
         private GenericSkill previousSecondarySkill;
 
 
@@ -321,34 +326,42 @@ namespace YusukeMod.SkillStates
                     // Once the move are changed, if either one of them are pressed, then it will move to the next state
                     if (!followUpActivated && inputBank.skill1.down && isAuthority)
                     {
-                        chosenMove = 1;
-                        Log.Info("chosen move: " + chosenMove);
-                        followUpActivated = true;
-                        //SwitchSkillsBack(1);
-                        Log.Info("SP!");
-                        if (!nextState)
+                        if (CheckMoveAvailability(equipedPrimarySlot))
                         {
-                            nextState = true;
-                            outer.SetNextState(NextFollowUpState());
+                            chosenMove = 1;
+                            Log.Info("chosen move: " + chosenMove);
+                            followUpActivated = true;
+                            //SwitchSkillsBack(1);
+                            Log.Info("SP!");
+                            if (!nextState)
+                            {
+                                nextState = true;
+                                outer.SetNextState(MeleeFollowUp());
+                            }
+                            return;
                         }
-                        return;                        
+                                              
 
                     }
 
                     if (!followUpActivated && inputBank.skill2.down && isAuthority)
                     {
-                        chosenMove = 2;
-                        Log.Info("chosen move: "+chosenMove);
-                        followUpActivated = true;
-                        //SwitchSkillsBack(2);
-                        Log.Info("SPIRIT GUN FOLLOW UP!!!!");
-                        if (!nextState)
+                        if (CheckMoveAvailability(equipedSecondarySlot))
                         {
-                            nextState = true;
-                            outer.SetNextState(NextFollowUpState());
+                            chosenMove = 2;
+                            Log.Info("chosen move: " + chosenMove);
+                            followUpActivated = true;
+                            //SwitchSkillsBack(2);
+                            Log.Info("SPIRIT GUN FOLLOW UP!!!!");
+                            if (!nextState)
+                            {
+                                nextState = true;
+                                outer.SetNextState(GunFollowUp());
+                            }
+
+                            return;
                         }
                         
-                        return;
 
                     }
 
@@ -369,7 +382,18 @@ namespace YusukeMod.SkillStates
         }
 
         // next followup entity state
-        protected virtual EntityState NextFollowUpState()
+
+        protected virtual EntityState MeleeFollowUp()
+        {
+            return new SpiritGunFollowUp
+            {
+                charge = charge,
+                ID = chosenMove,
+                target = target
+            };
+        }
+
+        protected virtual EntityState GunFollowUp()
         {
             return new SpiritGunFollowUp
             {
@@ -377,6 +401,17 @@ namespace YusukeMod.SkillStates
                 ID = chosenMove
             };
         }
+
+        protected virtual EntityState ShotGunFollowUp()
+        {
+            return new SpiritGunFollowUp
+            {
+                charge = charge,
+                ID = chosenMove
+            };
+        }
+
+        
 
 
         private void FireBulletForFlying()
@@ -628,10 +663,12 @@ namespace YusukeMod.SkillStates
                     case prefix + "SECONDARY_GUN_NAME":
                         skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                         skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                        equipedSecondarySlot = 2;
                         FollowUpSettings(followUpActivated,2,2); // uses three parameters to determine what actions are needed for the move
                         Log.Info("Move has been changed");
                         break;
                     case prefix + "SECONDARY_SHOTGUN_NAME":
+                        equipedSecondarySlot = 2;
                         /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                         base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
                         FollowUpSettings(followUpActivated, 2,3);
@@ -642,6 +679,21 @@ namespace YusukeMod.SkillStates
             }
         }   
 
+        public bool CheckMoveAvailability(int equipedSlot)
+        {
+            YusukeMain targetState = (YusukeMain)stateMachine.state;
+            if (targetState.GetMoveStatus(equipedSlot)) 
+            {
+                Log.Info("THE SLOT " + equipedSlot + " IS READY!!!!");
+                return true;
+            }
+            if (!targetState.GetMoveStatus(equipedSlot)) 
+            {
+                Log.Info("The SLOT " + equipedSlot + " IS NOT READY UGGGGGGGHHH!!!!!");
+                return false;
+            } 
+            return false;
+        }
 
         public void FollowUpSettings(bool isFollowUpActive, int skillSlot, int ID)
         {
@@ -659,7 +711,7 @@ namespace YusukeMod.SkillStates
             }
             else
             {
-                Type currentStateType = stateMachine.state.GetType();
+                currentStateType = stateMachine.state.GetType();
                 if (currentStateType == typeof(YusukeMain))
                 {
                     YusukeMain targetState = (YusukeMain)stateMachine.state;
@@ -668,11 +720,13 @@ namespace YusukeMod.SkillStates
                     /* if the user just released the punch, then it will retrieve the current conditions for each move, e.g. their cooldown timer 
                         which is stored on the YusukeMain state machine.
                      */
+                    bool canUse = targetState.GetMoveStatus(skillSlot);
+
                     if (skillSlot == 1)
                     {
                         Log.Info("ID Before retrieval: " + ID);
                         // if the interval is smaller than 0 (meaning the skill is no longer on cooldown), re-add the stock.
-                        if (targetState.GetInterval(ID) <= 0)
+                        if (targetState.GetInterval(ID) <= 0 || canUse)
                         {
                             Log.Info("yes....");
                             skillLocator.primary.AddOneStock();
@@ -691,7 +745,7 @@ namespace YusukeMod.SkillStates
                     {
 
                         Log.Info("ID Before retrieval: " + targetState.GetInterval(ID));
-                        if (targetState.GetInterval(ID) <= 0)
+                        if (targetState.GetInterval(ID) <= 0 || canUse)
                         {
                             Log.Info("yes....");
                             skillLocator.secondary.AddOneStock();
