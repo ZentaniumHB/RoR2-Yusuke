@@ -128,7 +128,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
                     hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
 
-                }.Fire();
+                }.Fire();   // blah
             }
         }
 
