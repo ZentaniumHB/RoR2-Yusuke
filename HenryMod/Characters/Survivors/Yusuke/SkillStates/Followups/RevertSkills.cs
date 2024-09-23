@@ -31,8 +31,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public int moveID;
         private bool switchSkills;
 
-
-
         public override void OnEnter()
         {
             base.OnEnter();
@@ -73,6 +71,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     int followUpSpiritGun = 0;
                     skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                     skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    RetrieveStock(2);   // used to retrieve the stock count from previous skill 
                     Log.Info("SpiritGun was reverted");
                     Log.Info("MoveID: " +moveID);
                     Log.Info("followUpGun: " + followUpSpiritGun);
@@ -84,12 +83,44 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     int followUpShotgun = 1;
                     /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                     base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                    RetrieveStock(2);
                     if (moveID != 4)
                         if (moveID == 2)
                             if (followUpShotgun == 1) FollowUpSettings(true, 2, 3);  //shotgun was used so it will start the cooldown on the spirit shotgun follow up.
                     break;
 
             }
+        }
+
+        // retrieve the previous stock count that the user had within the skillslot.
+        private void RetrieveStock(int skillSlot)
+        {
+            YusukeMain mainState = (YusukeMain)stateMachine.state;
+            int stock = mainState.RetrieveStock();
+
+            if (skillSlot == 1)
+            {
+                if(skillSlot != 0)
+                {
+                    for (int i = 0; i < stock; i++)
+                    {
+                        skillLocator.primary.AddOneStock();
+                    }
+                }
+                
+            }
+
+            if (skillSlot == 2)
+            {
+                if (skillSlot != 0)
+                {
+                    for (int i = 0; i < stock; i++)
+                    {
+                        skillLocator.secondary.AddOneStock();
+                    }
+                }
+            }
+
         }
 
         public void FollowUpSettings(bool isFollowUpActive, int skillSlot, int ID)

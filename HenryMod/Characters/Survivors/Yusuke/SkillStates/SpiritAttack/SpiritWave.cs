@@ -661,6 +661,7 @@ namespace YusukeMod.SkillStates
                 switch (skillLocator.secondary.skillNameToken)
                 {
                     case prefix + "SECONDARY_GUN_NAME":
+                        StoreStockCount(2);
                         skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                         skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                         equipedSecondarySlot = 2;
@@ -668,9 +669,10 @@ namespace YusukeMod.SkillStates
                         Log.Info("Move has been changed");
                         break;
                     case prefix + "SECONDARY_SHOTGUN_NAME":
-                        equipedSecondarySlot = 2;
+                        StoreStockCount(2);
                         /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                         base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        equipedSecondarySlot = 2;
                         FollowUpSettings(followUpActivated, 2,3);
                         break;
 
@@ -679,17 +681,27 @@ namespace YusukeMod.SkillStates
             }
         }   
 
+
+        // stores the current stock count for the move that is going to switch, that way it won't simply reset to zero everytime there is a switch
+        private void StoreStockCount(int skillSlot)
+        {
+            YusukeMain mainState = (YusukeMain)stateMachine.state;
+            if (skillSlot == 1) mainState.SetStock(skillLocator.secondary.stock);
+            if (skillSlot == 2) mainState.SetStock(skillLocator.secondary.stock);
+        }
+
+        // used to check if the move can be done, whether that be the primary or secondary slot 
         public bool CheckMoveAvailability(int equipedSlot)
         {
             YusukeMain targetState = (YusukeMain)stateMachine.state;
             if (targetState.GetMoveStatus(equipedSlot)) 
             {
-                Log.Info("THE SLOT " + equipedSlot + " IS READY!!!!");
+                // move is ready to be used.
                 return true;
             }
             if (!targetState.GetMoveStatus(equipedSlot)) 
             {
-                Log.Info("The SLOT " + equipedSlot + " IS NOT READY UGGGGGGGHHH!!!!!");
+                // move is not ready to be used. 
                 return false;
             } 
             return false;
