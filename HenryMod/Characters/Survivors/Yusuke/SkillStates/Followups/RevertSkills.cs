@@ -41,7 +41,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         }
 
-        
 
         public override void FixedUpdate()
         {
@@ -79,7 +78,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     Log.Info("followUpGun: " + followUpSpiritGun);
                     if (moveID != 4)
                         if (moveID == 2)
-                            if (followUpSpiritGun == 0) FollowUpSettings(true, 2, 2);  //spirit gun was used
+                            if (followUpSpiritGun == 0) FollowUpSettings(true, 2, 2);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
                 case prefix + "FOLLOWUP_SHOTGUN_NAME":
                     int followUpShotgun = 1;
@@ -87,7 +86,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
                     if (moveID != 4)
                         if (moveID == 2)
-                            if (followUpShotgun == 1) FollowUpSettings(true, 2, 3);  //shotgun was used
+                            if (followUpShotgun == 1) FollowUpSettings(true, 2, 3);  //shotgun was used so it will start the cooldown on the spirit shotgun follow up.
                     break;
 
             }
@@ -110,6 +109,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
                     Log.Info("Yusuke State machine found");
                     YusukeMain targetState = (YusukeMain)stateMachine.state;
+
+                    /* since the user followed through with the follow up the boolean will become true, if so 
+                        the cooldown for the move will start.
+                     */
+
                     Log.Info("Starting cooldown");
                     if (ID == 1) targetState.StartCoolDown(1);
                     if (ID == 2) targetState.StartCoolDown(2);
