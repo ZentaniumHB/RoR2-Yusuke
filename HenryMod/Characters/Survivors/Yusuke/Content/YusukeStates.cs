@@ -29,6 +29,8 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(SpiritGunDouble));
 
             Modules.Content.AddEntityState(typeof(SpiritGunFollowUp));
+            Modules.Content.AddEntityState(typeof(DivePunch));
+
             Modules.Content.AddEntityState(typeof(Roll));
 
             Modules.Content.AddEntityState(typeof(ThrowBomb));

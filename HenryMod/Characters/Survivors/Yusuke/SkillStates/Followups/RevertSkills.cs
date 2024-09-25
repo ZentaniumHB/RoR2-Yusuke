@@ -29,11 +29,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private EntityStateMachine stateMachine;
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
         public int moveID;
-        private bool switchSkills;
+        private bool switchSkill;
 
         public override void OnEnter()
         {
             base.OnEnter();
+            
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
             SwitchSkillsBack(moveID);
 
@@ -43,7 +44,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if (switchSkills) outer.SetNextStateToMain();
+            if (switchSkill) outer.SetNextStateToMain();
         }
 
         private void SwitchSkillsBack(int moveID)
@@ -58,8 +59,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             Log.Info("Checking skills to change back");
             switch (skillLocator.primary.skillNameToken)
             {
-                case prefix + "PRIMARY_SLASH_NAME":
-                    // swap the skills out
+                case prefix + "FOLLOWUP_MELEE_NAME":
+                    int meleeFollowUp = 0;
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.meleeFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
+                    RetrieveStock(1);
+                    if (moveID != 4)
+                        if (moveID == 1)
+                            if (meleeFollowUp == 0) FollowUpSettings(true, 1, 1);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
                 case prefix + "PRIMARY_GUN_NAME":
                     // swapt the skills out
@@ -144,13 +151,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     /* since the user followed through with the follow up the boolean will become true, if so 
                         the cooldown for the move will start.
                      */
+                    if(isFollowUpActive)
+                    {
+                        Log.Info("Starting cooldown");
+                        if (ID == 1) targetState.StartCoolDown(skillSlot, 1);
+                        if (ID == 2) targetState.StartCoolDown(skillSlot, 2);
+                        if (ID == 3) targetState.StartCoolDown(skillSlot, 3);
 
-                    Log.Info("Starting cooldown");
-                    if (ID == 1) targetState.StartCoolDown(skillSlot,1);
-                    if (ID == 2) targetState.StartCoolDown(skillSlot,2);
-                    if (ID == 3) targetState.StartCoolDown(skillSlot,3);
-
-                    switchSkills = true;
+                        switchSkill = true;
+                    }
+                    
                 }
                 else
                 {

@@ -259,6 +259,7 @@ namespace YusukeMod.Survivors.Yusuke
             primarySkillDef1.stepGraceDuration = 0.5f;
 
             Skills.AddPrimarySkills(bodyPrefab, primarySkillDef1);
+            YusukeSurvivor.primaryMelee = primarySkillDef1;
         }
 
         private void AddSecondarySkills()
@@ -457,12 +458,43 @@ namespace YusukeMod.Survivors.Yusuke
         private void CreateFollowUpSkills()
         {
 
+            YusukeSurvivor.meleeFollowUp = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeFollowUpMelee",
+                skillNameToken = YUSUKE_PREFIX + "FOLLOWUP_MELEE_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(DivePunch)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
+
+                baseRechargeInterval = 30f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
 
             YusukeSurvivor.spiritGunFollowUp = Skills.CreateSkillDef(new SkillDefInfo
             {
                 skillName = "YusukeFollowUpSpiritGun",
                 skillNameToken = YUSUKE_PREFIX + "FOLLOWUP_GUN_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_GUN_DESCRIPTION",
+                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_GUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
 
@@ -522,7 +554,8 @@ namespace YusukeMod.Survivors.Yusuke
 
             });
 
-            //Skills.AddSkillsToFamily(followUpSkills.skillFamily, spiritShotgunFollowUp);
+            
+
 
         }
 

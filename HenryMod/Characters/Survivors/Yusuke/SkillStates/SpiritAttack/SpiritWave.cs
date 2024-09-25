@@ -78,6 +78,7 @@ namespace YusukeMod.SkillStates
         // targeting and knockback
         private bool collision;
         private BullseyeSearch search = new BullseyeSearch();
+        private Collider enemyCollider;
         private HurtBox target;
         public List<Collider> bodyList;
         private bool isBodyFound = false;
@@ -98,8 +99,10 @@ namespace YusukeMod.SkillStates
         private bool hasSwappedSkills;
         private EntityStateMachine stateMachine;
         private bool followUpActivated;
-        private bool coolDownComplete;
-        private int chosenMove;
+
+        private int chosenSkill;
+
+        private bool hasAddedIDs;
         private bool nextState;
 
         private Type currentStateType;
@@ -155,6 +158,7 @@ namespace YusukeMod.SkillStates
         private void UpdateDashSpeed(float max, float final)
         {
             dashSpeed = (moveSpeedStat * 1.2f) * Mathf.Lerp(max, final, fixedAge / duration);
+            Log.Info("Dashspeed: " + dashSpeed);
         }
 
         private float GetChargedMax(float charge)
@@ -311,7 +315,7 @@ namespace YusukeMod.SkillStates
                     {
                         outer.SetNextState(new RevertSkills
                         {
-                            moveID = 4
+                            moveID = 4,
                         });
                         return;
                     }
@@ -328,8 +332,8 @@ namespace YusukeMod.SkillStates
                     {
                         if (CheckMoveAvailability(equipedPrimarySlot))
                         {
-                            chosenMove = 1;
-                            Log.Info("chosen move: " + chosenMove);
+                            chosenSkill = 1;
+                            Log.Info("chosen move: " + chosenSkill);
                             followUpActivated = true;
                             //SwitchSkillsBack(1);
                             Log.Info("SP!");
@@ -348,8 +352,8 @@ namespace YusukeMod.SkillStates
                     {
                         if (CheckMoveAvailability(equipedSecondarySlot))
                         {
-                            chosenMove = 2;
-                            Log.Info("chosen move: " + chosenMove);
+                            chosenSkill = 2;
+                            Log.Info("chosen move: " + chosenSkill);
                             followUpActivated = true;
                             //SwitchSkillsBack(2);
                             Log.Info("SPIRIT GUN FOLLOW UP!!!!");
@@ -385,11 +389,12 @@ namespace YusukeMod.SkillStates
 
         protected virtual EntityState MeleeFollowUp()
         {
-            return new SpiritGunFollowUp
+            return new DivePunch
             {
                 charge = charge,
-                ID = chosenMove,
-                target = target
+                ID = chosenSkill,
+                target = target,
+                enemyCollider = enemyCollider,
             };
         }
 
@@ -398,8 +403,9 @@ namespace YusukeMod.SkillStates
             return new SpiritGunFollowUp
             {
                 charge = charge,
-                ID = chosenMove,
-                target = target
+                ID = chosenSkill,
+                target = target,
+
             };
         }
 
@@ -408,8 +414,9 @@ namespace YusukeMod.SkillStates
             return new SpiritGunFollowUp
             {
                 charge = charge,
-                ID = chosenMove,
-                target = target
+                ID = chosenSkill,
+                target = target,
+
             };
         }
 
@@ -610,6 +617,7 @@ namespace YusukeMod.SkillStates
                 // check each hurtbox and catpure the hurtbox they have, then compare the two for a match.
                 foreach (Collider result in capturedColliders)
                 {
+                    enemyCollider = result;
                     HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
 
                     if (capturedHurtbox)
@@ -643,6 +651,7 @@ namespace YusukeMod.SkillStates
                ID 3 == ShotGun
 
             */
+            
 
             if (!hasSwappedSkills)
             {
@@ -653,8 +662,11 @@ namespace YusukeMod.SkillStates
                 switch (skillLocator.primary.skillNameToken)
                 {
                     case prefix + "PRIMARY_SLASH_NAME":
-                        // AssignCooldown(0, 1);
-                        // swap the skills out
+                        StoreStockCount(1);
+                        skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
+                        skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.meleeFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                        equipedPrimarySlot = 1;
+                        FollowUpSettings(followUpActivated, 1, 1); // uses three parameters to determine what actions are needed for the move
                         break;
                     case prefix + "PRIMARY_GUN_NAME":
                         // swapt the skills out

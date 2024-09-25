@@ -77,6 +77,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
 
         }
 
+
+
         private void FixedUpdate()
         {
             if (!grabPosition)
@@ -156,7 +158,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             {
                 // visually rotate the model to look as if they are actually flying off their feet
                 //body.transform.rotation = Quaternion.Euler(-45f, modelTransform.localRotation.eulerAngles.y, 0f);
-
             }
 
             if (knockbackStopwatch > knockbackDuration)
