@@ -336,7 +336,7 @@ namespace YusukeMod.SkillStates
                             Log.Info("chosen move: " + chosenSkill);
                             followUpActivated = true;
                             //SwitchSkillsBack(1);
-                            Log.Info("SP!");
+                            knockbackController.isFollowUpActive = true;
                             if (!nextState)
                             {
                                 nextState = true;
@@ -356,7 +356,6 @@ namespace YusukeMod.SkillStates
                             Log.Info("chosen move: " + chosenSkill);
                             followUpActivated = true;
                             //SwitchSkillsBack(2);
-                            Log.Info("SPIRIT GUN FOLLOW UP!!!!");
                             if (!nextState)
                             {
                                 nextState = true;

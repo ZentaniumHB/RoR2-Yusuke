@@ -37,6 +37,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public HurtBox target;
         public Collider enemyCollider;
         private DivePunchController DivePunchController;
+        private KnockbackController knockbackController;
         private Vector3 forwardDirection;
         private Vector3 previousPosition;
         private Vector3 vector;
@@ -84,7 +85,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 characterMotor.Motor.ForceUnground();
 
-
+                knockbackController = new KnockbackController();
 
             }
             
@@ -136,6 +137,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             {
                                 Log.Info("ATTAACKING");
                                 MachineGunPunch(charge);
+
                             }
 
                         }
@@ -148,6 +150,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     {
 
                         Log.Info("Attack compolete");
+                        knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
+                        if (knockbackController)
+                        {
+                            knockbackController.ForceDestory();
+                        }
                         outer.SetNextState(new RevertSkills
                         {
                             moveID = ID
@@ -290,8 +297,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             else
             {
                 hasBarrageFinished = true;
-                if (ID != 0) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
-
+                if (ID != 0)
+                {
+                    DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+                    DivePunchController.Remove();
+                }
             }
 
 

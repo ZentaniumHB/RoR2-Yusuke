@@ -38,6 +38,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public bool hasStringEnded;
         public bool hasLanded;
         public bool hasRevertedRotation;
+        public float changeInY = 0;
 
         private void Awake()
         {
@@ -144,7 +145,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (hasStringEnded)
                 {
 
-                    if(hasRevertedRotation) Release();
+                    if(hasRevertedRotation) Remove();
                 }
 
                 if (hasLanded)
@@ -155,12 +156,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (modelTransform)
                 {
                     modelTransform.position = pivotTransform.position;
-                    //modelTransform.rotation = pivotTransform.rotation;
 
                     
 
 
                 }
+            }
+            else
+            {
+                Destroy(this);
             }
             
 
@@ -203,7 +207,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                     float pivotX = pivotTransform.position.x;
                     float colliderY = centerOfCollider.x;
-                    float changeInY = 0;
 
                     if (pivotX > colliderY)
                     {
@@ -215,15 +218,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                         changeInY = colliderY - pivotX;
                     }
 
-                    Log.Info("ChangeInY: " + changeInY);
-                    pivotTransform.position = new Vector3(pivotTransform.position.x, pivotTransform.position.y, pivotTransform.position.z);
-                    pivotTransform.position += Vector3.down * changeInY;
-                    Log.Info("New pivot transform: " + pivotTransform.position);
-                    Log.Info("Enemy colliders center: " + centerOfCollider);
+                    
 
                 }
 
-                if (!pinned) hasRevertedRotation = true;
+                if (!pinned) 
+                { 
+
+                    hasRevertedRotation = true;
+                    
+                }
+                    
 
             }
             else
@@ -232,9 +237,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
         }
 
-        public void Release()
+        public void Remove()
         {
-            
+            Log.Info("[Dive punch] enabling and destroying");
             if (modelLocator) modelLocator.enabled = true;
             if (modelTransform) modelTransform.rotation = originalRotation;
             if (direction) direction.enabled = true;
@@ -242,6 +247,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
+
+
             
             Destroy(this);
         }

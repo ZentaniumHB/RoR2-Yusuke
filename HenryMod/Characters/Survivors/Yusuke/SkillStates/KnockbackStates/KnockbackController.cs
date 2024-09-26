@@ -31,9 +31,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
         private Vector3 knockbackVelocity;
         private bool grabPosition;
         private Vector3 previousPosition;
+
         public bool wasAttackGrounded;
         public float liftedFromGroundAmount = 30f;
         public Vector3 finalKnockBack;
+        public bool isFollowUpActive;
 
         private Collider collider;
         private SphereCollider sphereCollider;
@@ -162,26 +164,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
 
             if (knockbackStopwatch > knockbackDuration)
             {
-                Recover();
+                if(!isFollowUpActive) Recover();
             }
+
+
         }
 
         private void Recover()
         {
             // reset everything back to "normal"
 
-            if (body.isFlying)
-            {
-                if (modelLocator) modelLocator.enabled = true;
-                if (modelTransform) modelTransform.rotation = originalRotation;
-                if (direction) direction.enabled = true;
-                if (motor) motor.disableAirControlUntilCollision = false;
-            }
-            
+            if (modelLocator) modelLocator.enabled = true;
+            if (modelTransform) modelTransform.rotation = originalRotation;
+            if (direction) direction.enabled = true;
+            if (motor) motor.disableAirControlUntilCollision = false;
+
             Destroy(this); 
         }
 
-    
+        public void ForceDestory()
+        {
+            Destroy(this);
+        }
+
 
     }
 }
