@@ -260,12 +260,7 @@ namespace YusukeMod.SkillStates
                     if (modelTransform)
                     {
 
-                        // alter the rotation stuff
-
-                        /*Vector3 vector = new Vector3(0f, forwardDirection.y * 0f);
-                        Quaternion targetRotation = Quaternion.LookRotation(vector, Vector3.up);
-
-                        characterBody.transform.rotation = targetRotation;*/
+                        
                     }
                     
 
@@ -347,6 +342,9 @@ namespace YusukeMod.SkillStates
                                               
 
                     }
+
+                    Log.Info("MODEL NAME: " + target.healthComponent.gameObject.name);
+
 
                     if (!followUpActivated && inputBank.skill2.down && isAuthority)
                     {

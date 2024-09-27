@@ -31,6 +31,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private BaseState state;
 
         private bool setBounds;
+        public bool Pinnable;
 
         private Vector3 oldMoveVec;
         private Quaternion oldModelRotation;
@@ -95,35 +96,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
 
             hasRevertedRotation = false;
+            setBounds = false;
+            Log.Info("Setup complete");
 
-            
         }
 
         private void FixedUpdate()
         {
+
             if(pivotTransform.position != Vector3.zero)
             {
-                if (!setBounds)
+                if (!setBounds && Pinnable)
                 {
+                    //Log.Info("Setting bounds");
                     setBounds = true;
-                    Renderer renderer = modelTransform.GetComponentInChildren<Renderer>();
-                    if (renderer)
-                    {
-                        centerOfMass = renderer.bounds.center;
-                        Log.Info("Enemy pivot transform: " + pivotTransform.position);
-
-                    }
-                    else
-                    {
-                        Log.Info("no renderer");
-                    }
-
                     EnemyRotation(modelTransform, true);
 
                 }
 
+
+                //Log.Info("Checking motor");
                 if (motor)
                 {
+                    //Log.Info("motor exists");
                     motor.disableAirControlUntilCollision = true;
                     motor.velocity = Vector3.zero;
                     motor.rootMotion = Vector3.zero;
@@ -131,8 +126,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 }
 
+                //Log.Info("checking rigidMotor");
                 if (rigidMotor)
                 {
+                    //Log.Info("motor exists");
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
                     if (rigidbody)
@@ -157,14 +154,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     modelTransform.position = pivotTransform.position;
 
-                    
-
 
                 }
+
+
             }
             else
             {
+                Log.Info(" pivot Doesn't exist, destory");
                 Destroy(this);
+
             }
             
 
@@ -176,7 +175,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             if (modelTransform)
             {
-
+                Log.Info("Rotating character");
                 // ----------Rotating the character
                 oldModelRotation = model.localRotation; 
 
@@ -191,8 +190,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 Quaternion faceTheSky = Quaternion.identity;
                 if(pinned) faceTheSky = Quaternion.Euler(-90f, 0f, 0f); // rotating so the enemy faces the sky
                 if(!pinned) faceTheSky = Quaternion.Euler(90f, 0f, 0f); // rotating so the enemy faces the sky
-
-
 
                 Quaternion newLocalRotation = localRotation * faceTheSky;
                 //from local to world space
@@ -246,6 +243,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (collider) collider.enabled = true;
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
+            if (motor) motor.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
 
 
