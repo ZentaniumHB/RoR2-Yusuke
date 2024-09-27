@@ -169,7 +169,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
 
                     Log.Info("Attack compolete");
-                    knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
+                    if(target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
                     if (knockbackController)
                     {
                         Log.Info("Now deleting knockback controller");
@@ -292,7 +292,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             punchStopwatch += GetDeltaTime();
 
-            if (punchCount != maxPunches)
+            if (target.healthComponent.alive)
             {
                 if (punchStopwatch > 0.2f)
                 {
@@ -316,7 +316,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         attacker = gameObject,
                         inflictor = gameObject,
                         teamIndex = GetTeam(),
-                        damage = damageCoefficient * damageStat,
+                        damage = damageCoefficient * damageStat + (charge/6),
                         procCoefficient = procCoefficient,
                         hitEffectPrefab = hitEffectPrefab,
                         pushAwayForce = pushForce,
@@ -329,17 +329,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     punchStopwatch = 0;
 
                 }
+           
 
             }
-            else
+            
+            if(punchCount == maxPunches || !target.healthComponent.alive)
             {
                 hasBarrageFinished = true;
                 if (ID != 0)
                 {
+                    Log.Info("TOTAL PUNCHES: "+punchCount);
                     Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
                     if(beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
                     Log.Info("First deleting dive punch");
-                    DivePunchController.Remove();
+                    if(target.healthComponent.alive) DivePunchController.Remove();
                 }
             }
 
