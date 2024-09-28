@@ -36,6 +36,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             base.OnEnter();
             
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            Log.Info("ID IN REVERT SKILLS: " + moveID);
             SwitchSkillsBack(moveID);
 
         }
