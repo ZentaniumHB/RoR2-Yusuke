@@ -32,6 +32,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private bool SkipDive;
         private bool playAnim;
 
+        private bool resetY;
+
 
         public int ID;
         public HurtBox target;
@@ -282,6 +284,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             slowedVelocity.x = Mathf.Lerp(slowedVelocity.x, 0f, slowValue * Time.deltaTime);
             slowedVelocity.z = Mathf.Lerp(slowedVelocity.z, 0f, slowValue * Time.deltaTime);
             Vector3 vector3 = new Vector3(direction.x, 0f, direction.z).normalized * 1.5f;
+
+            // resetting the Y value so the velocity doesn't send them too high
+            if (!resetY)
+            {
+                resetY = true;
+                slowedVelocity.y = 0f;
+            }
 
             // Set the updated velocity back
             characterMotor.velocity = slowedVelocity + vector3;
