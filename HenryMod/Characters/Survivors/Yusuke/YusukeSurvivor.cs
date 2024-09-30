@@ -13,6 +13,8 @@ using YusukeMod.Modules.BaseStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
+using RoR2.UI;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -37,6 +39,9 @@ namespace YusukeMod.Survivors.Yusuke
         public override string survivorTokenPrefix => YUSUKE_PREFIX;
 
 
+       
+
+
         // loadout skills
         internal static SkillDef primaryMelee;
         internal static SkillDef primarySpiritGun;
@@ -50,6 +55,8 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef spiritGunFollowUp;
         internal static SkillDef spiritShotgunFollowUp;
 
+        //HUD
+        internal static HUD hud = null;
 
         public override BodyInfo bodyInfo => new BodyInfo
         {
@@ -143,6 +150,7 @@ namespace YusukeMod.Survivors.Yusuke
             AddHitboxes();
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
             //bodyPrefab.AddComponent<Tracking>();
+            bodyPrefab.AddComponent<YusukeHUD>();
             //anything else here
         }
 
@@ -654,6 +662,8 @@ namespace YusukeMod.Survivors.Yusuke
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
             On.RoR2.GlobalEventManager.OnHitEnemy += GlobalEventManager_OnHitEnemy;
             On.RoR2.GlobalEventManager.OnCharacterDeath += GlobalEventManager_OnCharacterDeath;
+            On.RoR2.UI.HUD.Awake += GetHUD;
+
 
         }
 
@@ -712,5 +722,21 @@ namespace YusukeMod.Survivors.Yusuke
             }
 
         }
+
+
+        private void GetHUD(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
+        {
+            orig(self); // Don't forget to call this, or the vanilla / other mods' codes will not execute!
+            hud = self;
+
+            //hud.mainContainer.transform // This will return the main container. You should put your UI elements under it or its children!
+            // Rest of the code is to go here
+        }
+
+        private void OnDestroy()
+        {
+            On.RoR2.UI.HUD.Awake -= GetHUD;
+        }
+
     }
 }

@@ -28,6 +28,10 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritGunPiercePrefab;
         public static GameObject spiritGunMegaPrefab;
 
+        //HUD
+        public static GameObject SpiritCuffGauge;
+        public static GameObject MazokuGauge;
+
         private static AssetBundle _assetBundle;
 
         public static void Init(AssetBundle assetBundle)
@@ -40,6 +44,8 @@ namespace YusukeMod.Survivors.Yusuke
             CreateEffects();
 
             CreateProjectiles();
+
+            CreateHUD();
         }
 
         #region effects
@@ -226,5 +232,15 @@ namespace YusukeMod.Survivors.Yusuke
         }
 
         #endregion projectiles
+
+
+        private static void CreateHUD()
+        {
+            Log.Info("Setting the UI OBJECT in Assets");
+            SpiritCuffGauge = _assetBundle.LoadAsset<GameObject>("SpiritCuffGauge");
+            MazokuGauge = _assetBundle.LoadAsset<GameObject>("MazokuGauge");
+
+        }
+
     }
 }
