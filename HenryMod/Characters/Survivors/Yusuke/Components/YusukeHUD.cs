@@ -17,7 +17,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public GameObject SpiritCuffGauge;
         public GameObject MazokuGauge;
         private GameObject bottomLeftCluster;
+        const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
+        private bool hasCheckedUtility;
+        private bool hasWaveUtility;
 
         public bool activateUI;
 
@@ -28,6 +31,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             //grabs the hud that is located and hooked from the Survivor class
             hud = YusukeSurvivor.hud;
             characterBody = GetComponent<CharacterBody>();
+            hasCheckedUtility = false;
 
             //UI objects that are being created by loading them from the assets
             SpiritCuffGauge = UnityEngine.Object.Instantiate(YusukeAssets.SpiritCuffGauge);
@@ -62,42 +66,40 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 Log.Info("bottomLeftCluster does not exits.");
             }
 
-
-            if (hud.transform != null)
-            {
-                Log.Info("HUD Exists");
-            }
-            else
-            {
-                Log.Info("HUD does not exist");
-            }
-
-            if (characterBody)
-            {
-                Log.Info("Charabody exists");
-            }
-
-
             MazokuGauge.SetActive(true);
-
-            // check if the user has skill 4 activated (spirit cuff)
-            SpiritCuffGauge.SetActive(true);
             
-
 
 
         }
 
 
-
         public void FixedUpdate()
         {
-            
+
+            Log.Info(characterBody.skillLocator.utility.skillNameToken);
 
 
-            
 
-            
+            if (characterBody)
+            {
+                if (!hasCheckedUtility)
+                {
+                    hasCheckedUtility = true;
+                    Log.Info("Charabody exists");
+                    if (characterBody.skillLocator.utility.skillNameToken != prefix + "UTILITY_WAVE_NAME")
+                    {
+                        hasWaveUtility = false;
+                        SpiritCuffGauge.SetActive(false);
+
+                    }
+                    else
+                    {
+                        hasWaveUtility = true;
+                    }
+                }
+                
+
+            }
 
 
         }
