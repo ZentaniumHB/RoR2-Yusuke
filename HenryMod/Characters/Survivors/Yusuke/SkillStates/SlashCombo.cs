@@ -1,13 +1,20 @@
 ﻿using YusukeMod.Modules.BaseStates;
 using RoR2;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
     public class SlashCombo : BaseMeleeAttack
     {
+
+        private SpiritCuffComponent cuffComponent;
+
         public override void OnEnter()
         {
+            cuffComponent = gameObject.GetComponent<SpiritCuffComponent>();
+
+
             hitboxGroupName = "SwordGroup";
 
             damageType = DamageType.Generic;
@@ -54,6 +61,10 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         protected override void OnHitEnemyAuthority()
         {
             base.OnHitEnemyAuthority();
+            if (cuffComponent)
+            {
+                cuffComponent.IncreaseCuff(1);
+            }
         }
 
         public override void OnExit()

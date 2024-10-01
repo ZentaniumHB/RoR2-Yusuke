@@ -6,6 +6,7 @@ using RoR2;
 using RoR2.UI;
 using TMPro;
 using YusukeMod.Survivors.Yusuke;
+using UnityEngine.UI;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Components
 {
@@ -16,11 +17,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public HUD hud = null;
         public GameObject SpiritCuffGauge;
         public GameObject MazokuGauge;
-        private GameObject bottomLeftCluster;
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
         private bool hasCheckedUtility;
         private bool hasWaveUtility;
+        public Image spiritCuffFill;
+        private float currentAmount;
 
         public bool activateUI;
 
@@ -76,9 +78,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public void FixedUpdate()
         {
 
-            Log.Info(characterBody.skillLocator.utility.skillNameToken);
-
-
+            //Log.Info(characterBody.skillLocator.utility.skillNameToken);
 
             if (characterBody)
             {
@@ -86,7 +86,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 {
                     hasCheckedUtility = true;
                     Log.Info("Charabody exists");
-                    if (characterBody.skillLocator.utility.skillNameToken != prefix + "UTILITY_WAVE_NAME")
+                    if (characterBody.skillLocator.special.skillNameToken != prefix + "SPECIAL_SPIRITCUFF_NAME")
                     {
                         hasWaveUtility = false;
                         SpiritCuffGauge.SetActive(false);
@@ -95,12 +95,68 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                     else
                     {
                         hasWaveUtility = true;
+                        Transform childTransform = SpiritCuffGauge.transform.Find("SpiritCuffCharge");
+                        if(childTransform != null)
+                        {
+                            //Log.Info("SpiritCuffCharge FOUND, getting image");
+                            spiritCuffFill = childTransform.GetComponent<Image>();
+                            if (spiritCuffFill)
+                            {
+                                //Log.Info("SpiritCuffFill exists");
+                            }
+                            else
+                            {
+                                //Log.Info("SpiritCuffFill does not exists");
+                            }
+                        }
+                        else
+                        {
+                            //Log.Info("SpiritCuffCharge was not found");
+                        }
+                        
                     }
                 }
                 
 
             }
+            if (hasWaveUtility)
+            {
+                //Log.Info("SpiritCuff equiped, getting cuffComponent");
+                SpiritCuffComponent cuffComponent = hud.targetBodyObject.GetComponent<SpiritCuffComponent>();
+                if((bool)cuffComponent)
+                {
+                    //Log.Info("Getting Fill");
+                    float finalFill = cuffComponent.currentSpiritValue / cuffComponent.maxSpiritCuffValue;
+                    Log.Info("finalFill: " + finalFill);
+                    //Log.Info("Updating fill");
+                    UpdateFill(finalFill);
+                    //Log.Info("Applying fill");
+                    spiritCuffFill.fillAmount = currentAmount;
+                    if (currentAmount >= 1f)
+                    {
+                        spiritCuffFill.color = Color.yellow;
+                    }
+                }
+                else
+                {
+                    //Log.Info("cuffComponent does not exist");
+                }
+               
+            }
 
+
+        }
+
+        private void UpdateFill(float finalFill)
+        {
+            if(finalFill > currentAmount)
+            {
+
+                currentAmount = finalFill;
+
+            }
+            
+            
 
         }
 

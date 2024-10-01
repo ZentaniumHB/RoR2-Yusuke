@@ -15,6 +15,7 @@ using YusukeMod.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using RoR2.UI;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -151,6 +152,7 @@ namespace YusukeMod.Survivors.Yusuke
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
             //bodyPrefab.AddComponent<Tracking>();
             bodyPrefab.AddComponent<YusukeHUD>();
+            bodyPrefab.AddComponent<SpiritCuffComponent>();
             //anything else here
         }
 
@@ -460,6 +462,40 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSpecialSkills(bodyPrefab, specialSkillDef1);
+
+
+            SkillDef specialSkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeSpiritCuff",
+                skillNameToken = YUSUKE_PREFIX + "SPECIAL_SPIRITCUFF_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_SPIRITCUFF_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ReleaseSpiritCuff)),
+                activationStateMachineName = "Body",
+                interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
+
+                baseRechargeInterval = 0f,
+                baseMaxStock = 1,
+
+                rechargeStock = 100,
+                requiredStock = 0,
+                stockToConsume = 0,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = false,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = true,
+                forceSprintDuringState = false
+
+            });
+
+            Skills.AddSpecialSkills(bodyPrefab, specialSkillDef2);
         }
 
         // follow up skills being created
