@@ -158,7 +158,7 @@ namespace YusukeMod.SkillStates
         private void UpdateDashSpeed(float max, float final)
         {
             dashSpeed = (moveSpeedStat * 1.2f) * Mathf.Lerp(max, final, fixedAge / duration);
-            Log.Info("Dashspeed: " + dashSpeed);
+            //Log.Info("Dashspeed: " + dashSpeed);
         }
 
         private float GetChargedMax(float charge)

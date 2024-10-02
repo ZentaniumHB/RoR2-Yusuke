@@ -7,6 +7,8 @@ using RoR2.UI;
 using TMPro;
 using YusukeMod.Survivors.Yusuke;
 using UnityEngine.UI;
+using static AkMIDIEvent;
+using UnityEngine.Networking.Types;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Components
 {
@@ -85,7 +87,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 if (!hasCheckedUtility)
                 {
                     hasCheckedUtility = true;
-                    Log.Info("Charabody exists");
+                    // checks if the spiritcuff skill is equiped, if not, it doesn't display the gauge
                     if (characterBody.skillLocator.special.skillNameToken != prefix + "SPECIAL_SPIRITCUFF_NAME")
                     {
                         hasWaveUtility = false;
@@ -94,11 +96,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                     }
                     else
                     {
+                        //if it is, then the gauge is visible and the calculations for the spiritcuff gauge are applied.
                         hasWaveUtility = true;
                         Transform childTransform = SpiritCuffGauge.transform.Find("SpiritCuffCharge");
                         if(childTransform != null)
                         {
-                            //Log.Info("SpiritCuffCharge FOUND, getting image");
+                            
                             spiritCuffFill = childTransform.GetComponent<Image>();
                             if (spiritCuffFill)
                             {
@@ -106,12 +109,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                             }
                             else
                             {
-                                //Log.Info("SpiritCuffFill does not exists");
+                                //Log.Error("SpiritCuffFill does not exists");
                             }
                         }
                         else
                         {
-                            //Log.Info("SpiritCuffCharge was not found");
+                            //Log.Error("SpiritCuffCharge was not found");
                         }
                         
                     }
@@ -125,12 +128,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 SpiritCuffComponent cuffComponent = hud.targetBodyObject.GetComponent<SpiritCuffComponent>();
                 if((bool)cuffComponent)
                 {
-                    //Log.Info("Getting Fill");
+                    // retrieves the value that needs to be added to the fill
                     float finalFill = cuffComponent.currentSpiritValue / cuffComponent.maxSpiritCuffValue;
-                    Log.Info("finalFill: " + finalFill);
-                    //Log.Info("Updating fill");
                     UpdateFill(finalFill);
-                    //Log.Info("Applying fill");
                     spiritCuffFill.fillAmount = currentAmount;
                     if (currentAmount >= 1f)
                     {

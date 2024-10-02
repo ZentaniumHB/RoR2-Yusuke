@@ -16,6 +16,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using RoR2.UI;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
+using static YusukeMod.Modules.Skins;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -464,12 +465,12 @@ namespace YusukeMod.Survivors.Yusuke
             Skills.AddSpecialSkills(bodyPrefab, specialSkillDef1);
 
 
-            SkillDef specialSkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
+            SkillDef specialSkillDef2 = Skills.CreateCuffSkillDef(new SkillDefInfo
             {
                 skillName = "YusukeSpiritCuff",
                 skillNameToken = YUSUKE_PREFIX + "SPECIAL_SPIRITCUFF_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_SPIRITCUFF_DESCRIPTION",
-                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("texPassiveIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ReleaseSpiritCuff)),
                 activationStateMachineName = "Body",
