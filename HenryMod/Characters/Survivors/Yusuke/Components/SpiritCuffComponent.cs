@@ -14,10 +14,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public float currentSpiritValue;
         public float previousValue;
 
+        public bool hasReleased;
+        private float decreaseValue = 3f;
+
 
         private void Start()
         {
 
+        }
+
+        private void FixedUpdate()
+        {
+            if (hasReleased)
+            {
+                Log.Info("currentSpiritValue " + currentSpiritValue);
+                currentSpiritValue = Mathf.Clamp(currentSpiritValue - (decreaseValue * Time.deltaTime), 0f, maxSpiritCuffValue);
+                previousValue = currentSpiritValue;
+            }
+            if(previousValue <= 0)
+            {
+                currentSpiritValue = 0;
+                previousValue = currentSpiritValue;
+                hasReleased = false;
+            }
         }
 
         public bool IncreaseCuff(int type)
@@ -27,10 +46,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             switch (type)
             {
                 case 1:
+                    if (hasReleased) return IncreaseCuff(0.5f);
                     return IncreaseCuff(1f);
                 case 2:
+                    if (hasReleased) return IncreaseCuff(1.5f);
                     return IncreaseCuff(3f);
                 case 3:
+                    if (hasReleased) return IncreaseCuff(0.5f);
                     return IncreaseCuff(1f);
                 default: return false;
             }

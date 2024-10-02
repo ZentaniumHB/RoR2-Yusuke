@@ -27,6 +27,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         private float currentAmount;
 
         public bool activateUI;
+        private Color cuffGuageColour;
+        private Color cuffBorderColour;
 
 
         public void Start()
@@ -105,7 +107,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                             spiritCuffFill = childTransform.GetComponent<Image>();
                             if (spiritCuffFill)
                             {
-                                //Log.Info("SpiritCuffFill exists");
+                                cuffGuageColour = spiritCuffFill.color;
                             }
                             else
                             {
@@ -136,6 +138,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                     {
                         spiritCuffFill.color = Color.yellow;
                     }
+                    else
+                    {
+                        if(currentAmount <= 1f && !cuffComponent.hasReleased) spiritCuffFill.color = cuffGuageColour;
+                    }
                 }
                 else
                 {
@@ -149,14 +155,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
 
         private void UpdateFill(float finalFill)
         {
-            if(finalFill > currentAmount)
+            /*if(finalFill > currentAmount)
             {
 
-                currentAmount = finalFill;
+                
 
-            }
-            
-            
+            }*/
+            currentAmount = finalFill;
+
 
         }
 
