@@ -94,7 +94,7 @@ namespace YusukeMod.SkillStates
 
                     if(numberOfShots == 1)
                     {
-                        DamageType value = (DamageType.Shock5s);
+                        DamageType value = (DamageType.Generic);
                         FireProjectileInfo fireProjectileInfo = new FireProjectileInfo
                         {
                             projectilePrefab = regularSpiritGunPrefab,
