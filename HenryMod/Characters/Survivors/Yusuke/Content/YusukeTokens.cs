@@ -8,7 +8,7 @@ namespace YusukeMod.Survivors.Yusuke
     {
         public static void Init()
         {
-            AddHenryTokens();
+            AddYusukeTokens();
 
             ////uncomment this to spit out a lanuage file with all the above tokens that people can translate
             ////make sure you set Language.usingLanguageFolder and printingEnabled to true
@@ -16,7 +16,7 @@ namespace YusukeMod.Survivors.Yusuke
             ////refer to guide on how to build and distribute your mod with the proper folders
         }
 
-        public static void AddHenryTokens()
+        public static void AddYusukeTokens()
         {
             string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
@@ -71,6 +71,11 @@ namespace YusukeMod.Survivors.Yusuke
             #region Special
             Language.Add(prefix + "SPECIAL_BOMB_NAME", "Bomb");
             Language.Add(prefix + "SPECIAL_BOMB_DESCRIPTION", $"Throw a bomb for <style=cIsDamage>{100f * YusukeStaticValues.bombDamageCoefficient}% damage</style>.");
+
+            // spirit cuff release
+            Language.Add(prefix + "SPECIAL_SPIRITCUFF_NAME", "Spirit Cuff Release");
+            Language.Add(prefix + "SPECIAL_SPIRITCUFF_DESCRIPTION", $"Release a ton of spirit energy that's been stored within; increasing attack power and speed.");
+
             #endregion
 
             #region Achievements

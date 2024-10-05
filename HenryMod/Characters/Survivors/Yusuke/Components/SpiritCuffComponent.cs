@@ -27,7 +27,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         {
             if (hasReleased)
             {
-                Log.Info("currentSpiritValue " + currentSpiritValue);
+                //Log.Info("currentSpiritValue " + currentSpiritValue);
                 currentSpiritValue = Mathf.Clamp(currentSpiritValue - (decreaseValue * Time.deltaTime), 0f, maxSpiritCuffValue);
                 previousValue = currentSpiritValue;
             }

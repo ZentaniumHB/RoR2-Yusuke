@@ -51,6 +51,12 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef secondarySpiritGun;
         internal static SkillDef secondarySpiritShotgun;
 
+        // Sprites
+
+        internal static Sprite spiritGunIcon;
+        internal static Sprite spiritBeamIcon;
+        internal static Sprite spiritGunDoubleIcon;
+
 
         // follow-up skills
         internal static SkillDef meleeFollowUp;
@@ -154,6 +160,7 @@ namespace YusukeMod.Survivors.Yusuke
             //bodyPrefab.AddComponent<Tracking>();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
+            LoadAdditionalSprites();
             //anything else here
         }
 
@@ -280,11 +287,11 @@ namespace YusukeMod.Survivors.Yusuke
             //here is a basic skill def with all fields accounted for
             SkillDef secondarySkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
             {
-                skillName = "HenryGun",
+                skillName = "YusukeSpiritGun",
                 skillNameToken = YUSUKE_PREFIX + "SECONDARY_GUN_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_GUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
-                skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGun)),
                 activationStateMachineName = "Weapon2",
@@ -606,6 +613,15 @@ namespace YusukeMod.Survivors.Yusuke
 
 
         #endregion skills
+
+
+        private void LoadAdditionalSprites()
+        {   
+            // the icons here are mainly used for visual representation of the moves that will come out during certain states, will switch between them
+            spiritGunIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon");
+            spiritBeamIcon = assetBundle.LoadAsset<Sprite>("texSpiritBeamIcon");
+            spiritGunDoubleIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunDoubleIcon");
+        }
 
         #region skins
         public override void InitializeSkins()

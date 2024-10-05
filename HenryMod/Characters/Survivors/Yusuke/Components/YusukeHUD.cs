@@ -22,7 +22,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
         private bool hasCheckedUtility;
-        private bool hasWaveUtility;
+        public bool hasWaveUtility;
         public Image spiritCuffFill;
         private float currentAmount;
 

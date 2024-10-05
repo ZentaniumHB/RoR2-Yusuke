@@ -1,9 +1,12 @@
 ﻿using EntityStates;
 using EntityStates.Captain.Weapon;
 using RoR2;
+using RoR2.Skills;
 using RoR2.UI;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
@@ -14,15 +17,35 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
+        private SpiritCuffComponent cuffComponent;
+        private Sprite previousSprite;
+        const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
+
+        private bool hasIconSwitch;
+
 
         public override void OnEnter()
         {
             base.OnEnter();
 
+
+            cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
             // starting value, max value and how fast to increment
             chargeValue = 0.0f;
             chargeLimit = 100.0f;
-            baseChargeDuration = 5.0f;
+
+            if (cuffComponent)
+            {
+                if (cuffComponent.hasReleased)
+                {
+                    baseChargeDuration = 3.0f;
+                }
+                else
+                {
+                    baseChargeDuration = 5.0f;
+                }
+            }
+            
 
             chargeDuration = baseChargeDuration;
 
@@ -31,7 +54,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public override void OnExit()
         {
             base.OnExit();
-            
+            if(isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch();
+
+
         }
 
         public override void FixedUpdate()
@@ -59,6 +84,29 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                if (!hasIconSwitch)
+                {
+                    hasIconSwitch = true;
+
+                    /* checks whether the cuff state is released and changes the icon accordingly 
+                     * This is mainly done for visual purposes. SO the player knows what type of spirit gun they are doing
+                    */
+                    if (cuffComponent)
+                    {
+                        if (cuffComponent.hasReleased)
+                        {
+                            IconSwitch(true);
+                        }
+                        else
+                        {
+                            IconSwitch(false);
+                        }
+                    }
+                    
+                }
+
+                
             }
 
             if (!IsKeyDown() && isAuthority)
@@ -67,10 +115,26 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
                 if (isMaxCharge)
                 {
-                    outer.SetNextState(DoubleNextState());
+                    if (cuffComponent)
+                    {
+                        // if spiritcuff is activated, do spirit beam
+                        if (cuffComponent.hasReleased)
+                        {
+
+                            outer.SetNextState(BeamNextState());
+                        }
+                        else
+                        {
+                            // if not, do spirit gun double
+                            outer.SetNextState(DoubleNextState());
+                        }
+                    }
+
+                    
                 }
                 else
                 {
+                    // if neither, just do regular
                     outer.SetNextState(SpiritNextState());
                 }
                 
@@ -87,6 +151,61 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             characterBody.SetSpreadBloom(age / chargeDuration);
 
         }
+
+        private void IconSwitch(bool hasReleased)
+        {
+            // getting the icons and changing them accordingly 
+            SkillDef primary = skillLocator.primary.skillDef;
+            SkillDef secondary = skillLocator.secondary.skillDef;
+            Log.Info("ICON SWITCH hasReleased: "+hasReleased);
+            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
+            {
+                if (hasReleased)
+                {
+                    primary.icon = YusukeSurvivor.spiritBeamIcon;
+                }
+                else
+                {
+                    primary.icon = YusukeSurvivor.spiritGunDoubleIcon;
+                }
+                
+                
+            }
+            if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
+            {
+                if (hasReleased)
+                {
+                    secondary.icon = YusukeSurvivor.spiritBeamIcon;
+                }
+                else
+                {
+                    secondary.icon = YusukeSurvivor.spiritGunDoubleIcon;
+                }
+                
+            }
+
+
+            
+        }
+
+
+        private void RevertIconSwitch()
+        {
+            // getting the icons and changing them back 
+            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
+            {
+                SkillDef primary = skillLocator.primary.skillDef;
+                primary.icon = YusukeSurvivor.spiritGunIcon;
+            }
+            if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
+            {
+                SkillDef secondary = skillLocator.secondary.skillDef;
+                secondary.icon = YusukeSurvivor.spiritGunIcon;
+            }
+
+
+        }
+
 
         protected virtual bool IsKeyDown() {
 
@@ -113,6 +232,16 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             {
                 charge = totalCharge,
                 isMaxCharge = isMaxCharge
+            };
+        }
+
+        protected virtual EntityState BeamNextState()
+        {
+
+            return new FireSpiritBeam
+            {
+                charge = totalCharge,
+                
             };
         }
 
