@@ -15,8 +15,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
     public class ChargeSpiritShotgun : MultiTracking
     {
 
-        
-
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
         private bool hasIconSwitch;

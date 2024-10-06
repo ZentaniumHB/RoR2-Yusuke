@@ -47,7 +47,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
 
-
         }
 
         public override void OnExit()
@@ -87,6 +86,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 {
                     Ray aimRay = GetAimRay();
                     AddRecoil(-1f * recoil, -2f * recoil, -0.5f * recoil, 0.5f * recoil);
+                    characterMotor.velocity = -aimRay.direction * 18f;  // pushback
+                    
 
                     beamBullet = new BulletAttack
                     {
