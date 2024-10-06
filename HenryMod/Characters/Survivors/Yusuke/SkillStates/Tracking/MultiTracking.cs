@@ -14,7 +14,7 @@ using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 {
-    public class MultiTracking : BaseSkillState
+    public class MultiTracking : BaseChargeSpirit
     {
         public static Color Green = new Color(0.0f, 0.5f, 0f, 1f);
 
@@ -66,7 +66,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 targetsList = new List<HurtBox>();
                 targetIndicators = new Dictionary<HurtBox, IndicatorInfo>();
                 search = new BullseyeSearch();
-                Log.Info("Enter Compete");
+                ////Log.Info("Enter Compete");
             }
 
         }
@@ -79,7 +79,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             trackerUpdateStopwatch += Time.fixedDeltaTime;
             if (trackerUpdateStopwatch >= 1f / trackerUpdateFrequency)
             {
-                //Log.Info("NEEDS TO BE CLEANED");
+                //////Log.Info("NEEDS TO BE CLEANED");
                 trackerUpdateStopwatch = 0f;
 
                 CleanTargetsList(previousHurtBoxes);
@@ -91,8 +91,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                     //previousHurtBoxes = currentTarget; // this is used for the clean target, checking if hurtbox is in range
 
                     
-                    Log.Info("Length of previousHurtBoxes (AFTER POINTING): " + previousHurtBoxes.Count);
-                    Log.Info("The currentTarget AFTER THE POINTER WAS DONE: " + currentTarget.Count);
+                    ////Log.Info("Length of previousHurtBoxes (AFTER POINTING): " + previousHurtBoxes.Count);
+                    ////Log.Info("The currentTarget AFTER THE POINTER WAS DONE: " + currentTarget.Count);
                 }
                 
 
@@ -100,7 +100,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
             if (!IsKeyDown() && isAuthority)
             {
-                outer.SetNextState(Shotgun());
+                outer.SetNextStateToMain();
                 return;
 
             }
@@ -111,9 +111,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 
                 trackerUpdateStopwatch = 0f;
                 targetResults.Clear();
-                //Log.Info("searching...");
+                ////Log.Info("searching...");
                 SearchForMultipeTargets(inputBank.GetAimRay());
-                //Log.Info("displaying results");
+                ////Log.Info("displaying results");
                 foreach (HurtBox singleTarget in targetResults)
                 {
                     
@@ -126,14 +126,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
         }
 
-        protected virtual EntityState Shotgun()
+        /*protected virtual EntityState Shotgun()
         {
             return new FireSpiritShotgun
             {
                 charge = 100,
                 targets = targetsList
             };
-        }
+        }*/
 
 
         protected virtual bool IsKeyDown()
@@ -143,16 +143,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
         private void CleanTargetsList(List<HurtBox> previousHurtBoxes)
         {
-            Log.Info("Number of targets marked: " + targetsList.Count);
-            Log.Info("Number of targets Indicators: " + targetIndicators.Count);
+            //Log.Info("Number of targets marked: " + targetsList.Count);
+            //Log.Info("Number of targets Indicators: " + targetIndicators.Count);
 
             if(previousHurtBoxes.Count == 0)
             {
-                Log.Info("Length of previousHurtBoxes: 0");
+                //Log.Info("Length of previousHurtBoxes: 0");
             }
             else
             {
-                Log.Info("Length of previousHurtBoxes: " + previousHurtBoxes.Count);
+                //Log.Info("Length of previousHurtBoxes: " + previousHurtBoxes.Count);
             }
 
             
@@ -171,7 +171,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                 if (previousHurtBoxes.Count > 0)
                 {
 
-                    Log.Info("previousHurtbox exists,checking range");
+                    //Log.Info("previousHurtbox exists,checking range");
                     UpdateScan(out List<HurtBox> currentlist);
                     if (!currentlist.Contains(previousHurtBoxes[i]))
                     {
@@ -207,9 +207,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             }
 
 
-            Log.Info("Number of targets marked (AFTER DELETION): " + targetsList.Count);
-            Log.Info("Number of targets Indicators (AFTER DELETION): " + targetIndicators.Count);
-            Log.Info("Length of previousHurtBoxes (AFTER DELETION): " + previousHurtBoxes.Count);
+            //Log.Info("Number of targets marked (AFTER DELETION): " + targetsList.Count);
+            //Log.Info("Number of targets Indicators (AFTER DELETION): " + targetIndicators.Count);
+            //Log.Info("Length of previousHurtBoxes (AFTER DELETION): " + previousHurtBoxes.Count);
 
         }
 
@@ -217,9 +217,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
         private void AddTagToEnemy(List<HurtBox> hurtBox)
         {
 
-            Log.Info("Number of targets marked (BEFORE ADDING): " + targetsList.Count);
-            Log.Info("Number of targets Indicators (BEFORE ADDING): " + targetIndicators.Count);
-            Log.Info("Length of previousHurtBoxes (BEFORE ADDING): " + previousHurtBoxes.Count);
+            //Log.Info("Number of targets marked (BEFORE ADDING): " + targetsList.Count);
+            //Log.Info("Number of targets Indicators (BEFORE ADDING): " + targetIndicators.Count);
+            //Log.Info("Length of previousHurtBoxes (BEFORE ADDING): " + previousHurtBoxes.Count);
 
             foreach (HurtBox box in hurtBox)
             {
@@ -249,16 +249,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
                         hasMaxSoundPlayed = true;
                     }
                     
-                    Log.Info("Max pellets reached");
+                    //Log.Info("Max pellets reached");
                 }
                 
                 
 
             }
 
-            Log.Info("Number of targets marked (AFTER ADDING): " + targetsList.Count);
-            Log.Info("Number of targets Indicators (AFTER ADDING): " + targetIndicators.Count);
-            Log.Info("Length of previousHurtBoxes (AFTER ADDING): " + previousHurtBoxes.Count);
+            ////Log.Info("Number of targets marked (AFTER ADDING): " + targetsList.Count);
+            ////Log.Info("Number of targets Indicators (AFTER ADDING): " + targetIndicators.Count);
+            ////Log.Info("Length of previousHurtBoxes (AFTER ADDING): " + previousHurtBoxes.Count);
 
         }
 

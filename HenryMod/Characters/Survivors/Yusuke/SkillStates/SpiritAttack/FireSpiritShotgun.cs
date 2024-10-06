@@ -65,7 +65,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
         }
 
-        
+
 
         private void Fire()
         {
@@ -81,7 +81,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
                 damageDivision = targets.Count;
 
-                foreach(HurtBox enemy in targets)
+                foreach (HurtBox enemy in targets)
                 {
                     //do a check if its a max charge, it SlowOnHit. If not, then regular.
                     EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
@@ -118,16 +118,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         spreadYawScale = 1f,
                         queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
                         hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
-                        
+
                     }.Fire();
-
-                    
-
                 }
-                
-
-                
             }
+           
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

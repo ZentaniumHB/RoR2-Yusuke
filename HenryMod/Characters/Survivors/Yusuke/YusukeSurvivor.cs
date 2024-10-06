@@ -56,6 +56,8 @@ namespace YusukeMod.Survivors.Yusuke
         internal static Sprite spiritGunIcon;
         internal static Sprite spiritBeamIcon;
         internal static Sprite spiritGunDoubleIcon;
+        internal static Sprite spiritShotgunIcon;
+        internal static Sprite spiritShotGunDoubleIcon;
 
 
         // follow-up skills
@@ -326,9 +328,9 @@ namespace YusukeMod.Survivors.Yusuke
                 skillNameToken = YUSUKE_PREFIX + "SECONDARY_SHOTGUN_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_SHOTGUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
-                skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon0"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritShotgunIcon"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(MultiTracking)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritShotgun)),
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Skill,
 
@@ -621,6 +623,10 @@ namespace YusukeMod.Survivors.Yusuke
             spiritGunIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon");
             spiritBeamIcon = assetBundle.LoadAsset<Sprite>("texSpiritBeamIcon");
             spiritGunDoubleIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunDoubleIcon");
+
+            spiritShotgunIcon = assetBundle.LoadAsset<Sprite>("texSpiritShotgunIcon");
+            spiritShotGunDoubleIcon = assetBundle.LoadAsset<Sprite>("texSpiritShotgunTimes2");
+
         }
 
         #region skins

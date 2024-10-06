@@ -17,9 +17,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
-        private SpiritCuffComponent cuffComponent;
-        private Sprite previousSprite;
-        const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
+ 
 
         private bool hasIconSwitch;
 
@@ -54,7 +52,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public override void OnExit()
         {
             base.OnExit();
-            if(isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch();
+            if(isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(2);
 
 
         }
@@ -96,11 +94,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     {
                         if (cuffComponent.hasReleased)
                         {
-                            IconSwitch(true);
+                            IconSwitch(true, 2);
                         }
                         else
                         {
-                            IconSwitch(false);
+                            IconSwitch(false, 2);
                         }
                     }
                     
@@ -130,7 +128,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         }
                     }
 
-                    
                 }
                 else
                 {
@@ -151,61 +148,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             characterBody.SetSpreadBloom(age / chargeDuration);
 
         }
-
-        private void IconSwitch(bool hasReleased)
-        {
-            // getting the icons and changing them accordingly 
-            SkillDef primary = skillLocator.primary.skillDef;
-            SkillDef secondary = skillLocator.secondary.skillDef;
-            Log.Info("ICON SWITCH hasReleased: "+hasReleased);
-            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
-            {
-                if (hasReleased)
-                {
-                    primary.icon = YusukeSurvivor.spiritBeamIcon;
-                }
-                else
-                {
-                    primary.icon = YusukeSurvivor.spiritGunDoubleIcon;
-                }
-                
-                
-            }
-            if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
-            {
-                if (hasReleased)
-                {
-                    secondary.icon = YusukeSurvivor.spiritBeamIcon;
-                }
-                else
-                {
-                    secondary.icon = YusukeSurvivor.spiritGunDoubleIcon;
-                }
-                
-            }
-
-
-            
-        }
-
-
-        private void RevertIconSwitch()
-        {
-            // getting the icons and changing them back 
-            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
-            {
-                SkillDef primary = skillLocator.primary.skillDef;
-                primary.icon = YusukeSurvivor.spiritGunIcon;
-            }
-            if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
-            {
-                SkillDef secondary = skillLocator.secondary.skillDef;
-                secondary.icon = YusukeSurvivor.spiritGunIcon;
-            }
-
-
-        }
-
 
         protected virtual bool IsKeyDown() {
 

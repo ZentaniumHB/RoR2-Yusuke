@@ -4,17 +4,22 @@ using RoR2;
 using RoR2.UI;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
 
-    public class ChargeSpiritShotgun : BaseChargeSpirit
+    public class ChargeSpiritShotgun : MultiTracking
     {
+
+        
 
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
+        private bool hasIconSwitch;
 
         public override void OnEnter()
         {
@@ -28,11 +33,24 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             chargeDuration = baseChargeDuration;
 
 
+            if (cuffComponent)
+            {
+                if (cuffComponent.hasReleased)
+                {
+                    baseChargeDuration = 3.0f;
+                }
+                else
+                {
+                    baseChargeDuration = 5.0f;
+                }
+            }
+
         }
 
         public override void OnExit()
         {
             base.OnExit();
+            if (isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(3);
 
 
         }
@@ -63,6 +81,28 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                if (!hasIconSwitch)
+                {
+                    hasIconSwitch = true;
+
+                    /* checks whether the cuff state is released and changes the icon accordingly 
+                     * This is mainly done for visual purposes. SO the player knows what type of spirit gun they are doing
+                    */
+                    if (cuffComponent)
+                    {
+                        if (cuffComponent.hasReleased)
+                        {
+                            IconSwitch(true, 3);
+                        }
+                        else
+                        {
+                            IconSwitch(false, 3);
+                        }
+                    }
+
+                }
+
             }
 
             if (!IsKeyDown() && isAuthority)
@@ -71,11 +111,24 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
                 if (isMaxCharge)
                 {
-                    outer.SetNextState(DoubleNextState());
+                    if (cuffComponent)
+                    {
+                        // if spiritcuff is activated, do spirit beam
+                        if (cuffComponent.hasReleased)
+                        {
+
+                            outer.SetNextState(DoubleBarrelShotgun());
+                        }
+                        else
+                        {
+                            // if not, do spirit gun double
+                            outer.SetNextState(Shotgun());
+                        }
+                    }
                 }
                 else
                 {
-                    outer.SetNextState(SpiritNextState());
+                    outer.SetNextState(Shotgun());
                 }
                 
                 Log.Info($"Total charge (rounded (regular)): " + totalCharge);
@@ -99,25 +152,27 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Skill;
+            return InterruptPriority.PrioritySkill;
         }
 
-        protected virtual EntityState SpiritNextState()
+
+        protected virtual EntityState DoubleBarrelShotgun()
+        {
+            
+            return new SpiritDoubleBarrelShotgun
+            {
+                charge = totalCharge,
+                targets = targetsList
+            };
+        }
+
+        protected virtual EntityState Shotgun()
         {
             
             return new FireSpiritShotgun
             {
                 charge = totalCharge,
-                
-            };
-        }
-
-        protected virtual EntityState DoubleNextState()
-        {
-            return new FireSpiritShotgun
-            {
-                charge = totalCharge,
-                //isMaxCharge = isMaxCharge
+                targets = targetsList
             };
         }
 

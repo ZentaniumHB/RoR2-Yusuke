@@ -87,7 +87,7 @@ namespace YusukeMod.SkillStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Skill;
+            return InterruptPriority.Frozen;
         }
 
 
