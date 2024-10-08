@@ -580,13 +580,13 @@ namespace YusukeMod.Survivors.Yusuke
             {
                 skillName = "YusukeFollowUpShotgun",
                 skillNameToken = YUSUKE_PREFIX + "FOLLOWUP_SHOTGUN_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "SECONDARY_SHOTGUN_DESCRIPTION",
+                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_SHOTGUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSecondaryIcon0"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(MultiTracking)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SpiritShotgunFollowUp)),
                 activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
 
                 baseRechargeInterval = 10f,
                 baseMaxStock = 1,

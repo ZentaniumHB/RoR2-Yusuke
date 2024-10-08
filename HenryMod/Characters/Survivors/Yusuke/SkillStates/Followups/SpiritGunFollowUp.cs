@@ -82,7 +82,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             if (!hasFired)
             {
-                hasFired = true;
 
                 hasFired = true;
 

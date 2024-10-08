@@ -88,12 +88,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             if (followUpSpiritGun == 0) FollowUpSettings(true, 2, 2);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
                 case prefix + "FOLLOWUP_SHOTGUN_NAME":
+                    Log.Info("Spirit Shotgun reverted");
+                    Log.Info("MoveID: " + moveID);
                     int followUpShotgun = 1;
-                    /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                    base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                    base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                    base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                     RetrieveStock(2);
                     if (moveID != 4)
-                        if (moveID == 2)
+                        if (moveID == 3)
                             if (followUpShotgun == 1) FollowUpSettings(true, 2, 3);  //shotgun was used so it will start the cooldown on the spirit shotgun follow up.
                     break;
 
@@ -104,7 +106,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private void RetrieveStock(int skillSlot)
         {
             YusukeMain mainState = (YusukeMain)stateMachine.state;
-            int stock = mainState.RetrieveStock();
+            int stock = mainState.RetrieveStock(skillSlot);
 
             if (skillSlot == 1)
             {

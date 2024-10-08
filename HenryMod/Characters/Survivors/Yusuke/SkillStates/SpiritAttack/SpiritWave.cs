@@ -108,6 +108,7 @@ namespace YusukeMod.SkillStates
         private Type currentStateType;
         private int equipedPrimarySlot;
         private int equipedSecondarySlot;
+        private int attackType;
 
 
         private GenericSkill previousSecondarySkill;
@@ -350,17 +351,38 @@ namespace YusukeMod.SkillStates
                     {
                         if (CheckMoveAvailability(equipedSecondarySlot))
                         {
-                            chosenSkill = 2;
-                            Log.Info("chosen move: " + chosenSkill);
-                            followUpActivated = true;
-                            //SwitchSkillsBack(2);
-                            if (!nextState)
+                            if(attackType == 2)
                             {
-                                nextState = true;
-                                outer.SetNextState(GunFollowUp());
+                                chosenSkill = 2;
+                                Log.Info("chosen move: " + chosenSkill);
+                                followUpActivated = true;
+                                //SwitchSkillsBack(2);
+                                if (!nextState)
+                                {
+                                    nextState = true;
+                                    outer.SetNextState(GunFollowUp());
+                                   
+                                }
+
+                            }
+                            
+                            if(attackType == 3) 
+                            {
+                                chosenSkill = 3;
+                                Log.Info("chosen move: " + chosenSkill);
+                                followUpActivated = true;
+                                //SwitchSkillsBack(2);
+                                if (!nextState)
+                                {
+                                    nextState = true;
+                                    outer.SetNextState(ShotGunFollowUp());
+                                    
+                                }
                             }
 
                             return;
+
+                            
                         }
                         
 
@@ -408,7 +430,7 @@ namespace YusukeMod.SkillStates
 
         protected virtual EntityState ShotGunFollowUp()
         {
-            return new SpiritGunFollowUp
+            return new SpiritShotgunFollowUp
             {
                 charge = charge,
                 ID = chosenSkill,
@@ -663,6 +685,7 @@ namespace YusukeMod.SkillStates
                         skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
                         skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.meleeFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                         equipedPrimarySlot = 1;
+                        attackType = 1;
                         FollowUpSettings(followUpActivated, 1, 1); // uses three parameters to determine what actions are needed for the move
                         break;
                     case prefix + "PRIMARY_GUN_NAME":
@@ -676,14 +699,16 @@ namespace YusukeMod.SkillStates
                         skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                         skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                         equipedSecondarySlot = 2;
+                        attackType = 2;
                         FollowUpSettings(followUpActivated,2,2); // uses three parameters to determine what actions are needed for the move
                         Log.Info("Move has been changed");
                         break;
                     case prefix + "SECONDARY_SHOTGUN_NAME":
                         StoreStockCount(2);
-                        /*base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);*/
+                        base.skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                        base.skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                         equipedSecondarySlot = 2;
+                        attackType = 3;
                         FollowUpSettings(followUpActivated, 2,3);
                         break;
 
@@ -697,8 +722,8 @@ namespace YusukeMod.SkillStates
         private void StoreStockCount(int skillSlot)
         {
             YusukeMain mainState = (YusukeMain)stateMachine.state;
-            if (skillSlot == 1) mainState.SetStock(skillLocator.secondary.stock);
-            if (skillSlot == 2) mainState.SetStock(skillLocator.secondary.stock);
+            if (skillSlot == 1) mainState.SetStock(skillLocator.primary.stock, 1);
+            if (skillSlot == 2) mainState.SetStock(skillLocator.secondary.stock, 2);
         }
 
         // used to check if the move can be done, whether that be the primary or secondary slot 

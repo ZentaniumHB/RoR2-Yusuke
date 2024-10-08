@@ -127,7 +127,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Frozen;
         }
     }
 }
