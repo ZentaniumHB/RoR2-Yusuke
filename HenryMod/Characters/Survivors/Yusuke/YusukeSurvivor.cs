@@ -17,6 +17,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using RoR2.UI;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using static YusukeMod.Modules.Skins;
+using HG;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -721,10 +722,55 @@ namespace YusukeMod.Survivors.Yusuke
             R2API.RecalculateStatsAPI.GetStatCoefficients += RecalculateStatsAPI_GetStatCoefficients;
             On.RoR2.GlobalEventManager.OnHitEnemy += GlobalEventManager_OnHitEnemy;
             On.RoR2.GlobalEventManager.OnCharacterDeath += GlobalEventManager_OnCharacterDeath;
+            On.RoR2.GlobalEventManager.OnCharacterDeath += MazokuIncrease;
             On.RoR2.UI.HUD.Awake += GetHUD;
-
+            On.RoR2.CharacterMaster.OnBodyStart += Run_onRunStartGlobal;
 
         }
+
+        
+
+        private void Run_onRunStartGlobal(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
+        {
+
+            // adding components to the correct characterMaster
+            orig(self, body);
+            // cehcks if the playerCharacterMaster controller exists
+            if (self.playerCharacterMasterController != null)
+            {
+                //used to check the local user and checks if it exists
+                LocalUser localuser = LocalUserManager.GetFirstLocalUser();
+                if (localuser != null && localuser.currentNetworkUser != null)
+                {
+                    // checking if the networkUser that is storing the players info is the same as the local one. 
+                    if (self.playerCharacterMasterController.networkUser == localuser.currentNetworkUser)
+                    {
+
+                       /* Log.Info("self master net ID: " + self.playerCharacterMasterController.netId);
+                        Log.Info("Localuser net ID: " + Localuser.currentNetworkUser.netId);
+                        if(body) Log.Info("netID from charactermaster on body: " + body.master.playerCharacterMasterController.netId);
+                        Log.Info("This master belongs to you.");*/
+
+                        if(!self.gameObject.GetComponent<MazokuComponent>())
+                        {
+                            self.gameObject.AddComponent<MazokuComponent>();
+                            Log.Info("MazokuComponent added");
+                            
+                        }
+                        else
+                        {
+                            Log.Info("MazokuComponent already exists");
+                        }
+                         
+
+                    }
+                }
+            }
+
+            
+        }
+
+        
 
         private void GlobalEventManager_OnCharacterDeath(On.RoR2.GlobalEventManager.orig_OnCharacterDeath orig, GlobalEventManager self, DamageReport damageReport)
         {
@@ -749,9 +795,63 @@ namespace YusukeMod.Survivors.Yusuke
 
 
                     }
+
+                    
+
+                    
                 }
             }
             //throw new NotImplementedException();
+        }
+
+        private void MazokuIncrease(On.RoR2.GlobalEventManager.orig_OnCharacterDeath orig, GlobalEventManager self, DamageReport damageReport)
+        {
+            // adding components to the correct characterMaster
+            orig(self, damageReport);
+            if (damageReport.attackerBody != null && damageReport.attacker != null && damageReport != null)
+            {
+
+                if (damageReport.victim)
+                {
+                    //used to check the local user and checks if it exists
+                    LocalUser localuser = LocalUserManager.GetFirstLocalUser();
+                    if (localuser != null && localuser.currentNetworkUser != null)
+                    {
+                        // iterating through all masters within the list to check if they contain a YusukeBody
+                        for (int i = CharacterMaster.readOnlyInstancesList.Count - 1; i >= 0; i--)
+                        {
+                            CharacterMaster master = CharacterMaster.readOnlyInstancesList[i];
+                            if (master.teamIndex == TeamIndex.Player && master.bodyPrefab == BodyCatalog.FindBodyPrefab("YusukeBody"))
+                            {
+                                // checking if the master belongs to the local player
+                                if (master.playerCharacterMasterController.networkUser == localuser.currentNetworkUser)
+                                {
+                                    // increasing the mazoku value (using the increase value float instaed as it will cause a stack overflow when trying to trigger the method in here.
+                                    MazokuComponent mazokuComponent = master.GetComponent<MazokuComponent>();
+                                    if (damageReport.victimIsBoss)
+                                    {
+                                        mazokuComponent.increaseValue = 10f;
+
+                                    }else if (damageReport.victimIsElite)
+                                    {
+                                        mazokuComponent.increaseValue = 5f;
+                                    }
+                                    else
+                                    {
+                                        mazokuComponent.increaseValue = 1f;
+                                    }
+                                    
+                                    
+
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+            }
+            
         }
 
         private void GlobalEventManager_OnHitEnemy(On.RoR2.GlobalEventManager.orig_OnHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, GameObject victim)

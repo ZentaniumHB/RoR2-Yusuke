@@ -24,12 +24,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         private bool hasCheckedUtility;
         public bool hasWaveUtility;
         public Image spiritCuffFill;
+        public Image mazokuFill;
+
+        private float currentMazokuAmmount;
         private float currentAmount;
 
         public bool activateUI;
+
         private Color cuffGuageColour;
         private Color cuffBorderColour;
 
+        private Color mazokuGuageColour;
+        private Color mazokuBorderColour;
+
+        private bool hasMazokuSetup;
 
         public void Start()
         {
@@ -83,9 +91,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         {
 
             //Log.Info(characterBody.skillLocator.utility.skillNameToken);
-
+            
             if (characterBody)
             {
+                if (!hasMazokuSetup) SetUpMazoku();
                 if (!hasCheckedUtility)
                 {
                     hasCheckedUtility = true;
@@ -126,42 +135,93 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             }
             if (hasWaveUtility)
             {
-                //Log.Info("SpiritCuff equiped, getting cuffComponent");
-                SpiritCuffComponent cuffComponent = hud.targetBodyObject.GetComponent<SpiritCuffComponent>();
-                if((bool)cuffComponent)
-                {
-                    // retrieves the value that needs to be added to the fill
-                    float finalFill = cuffComponent.currentSpiritValue / cuffComponent.maxSpiritCuffValue;
-                    UpdateFill(finalFill);
-                    spiritCuffFill.fillAmount = currentAmount;
-                    if (currentAmount >= 1f)
-                    {
-                        spiritCuffFill.color = Color.yellow;
-                    }
-                    else
-                    {
-                        if(currentAmount <= 1f && !cuffComponent.hasReleased) spiritCuffFill.color = cuffGuageColour;
-                    }
-                }
-                else
-                {
-                    //Log.Info("cuffComponent does not exist");
-                }
-               
+                UpdateCuffGauge();
             }
+            UpdateMazokuGuage();
 
 
         }
 
-        private void UpdateFill(float finalFill)
+        private void SetUpMazoku()
         {
-            /*if(finalFill > currentAmount)
+            hasMazokuSetup = true;
+            Transform childTransform = MazokuGauge.transform.Find("MazokuCharge");
+            if (childTransform != null)
             {
 
-                
+                mazokuFill = childTransform.GetComponent<Image>();
+                if (mazokuFill)
+                {
+                    mazokuGuageColour = mazokuFill.color;
+                }
+                else
+                {
+                    //Log.Error("SpiritCuffFill does not exists");
+                }
+            }
+            else
+            {
+                //Log.Error("SpiritCuffCharge was not found");
+            }
 
-            }*/
-            currentAmount = finalFill;
+        }
+
+        private void UpdateCuffGauge()
+        {
+            //Log.Info("SpiritCuff equiped, getting cuffComponent");
+            SpiritCuffComponent cuffComponent = hud.targetBodyObject.GetComponent<SpiritCuffComponent>();
+            if ((bool)cuffComponent)
+            {
+                // retrieves the value that needs to be added to the fill
+                float finalFill = cuffComponent.currentSpiritValue / cuffComponent.maxSpiritCuffValue;
+                UpdateFill(finalFill, 2);
+                spiritCuffFill.fillAmount = currentAmount;
+                if (currentAmount >= 1f)
+                {
+                    spiritCuffFill.color = Color.yellow;
+                }
+                else
+                {
+                    if (currentAmount <= 1f && !cuffComponent.hasReleased) spiritCuffFill.color = cuffGuageColour;
+                }
+            }
+            else
+            {
+                //Log.Info("cuffComponent does not exist");
+            }
+        }
+
+        private void UpdateMazokuGuage()
+        {
+            //Log.Info("SpiritCuff equiped, getting cuffComponent");
+            MazokuComponent mazComponent = characterBody.master.GetComponent<MazokuComponent>();
+            if ((bool)mazComponent)
+            {
+                // retrieves the value that needs to be added to the fill
+                float finalMazFill = mazComponent.currentMazokuValue / mazComponent.maxMazokuValue;
+                UpdateFill(finalMazFill, 1);
+                mazokuFill.fillAmount = currentMazokuAmmount;
+                if (currentMazokuAmmount >= 1f)
+                {
+                    mazokuFill.color = Color.magenta;
+                }
+                else
+                {
+                    if (currentMazokuAmmount <= 1f && !mazComponent.hasTransformed) mazokuFill.color = mazokuGuageColour;
+                }
+            }
+            else
+            {
+                Log.Info("mazoku component does not exist");
+            }
+        }
+
+        private void UpdateFill(float finalFill, int bar)
+        {
+            
+            if(bar == 1) currentMazokuAmmount = finalFill;
+            if(bar == 2) currentAmount = finalFill;
+
 
 
         }
