@@ -66,7 +66,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         {
             if (currentMazokuValue >= maxMazokuValue)
             {
-                Log.Info("Reached max mazoku value. No need to increase.");
+                // Reached max mazoku value. No need to increase
                 return false;
             }
             if (currentMazokuValue >= maxMazokuValue && previousValue < maxMazokuValue)
