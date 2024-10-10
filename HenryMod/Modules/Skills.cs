@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using YusukeMod;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 
 namespace YusukeMod.Modules
 {
@@ -126,6 +127,12 @@ namespace YusukeMod.Modules
         public static void AddSpecialSkills(GameObject targetPrefab, params SkillDef[] skillDefs)
         {
             AddSkillsToFamily(targetPrefab.GetComponent<SkillLocator>().special.skillFamily, skillDefs);
+        }
+
+        // added skillCuffDef
+        internal static SpiritCuffSkillDef CreateCuffSkillDef(SkillDefInfo skillDefInfo)
+        {
+            return CreateSkillDef<SpiritCuffSkillDef>(skillDefInfo);
         }
 
         /// <summary>
