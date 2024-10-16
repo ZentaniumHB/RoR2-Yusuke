@@ -18,6 +18,12 @@ using RoR2.UI;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using static YusukeMod.Modules.Skins;
 using HG;
+using EntityStates;
+using static RoR2.TeleporterInteraction;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
+using RoR2.Projectile;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using Rewired.Utils;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -281,6 +287,44 @@ namespace YusukeMod.Survivors.Yusuke
 
             Skills.AddPrimarySkills(bodyPrefab, primarySkillDef1);
             YusukeSurvivor.primaryMelee = primarySkillDef1;
+
+
+
+            SkillDef primarySkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
+            { 
+                skillName = "YusukeSpiritGunPrimary",
+                skillNameToken = YUSUKE_PREFIX + "PRIMARY_GUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "PRIMARY_GUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGunPrimary)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Skill,
+
+                baseRechargeInterval = 5f,
+                baseMaxStock = 4,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            Skills.AddPrimarySkills(bodyPrefab, primarySkillDef2);
+            YusukeSurvivor.primarySpiritGun = primarySkillDef2;
+
         }
 
         private void AddSecondarySkills()
@@ -484,7 +528,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ReleaseSpiritCuff)),
                 activationStateMachineName = "Body",
-                interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
+                interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 0f,
                 baseMaxStock = 1,
@@ -523,7 +567,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(DivePunch)),
                 activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Frozen,
+                interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 30f,
                 baseMaxStock = 1,
@@ -555,7 +599,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SpiritGunFollowUp)),
                 activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
 
                 baseRechargeInterval = 20f,
                 baseMaxStock = 1,
@@ -725,10 +769,67 @@ namespace YusukeMod.Survivors.Yusuke
             On.RoR2.GlobalEventManager.OnCharacterDeath += MazokuIncrease;
             On.RoR2.UI.HUD.Awake += GetHUD;
             On.RoR2.CharacterMaster.OnBodyStart += Run_onRunStartGlobal;
+            On.RoR2.BulletAttack.ProcessHit += BulletProcessHit;
+            On.RoR2.Projectile.ProjectileImpactExplosion.OnProjectileImpact += ProjectilePocessExplosion;
+
 
         }
 
-        
+        private void ProjectilePocessExplosion(On.RoR2.Projectile.ProjectileImpactExplosion.orig_OnProjectileImpact orig, RoR2.Projectile.ProjectileImpactExplosion self, ProjectileImpactInfo impactInfo)
+        {
+            // grab the collider and hurtbox
+            Collider collider = impactInfo.collider;
+            HurtBox component = collider.GetComponent<HurtBox>();
+            if ((bool)component)
+            {
+                // check the teamindex of the object and make sure it is a monster
+                Log.Info("Object's team index: " +component.teamIndex);
+                if (component.teamIndex == TeamIndex.Monster)
+                {
+                    // checking if the owner of the projectile has the spiritcuffcomponent, also checking if they have the tag
+                    ProjectileController controller = self.GetComponent<ProjectileController>();
+                    SkillTags tag = self.GetComponent<SkillTags>();
+
+                    if ((bool)controller && tag != null)
+                    {
+                        if (controller.owner.GetComponent<SpiritCuffComponent>()) 
+                        {
+                            /* if so, check the values in the skilltags component and check if primary is true. This determins which spirit gun
+                                is the primary and which is the secondary. 
+                            */
+                            SpiritCuffComponent cuffComponent = controller.owner.GetComponent<SpiritCuffComponent>();
+                            if (cuffComponent && tag.isPrimary == true) 
+                            {
+                                Log.Info("Incerasing cuff from primary spirit gun. ");
+                                cuffComponent.IncreaseCuff(2f);
+
+                            } 
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool BulletProcessHit(On.RoR2.BulletAttack.orig_ProcessHit orig, BulletAttack self, ref BulletAttack.BulletHit hitInfo)
+        {
+            bool process = orig(self, ref hitInfo);
+
+            if (self.owner)
+            {
+                // the bullet fired will check whether the gameobject has the skillTag component that is always added whenever the spirit beam bullet is created and fired
+                if (self.owner.GetComponent<SpiritCuffComponent>() && self.owner.gameObject.GetComponent<SkillTags>())
+                {
+                    // if so, it will remove the tag and will increase the spirit cuff component accordingly.
+                    SkillTags tag = self.owner.gameObject.GetComponent<SkillTags>();
+                    tag.Remove();
+                    SpiritCuffComponent cuffComponent = self.owner.GetComponent<SpiritCuffComponent>();
+                    if (cuffComponent.hasReleased) cuffComponent.IncreaseCuff(2f);  // if in the released state, increase it by 2
+                }
+            }
+
+            return process;
+
+        }
 
         private void Run_onRunStartGlobal(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
         {
@@ -859,6 +960,10 @@ namespace YusukeMod.Survivors.Yusuke
             orig(self, damageInfo, victim);
             // do something whenever an enemy gets hit
             //throw new NotImplementedException();
+            if(damageInfo != null)
+            {
+               // Log.Info("Object that hit enemy: " + damageInfo.inflictor.);
+            }
         }
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)

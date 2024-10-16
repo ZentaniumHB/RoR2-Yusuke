@@ -31,6 +31,7 @@ namespace YusukeMod.SkillStates
 
         private Ray aimRay;
 
+        public bool isPrimary;
 
         public static GameObject regularSpiritGunPrefab;
         public static GameObject spiritGunPierceProjectile;
@@ -46,8 +47,15 @@ namespace YusukeMod.SkillStates
             characterDirection.turnSpeed = 2000f;
             base.characterBody.SetAimTimer(2f);
 
-
-            regularSpiritGunPrefab = YusukeAssets.basicSpiritGunPrefab;
+            if(isPrimary == true)
+            {
+                regularSpiritGunPrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
+            }
+            else
+            {
+                regularSpiritGunPrefab = YusukeAssets.basicSpiritGunPrefab;
+            }
+            
             spiritGunPierceProjectile = YusukeAssets.spiritGunPiercePrefab;
             base.PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
         }
@@ -79,7 +87,7 @@ namespace YusukeMod.SkillStates
                         DamageType value = (DamageType.BypassBlock);
                         FireProjectileInfo fireProjectileInfo = new FireProjectileInfo
                         {
-                            projectilePrefab = spiritGunPierceProjectile,
+                            projectilePrefab = regularSpiritGunPrefab,
                             position = aimRay.origin,
                             rotation = Util.QuaternionSafeLookRotation(aimRay.direction),
                             owner = base.gameObject,

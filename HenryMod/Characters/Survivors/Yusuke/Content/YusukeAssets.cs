@@ -5,6 +5,7 @@ using System;
 using RoR2.Projectile;
 using R2API;
 using UnityEngine.AddressableAssets;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -24,6 +25,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         //projectiles
         public static GameObject bombProjectilePrefab;
+        public static GameObject basicSpiritGunPrefabPrimary;
         public static GameObject basicSpiritGunPrefab;
         public static GameObject spiritGunPiercePrefab;
         public static GameObject spiritGunMegaPrefab;
@@ -114,14 +116,17 @@ namespace YusukeMod.Survivors.Yusuke
             Content.AddProjectilePrefab(bombProjectilePrefab);
 
             CreateBasicSpiritGun();
-            Content.AddProjectilePrefab(bombProjectilePrefab);
+            Content.AddProjectilePrefab(basicSpiritGunPrefab);
+
+            CreateBasicSpiritGunPrimary();
+            Content.AddProjectilePrefab(basicSpiritGunPrefabPrimary);
 
             CreateSpiritGunPierce();
             Content.AddProjectilePrefab(spiritGunPiercePrefab);
 
             CreateSpiritGunMega();
             Content.AddProjectilePrefab(spiritGunMegaPrefab);
-        }
+        }//
 
         private static void CreateBombProjectile()
         {
@@ -174,6 +179,34 @@ namespace YusukeMod.Survivors.Yusuke
             spiritGunImpact.impactEffect = spiritGunExplosionEffect;
 
 
+
+        }
+
+        private static void CreateBasicSpiritGunPrimary()
+        {
+            // cloning
+            GameObject baseSpiritGun = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Mage/MageFireboltBasic.prefab").WaitForCompletion();
+            basicSpiritGunPrefabPrimary = PrefabAPI.InstantiateClone(baseSpiritGun, "basicSpiritGunProjectilePrimary");
+
+            // add screen shake?
+
+            // settings for the appearance
+            ProjectileController spiritgunAesthetics = basicSpiritGunPrefabPrimary.GetComponent<ProjectileController>();
+            spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+
+            // speed and duration
+            ProjectileSimple spiritGunSpeed = basicSpiritGunPrefabPrimary.GetComponent<ProjectileSimple>();
+            spiritGunSpeed.desiredForwardSpeed = 120;
+            spiritGunSpeed.lifetime = 5;
+
+            // explosion impact 
+            ProjectileImpactExplosion spiritGunImpact = basicSpiritGunPrefabPrimary.GetComponent<ProjectileImpactExplosion>();
+            spiritGunImpact.blastRadius = 8f;
+            GameObject explosion = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/FireworkExplosion");
+            spiritGunImpact.impactEffect = spiritGunExplosionEffect;
+
+            SkillTags tag = basicSpiritGunPrefabPrimary.AddComponent<SkillTags>();
+            tag.isPrimary = true;
 
         }
 

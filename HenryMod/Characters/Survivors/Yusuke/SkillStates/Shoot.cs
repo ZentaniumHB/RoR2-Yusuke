@@ -8,6 +8,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
     public class Shoot : BaseSkillState
     {
+        public GameObject projectilePrefab = YusukeAssets.basicSpiritGunPrefab;
+
         public static float damageCoefficient = YusukeStaticValues.gunDamageCoefficient;
         public static float procCoefficient = 1f;
         public static float baseDuration = 0.6f;
@@ -24,6 +26,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private string muzzleString;
         public float charge;
 
+        public bool isPrimary;
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -31,6 +35,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             fireTime = firePercentTime * duration;
             characterBody.SetAimTimer(2f);
             muzzleString = "Muzzle";
+
+            if(isPrimary == true)
+            {
+                projectilePrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
+            }
 
             PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
         }
@@ -74,7 +83,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     DamageType value = (DamageType.Generic);
                     FireProjectileInfo fireProjectileInfo = new FireProjectileInfo
                     {
-                        projectilePrefab = YusukeAssets.basicSpiritGunPrefab,
+                        projectilePrefab = projectilePrefab,
                         position = aimRay.origin,
                         rotation = Util.QuaternionSafeLookRotation(aimRay.direction),
                         owner = base.gameObject,
@@ -108,7 +117,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         procCoefficient = procCoefficient,
                         radius = 0.75f,
                         sniper = false,
-                        stopperMask = LayerIndex.CommonMasks.bullet,
+                        stopperMask = LayerIndex.CommonMasks.bullet, 
                         weapon = null,
                         tracerEffectPrefab = tracerEffectPrefab,
                         spreadPitchScale = 1f,

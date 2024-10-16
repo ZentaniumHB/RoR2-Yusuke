@@ -689,7 +689,12 @@ namespace YusukeMod.SkillStates
                         FollowUpSettings(followUpActivated, 1, 1); // uses three parameters to determine what actions are needed for the move
                         break;
                     case prefix + "PRIMARY_GUN_NAME":
-                        // swapt the skills out
+                        StoreStockCount(1);
+                        skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                        skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                        equipedPrimarySlot = 1;
+                        attackType = 1;
+                        FollowUpSettings(followUpActivated, 1, 1); // uses three parameters to determine what actions are needed for the move
                         break;
                 }
                 switch (skillLocator.secondary.skillNameToken)

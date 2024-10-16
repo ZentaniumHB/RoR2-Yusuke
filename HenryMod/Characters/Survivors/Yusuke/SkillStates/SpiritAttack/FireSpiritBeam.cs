@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
 using Random = UnityEngine.Random;
 
@@ -29,6 +30,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private bool hasFired;
         private string muzzleString;
         public float charge;
+
+        public bool isPrimary;
 
         private int damageTypeDecider;
         private BulletAttack beamBullet;
@@ -109,7 +112,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                         procChainMask = default,
                         procCoefficient = procCoefficient,
                         radius = 2f,
-                        sniper = false,
+                        sniper = true,
                         stopperMask = LayerIndex.world.mask,
                         weapon = null,
                         tracerEffectPrefab = tracerEffectPrefab,
@@ -129,6 +132,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                         beamBullet.damageType = DamageType.Shock5s;
                     }
 
+                    gameObject.AddComponent<SkillTags>();
                     beamBullet.Fire();
                     
                 }

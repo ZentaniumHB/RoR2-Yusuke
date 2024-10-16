@@ -25,7 +25,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
     public class RevertSkills : BaseSkillState
     {
 
-
         private EntityStateMachine stateMachine;
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
         public int moveID;
@@ -70,7 +69,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             if (meleeFollowUp == 0) FollowUpSettings(true, 1, 1);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
                 case prefix + "PRIMARY_GUN_NAME":
-                    // swapt the skills out
+                    int followUpSpiritGunPrimary = 0;
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    RetrieveStock(1);
+                    if (moveID != 4)
+                        if (moveID == 1)
+                            if (followUpSpiritGunPrimary == 0) FollowUpSettings(true, 1, 2);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
             }
             switch (skillLocator.secondary.skillNameToken)
@@ -100,6 +105,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     break;
 
             }
+
+            switchSkill = true;
         }
 
         // retrieve the previous stock count that the user had within the skillslot.
@@ -161,7 +168,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         if (ID == 2) targetState.StartCoolDown(skillSlot, 2);
                         if (ID == 3) targetState.StartCoolDown(skillSlot, 3);
 
-                        switchSkill = true;
+                        
                     }
                     
                 }

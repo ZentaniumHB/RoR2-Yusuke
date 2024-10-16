@@ -16,8 +16,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
     {
 
         protected float totalCharge { get; private set; }
-        private bool isMaxCharge;
- 
+        public bool isMaxCharge;
+
+        public virtual int attackID { get; set; } = 2;
 
         private bool hasIconSwitch;
 
@@ -26,7 +27,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnEnter();
 
-
+            Log.Info("attack ID: " + attackID);
             cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
             // starting value, max value and how fast to increment
             chargeValue = 0.0f;
@@ -65,7 +66,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             if (!isMaxCharge) chargeValue += chargeIncrement;
             //totalCharge = Mathf.Lerp(0.0f, chargeLimit, fixedAge / baseChargeDuration);
             totalCharge = Mathf.Clamp(chargeValue, 0.0f, chargeLimit);
-            if (!isMaxCharge) Log.Info($"Spirit gun charge: " + totalCharge);
+            //if (!isMaxCharge) Log.Info($"Spirit gun charge: " + totalCharge);
 
 
             if (fixedAge >= chargeDuration)
@@ -94,11 +95,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     {
                         if (cuffComponent.hasReleased)
                         {
-                            IconSwitch(true, 2);
+                            IconSwitch(true, attackID);
                         }
                         else
                         {
-                            IconSwitch(false, 2);
+                            IconSwitch(false, attackID);
                         }
                     }
                     

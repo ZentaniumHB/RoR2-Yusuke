@@ -1,6 +1,7 @@
 ﻿
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke.SkillStates;
@@ -15,6 +16,7 @@ namespace YusukeMod.Survivors.Yusuke
 
 
             Modules.Content.AddEntityState(typeof(ChargeSpiritGun));
+            Modules.Content.AddEntityState(typeof(ChargeSpiritGunPrimary));
             Modules.Content.AddEntityState(typeof(ChargeSpiritGunMega));
             Modules.Content.AddEntityState(typeof(ChargeSpiritShotgun));
             Modules.Content.AddEntityState(typeof(MultiTracking));
