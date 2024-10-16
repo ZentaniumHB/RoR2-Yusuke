@@ -3,6 +3,7 @@ using RoR2;
 using RoR2.Skills;
 using RoR2.UI;
 using UnityEngine;
+using UnityEngine.Networking.Types;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
@@ -71,51 +72,53 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             // getting the icons and changing them accordingly 
             /*SkillDef primary = skillLocator.primary.skillDef;
             SkillDef secondary = skillLocator.secondary.skillDef;*/
-
-            if(attackID == 2)
+            switch (attackID)
             {
-                if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
-                {
-                    if (hasReleased)
+                case 1:
+                    if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_GUN_NAME")
                     {
-                        skillLocator.primary.skillDef.icon = YusukeSurvivor.spiritBeamIcon;
+                        if (hasReleased)
+                        {
+                            skillLocator.primary.skillDef.icon = YusukeSurvivor.spiritBeamIcon;
+                        }
+                        else
+                        {
+                            skillLocator.primary.skillDef.icon = YusukeSurvivor.spiritGunDoubleIcon;
+                        }
                     }
-                    else
+                    break;
+                case 2:
+                    if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
                     {
-                        skillLocator.primary.skillDef.icon = YusukeSurvivor.spiritGunDoubleIcon;
-                    }
-                }
-                if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_GUN_NAME")
-                {
-                    if (hasReleased)
-                    {
-                        skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritBeamIcon;
-                    }
-                    else
-                    {
-                        skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritGunDoubleIcon;
-                    }
+                        if (hasReleased)
+                        {
+                            skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritBeamIcon;
+                        }
+                        else
+                        {
+                            skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritGunDoubleIcon;
+                        }
 
-                }
+                    }
+                    break;
+                case 3:
+                    if (attackID == 3) // shotgun
+                    {
+                        if (skillLocator.secondary.skillNameToken == prefix + "SECONDARY_SHOTGUN_NAME")
+                        {
+                            if (hasReleased)
+                            {
+                                skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritShotGunDoubleIcon;
+                            }
+                            else
+                            {
+                                skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritShotgunIcon;
+                            }
+
+                        }
+                    }
+                    break;
             }
-            if (attackID == 3) // shotgun
-            {
-                if(skillLocator.secondary.skillNameToken == prefix + "SECONDARY_SHOTGUN_NAME")
-                {
-                    if (hasReleased)
-                    {
-                        skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritShotGunDoubleIcon;
-                    }
-                    else
-                    {
-                        skillLocator.secondary.skillDef.icon = YusukeSurvivor.spiritShotgunIcon;
-                    }
-                    
-                }
-            }
-
-
-
 
         }
 
