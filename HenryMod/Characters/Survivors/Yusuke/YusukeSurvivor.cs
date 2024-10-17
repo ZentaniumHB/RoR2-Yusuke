@@ -777,6 +777,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         private void ProjectilePocessExplosion(On.RoR2.Projectile.ProjectileImpactExplosion.orig_OnProjectileImpact orig, RoR2.Projectile.ProjectileImpactExplosion self, ProjectileImpactInfo impactInfo)
         {
+            
             // grab the collider and hurtbox
             Collider collider = impactInfo.collider;
             HurtBox component = collider.GetComponent<HurtBox>();
@@ -808,6 +809,7 @@ namespace YusukeMod.Survivors.Yusuke
                     }
                 }
             }
+            orig(self, impactInfo);
         }
 
         private bool BulletProcessHit(On.RoR2.BulletAttack.orig_ProcessHit orig, BulletAttack self, ref BulletAttack.BulletHit hitInfo)
