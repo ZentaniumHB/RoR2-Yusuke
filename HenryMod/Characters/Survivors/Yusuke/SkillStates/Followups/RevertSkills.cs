@@ -68,7 +68,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         if (moveID == 1)
                             if (meleeFollowUp == 0) FollowUpSettings(true, 1, 1);  //spirit gun was used so it will start the cooldown on the spirit gun follow up.
                     break;
-                case prefix + "PRIMARY_GUN_NAME":
+                case prefix + "FOLLOWUP_GUN_NAME":
                     int followUpSpiritGunPrimary = 0;
                     skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                     skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
@@ -114,6 +114,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             YusukeMain mainState = (YusukeMain)stateMachine.state;
             int stock = mainState.RetrieveStock(skillSlot);
+            Log.Info("Stock retrieved: " + stock);
 
             if (skillSlot == 1)
             {
