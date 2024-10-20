@@ -1,11 +1,14 @@
 ﻿using EntityStates;
+using Rewired.Demos;
 using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 
 namespace YusukeMod.Modules.BaseStates
 {
@@ -49,6 +52,8 @@ namespace YusukeMod.Modules.BaseStates
         private Ray yDistanceRay;
         private RaycastHit hit;
 
+
+        private bool hasMazokuSwitchBegun;
 
         public void Start()
         {
@@ -96,7 +101,7 @@ namespace YusukeMod.Modules.BaseStates
 
 
             CheckFollowUpIntervals();
-            TransformInput();
+            TransformProperties();
 
             Chat.AddMessage("melee timer: "+meleeRechargeInterval);
             Chat.AddMessage("primary move status: "+isPrimaryReady);
@@ -108,11 +113,12 @@ namespace YusukeMod.Modules.BaseStates
         }
 
         // transformation state
-        private void TransformInput()
+        private void TransformProperties()
         {
+            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             if (Input.GetKeyDown(KeyCode.V))
             {
-                MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+                
                 if (maz != null) 
                 {
                     if (maz.previousValue == maz.maxMazokuValue)
@@ -132,6 +138,26 @@ namespace YusukeMod.Modules.BaseStates
                     }
                 }
             }
+
+
+            if(maz != null)
+            {   // checks if the reverse boolean is true, which indicates that the mazoku transformation duration has ended
+                if (maz.startReverse)
+                {
+                    maz.startReverse = false;
+                    Log.Info("Switching skills back from maz.");
+                    outer.SetNextState(SwitchBackSkills(2));    // switching reverse so it reverts back to the skills it needs
+
+                }
+            }
+        }
+
+        protected virtual EntityState SwitchBackSkills(int ID)
+        {
+            return new SwitchSkills
+            {
+                switchID = ID,
+            };
         }
 
         public override void OnExit()
