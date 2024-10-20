@@ -58,6 +58,12 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef secondarySpiritGun;
         internal static SkillDef secondarySpiritShotgun;
 
+        internal static SkillDef utilityDash;
+        internal static SkillDef utilityWave;
+
+        internal static SkillDef specialSpiritGunMega;
+        internal static SkillDef specialSpiritCuff;
+
         // Sprites
 
         internal static Sprite spiritGunIcon;
@@ -71,6 +77,15 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef meleeFollowUp;
         internal static SkillDef spiritGunFollowUp;
         internal static SkillDef spiritShotgunFollowUp;
+
+        // mazoku moves
+        internal static SkillDef mazokuMelee;
+        internal static SkillDef mazokuDemonGun;
+        internal static SkillDef backToBackStrikes;
+        internal static SkillDef blinkDash;
+        internal static SkillDef swingCombo;
+        internal static SkillDef demonGunMega;
+        internal static SkillDef outOfLuck;
 
         //HUD
         internal static HUD hud = null;
@@ -166,7 +181,7 @@ namespace YusukeMod.Survivors.Yusuke
         {
             AddHitboxes();
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
-            //bodyPrefab.AddComponent<Tracking>();
+            bodyPrefab.AddComponent<Tracking>().TurnOff();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
             LoadAdditionalSprites();
@@ -208,6 +223,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             // creating follow up skills 
             CreateFollowUpSkills();
+            CreateMazokuSkills();
 
         }
 
@@ -440,6 +456,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySkillDef1);
+            YusukeSurvivor.utilityDash = utilitySkillDef1;
 
 
             SkillDef utilitySkillDef2 = Skills.CreateSkillDef(new SkillDefInfo
@@ -475,7 +492,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddUtilitySkills(bodyPrefab, utilitySkillDef2);
-
+            YusukeSurvivor.utilityWave = utilitySkillDef2;
 
         }
 
@@ -486,9 +503,9 @@ namespace YusukeMod.Survivors.Yusuke
             //a basic skill. some fields are omitted and will just have default values
             SkillDef specialSkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
             {
-                skillName = "HenryBomb",
-                skillNameToken = YUSUKE_PREFIX + "SPECIAL_BOMB_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_BOMB_DESCRIPTION",
+                skillName = "YusukeBomb",
+                skillNameToken = YUSUKE_PREFIX + "SPECIAL_SPIRITMEGA_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_SPIRITMEGA_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGunMega)),
@@ -517,6 +534,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSpecialSkills(bodyPrefab, specialSkillDef1);
+            YusukeSurvivor.specialSpiritGunMega = specialSkillDef1;
 
 
             SkillDef specialSkillDef2 = Skills.CreateCuffSkillDef(new SkillDefInfo
@@ -551,6 +569,7 @@ namespace YusukeMod.Survivors.Yusuke
             });
 
             Skills.AddSpecialSkills(bodyPrefab, specialSkillDef2);
+            YusukeSurvivor.specialSpiritCuff = specialSkillDef2;
         }
 
         // follow up skills being created
@@ -655,6 +674,92 @@ namespace YusukeMod.Survivors.Yusuke
 
             
 
+
+        }
+
+        // creation of the mazoku skills
+        private void CreateMazokuSkills()
+        {
+
+            SteppedSkillDef mazokuPrimnary = Skills.CreateSkillDef<SteppedSkillDef>(new SkillDefInfo
+                (
+                    "MazokuMelee",
+                    YUSUKE_PREFIX + "PRIMARY_MAZOKUMELEE_NAME",
+            YUSUKE_PREFIX + "PRIMARY_MAZOKUMELEE_DESCRIPTION",
+                    assetBundle.LoadAsset<Sprite>("texPrimaryIcon0"),
+                    new EntityStates.SerializableEntityStateType(typeof(SkillStates.SlashCombo)),
+                    "Weapon",
+                    true
+                ));
+            //custom Skilldefs can have additional fields that you can set manually
+            mazokuPrimnary.stepCount = 2;
+            mazokuPrimnary.stepGraceDuration = 0.5f;
+            YusukeSurvivor.mazokuMelee = mazokuPrimnary;
+
+
+            YusukeSurvivor.mazokuDemonGun = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeDemonGun",
+                skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZOKUGUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGun)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
+
+                baseRechargeInterval = 15f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.backToBackStrikes = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeDemonGun",
+                skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZOKUGUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGun)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
+
+                baseRechargeInterval = 10f,
+                baseMaxStock = 2,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
 
         }
 

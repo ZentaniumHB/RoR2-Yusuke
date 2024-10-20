@@ -1,9 +1,12 @@
 ﻿using EntityStates;
+using Rewired.Demos;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 {
@@ -26,7 +29,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
             if (isAuthority && fixedAge >= duration)
             {
-                outer.SetNextStateToMain();
+                outer.SetNextState(SkillSwitch(1));
             }
         }
 
@@ -38,6 +41,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             {
                 maz.hasTransformed = true;
             }
+        }
+
+        protected virtual EntityState SkillSwitch(int ID)
+        {
+            // use of an ID is needed to decide which move gets swapped in
+            return new SwitchSkills
+            {
+                switchID = ID,
+            };
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

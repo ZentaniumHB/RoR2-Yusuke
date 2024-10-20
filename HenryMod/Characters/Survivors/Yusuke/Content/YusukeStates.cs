@@ -30,8 +30,11 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(SpiritWave));
             Modules.Content.AddEntityState(typeof(ReleaseSpiritCuff));
 
-            Modules.Content.AddEntityState(typeof(SpiritGunDouble));
+            Modules.Content.AddEntityState(typeof(ChargeDemonGun));
 
+            Modules.Content.AddEntityState(typeof(FireDemonGunBarrage));
+
+            Modules.Content.AddEntityState(typeof(SpiritGunDouble));
             Modules.Content.AddEntityState(typeof(SpiritGunFollowUp));
             Modules.Content.AddEntityState(typeof(DivePunch));
 

@@ -15,9 +15,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public bool hasTransformed;
         private float decreaseValue = 2f;
         public float increaseValue = 0; // used for the hook reasoning
+        public bool startReverse;
 
-
-        private void Start()
+        public void Start()
         {
 
         }
@@ -32,9 +32,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             }
             if (previousValue <= 0)
             {
+                if (hasTransformed) startReverse = true; //used for the mazoku revert
                 currentMazokuValue = 0;
                 previousValue = currentMazokuValue;
                 hasTransformed = false;
+                
             }
 
             if (increaseValue != 0) IncreaseMazokuGuage(increaseValue);
