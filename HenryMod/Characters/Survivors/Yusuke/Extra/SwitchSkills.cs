@@ -52,8 +52,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.mazokuDemonGun, GenericSkill.SkillOverridePriority.Contextual);
                     break;
                 case prefix + "SECONDARY_SHOTGUN_NAME":
-                    //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.backToBackStrikes, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
             switch (skillLocator.utility.skillNameToken)
@@ -68,7 +68,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     break;
             }
 
-            characterBody.GetComponent<Tracking>().TurnOn();    // enabling the tracker for the specific move needed. 
+            characterBody.GetComponent<SingleTracking>().TurnOn();    // enabling the tracker for the specific move needed. 
 
             switchedSkill = true;
         }
@@ -94,9 +94,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.mazokuDemonGun, GenericSkill.SkillOverridePriority.Contextual);
                     skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                     break;
-                case prefix + "SECONDARY_SHOTGUN_NAME":
-                    //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                case prefix + "SECONDARY_MAZBACKTOBACK_NAME":
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.backToBackStrikes, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
             switch (skillLocator.utility.skillNameToken)
@@ -111,7 +111,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     break;
             }
 
-            characterBody.GetComponent<Tracking>().TurnOff(); // disabling the tracker. 
+            characterBody.GetComponent<SingleTracking>().TurnOff(); // disabling the tracker. 
 
             switchedSkill = true;
         }

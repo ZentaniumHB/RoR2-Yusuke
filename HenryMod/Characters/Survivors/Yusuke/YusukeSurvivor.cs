@@ -24,6 +24,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using RoR2.Projectile;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using Rewired.Utils;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -181,7 +182,7 @@ namespace YusukeMod.Survivors.Yusuke
         {
             AddHitboxes();
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
-            bodyPrefab.AddComponent<Tracking>().TurnOff();
+            bodyPrefab.AddComponent<SingleTracking>().TurnOff();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
             LoadAdditionalSprites();
@@ -731,13 +732,13 @@ namespace YusukeMod.Survivors.Yusuke
 
             YusukeSurvivor.backToBackStrikes = Skills.CreateSkillDef(new SkillDefInfo
             {
-                skillName = "YusukeDemonGun",
-                skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZOKUGUN_NAME",
+                skillName = "YusukeBackToBack",
+                skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZBACKTOBACK_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
-                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGun)),
+                activationState = new EntityStates.SerializableEntityStateType(typeof(MazBackToBackStrikes)),
                 activationStateMachineName = "Weapon2",
                 interruptPriority = EntityStates.InterruptPriority.Stun,
 

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 {
-    public class Tracking : HuntressTracker
+    public class SingleTracking : HuntressTracker
     {
         public static Color Green = new Color(0.0f, 0.5f, 0f, 1f);
 
@@ -16,7 +16,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
 
         public List<HurtBox> targetResults;
 
-        private Tracking()
+        private SingleTracking()
         {
             maxTrackingDistance = 24f;
             maxTrackingAngle = 24f;

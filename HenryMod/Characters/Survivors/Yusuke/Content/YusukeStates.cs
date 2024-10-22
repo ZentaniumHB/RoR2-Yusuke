@@ -1,5 +1,6 @@
 ﻿
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
@@ -31,7 +32,7 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(ReleaseSpiritCuff));
 
             Modules.Content.AddEntityState(typeof(ChargeDemonGun));
-
+            Modules.Content.AddEntityState(typeof(MazBackToBackStrikes));
             Modules.Content.AddEntityState(typeof(FireDemonGunBarrage));
 
             Modules.Content.AddEntityState(typeof(SpiritGunDouble));
