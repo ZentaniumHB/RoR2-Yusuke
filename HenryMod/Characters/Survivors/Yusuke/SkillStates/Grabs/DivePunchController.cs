@@ -243,7 +243,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (collider) collider.enabled = true;
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
-            if (motor) motor.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
 
 

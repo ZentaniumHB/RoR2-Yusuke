@@ -4,40 +4,33 @@ using System.Text;
 using UnityEngine;
 using RoR2;
 using EntityStates;
-
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 {
     internal class MazokuGrabController : MonoBehaviour
     {
-
         public Transform pivotTransform;
         public Vector3 centerOfCollider;
         public Transform modelTransform;
-
         private CharacterBody body;
         private CharacterMotor motor;
         private CharacterDirection direction;
         private Rigidbody rigidbody;
         private RigidbodyMotor rigidMotor;
         private ModelLocator modelLocator;
-
         private Quaternion originalRotation;
         private Collider collider;
         private SphereCollider sphCollider;
         private CapsuleCollider capCollider;
         private Vector3 centerOfMass;
         private BaseState state;
-
         private bool setBounds;
         public bool Pinnable;
-
         private Vector3 oldMoveVec;
-        private Quaternion oldModelRotation;
-
         public bool hasStringEnded;
         public bool hasLanded;
         public bool hasRevertedRotation;
         public float changeInY = 0;
+        private Quaternion finalRotation;
 
         private void Awake()
         {
@@ -50,9 +43,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             sphCollider = gameObject.GetComponent<SphereCollider>();
             capCollider = gameObject.GetComponent<CapsuleCollider>();
             rigidbody = gameObject.GetComponent<Rigidbody>();
-
             state = gameObject.GetComponent<BaseState>();
-
             if (collider)
             {
                 collider.enabled = false;
@@ -64,44 +55,32 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (capCollider)
             {
                 capCollider.enabled = false;
-
             }
-
             if (rigidMotor)
             {
-
                 oldMoveVec = rigidMotor.moveVector;
             }
-
-
             if (direction) direction.enabled = false;
-
             if (modelLocator)
             {
                 if (modelLocator.modelTransform)
                 {
                     modelTransform = modelLocator.modelTransform;
                     originalRotation = modelTransform.rotation;
-
                     if (modelLocator.gameObject.name == "GreaterWispBody(Clone)")
                     {
                         modelLocator.dontDetatchFromParent = true;
                         modelLocator.dontReleaseModelOnDeath = true;
                     }
-
                     modelLocator.enabled = false;
                 }
             }
-
             hasRevertedRotation = false;
             setBounds = false;
             Log.Info("Setup complete");
-
         }
-
         private void FixedUpdate()
         {
-
             if (pivotTransform.position != Vector3.zero)
             {
                 if (!setBounds)
@@ -111,6 +90,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     EnemyRotation(modelTransform, true);
 
                 }
+
 
 
                 //Log.Info("Checking motor");
@@ -137,24 +117,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     }
                 }
 
-                if (hasStringEnded)
+                if (pivotTransform)
                 {
-
-                    if (hasRevertedRotation) Remove();
-                }
-
-                if (hasLanded)
-                {
-                    pivotTransform = gameObject.transform;
+                    transform.position = pivotTransform.position;
                 }
 
                 if (modelTransform)
                 {
                     modelTransform.position = pivotTransform.position;
-
-
+                    modelTransform.rotation = finalRotation;
                 }
 
+                if (hasStringEnded)
+                {
+
+                    //if (hasRevertedRotation) Remove();
+                }
 
             }
             else
@@ -163,68 +141,53 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 Destroy(this);
 
             }
-
-
-
         }
-
-
         public void EnemyRotation(Transform model, bool rotate)
         {
             if (modelTransform)
             {
                 Log.Info("Rotating character");
                 // ----------Rotating the character
-                oldModelRotation = model.localRotation;
-
+                //oldModelRotation = model.localRotation;
                 Vector3 forwardDirection = model.forward;
                 Quaternion worldRotation = model.rotation;
-
                 // convert the world rotation to local rotation (relative to the current forward direction)
                 Quaternion localRotation = Quaternion.Inverse(Quaternion.LookRotation(forwardDirection)) * worldRotation;
-
                 Log.Info("Pinned = " + rotate + " Model local rotation (befire): " + model.localRotation);
-
                 Quaternion alteredRotation = Quaternion.identity;
-                if (rotate) alteredRotation = Quaternion.Euler(0f, -90f, 0f); // rotating so the enemy faces the sky
-                if (!rotate) alteredRotation = Quaternion.Euler(0f, 90f, 0f); // rotating so the enemy faces the sky
-
+                if (rotate) alteredRotation = Quaternion.Euler(0f, -180f, 0f); // rotating so the enemy faces the sky
+                if (!rotate) alteredRotation = Quaternion.Euler(0f, 180f, 0f); // rotating so the enemy faces the sky
                 Quaternion newLocalRotation = localRotation * alteredRotation;
                 //from local to world space
                 Quaternion finalWorldRotation = Quaternion.LookRotation(forwardDirection) * newLocalRotation;
-
                 model.localRotation = finalWorldRotation;
-
+                finalRotation = finalWorldRotation;
                 Log.Info("Pinned = " + rotate + " Model local rotation (after): " + model.localRotation);
 
                 if (!rotate)
                 {
-
                     hasRevertedRotation = true;
-                    
+
                 }
-
-
             }
             else
             {
                 Log.Info("No model.");
             }
         }
-
         public void Remove()
         {
             Log.Info("[backtoback strikes] enabling and destroying");
-            if (modelLocator) modelLocator.enabled = true;
+
+            if (modelLocator)modelLocator.enabled = true;
             if (modelTransform) modelTransform.rotation = originalRotation;
             if (direction) direction.enabled = true;
             if (collider) collider.enabled = true;
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
-            if (motor) motor.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
 
-
+            if (motor) motor.disableAirControlUntilCollision = false;
 
             Destroy(this);
         }

@@ -1039,15 +1039,15 @@ namespace YusukeMod.Survivors.Yusuke
                                     MazokuComponent mazokuComponent = master.GetComponent<MazokuComponent>();
                                     if (damageReport.victimIsBoss)
                                     {
-                                        mazokuComponent.increaseValue = 10f;
+                                        mazokuComponent.increaseValue = 100f; //10f
 
                                     }else if (damageReport.victimIsElite)
                                     {
-                                        mazokuComponent.increaseValue = 5f;
+                                        mazokuComponent.increaseValue = 100f; //5f
                                     }
                                     else
                                     {
-                                        mazokuComponent.increaseValue = 1f;
+                                        mazokuComponent.increaseValue = 100f; //1f
                                     }
                                     
                                     
