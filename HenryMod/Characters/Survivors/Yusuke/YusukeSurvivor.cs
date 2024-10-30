@@ -673,8 +673,6 @@ namespace YusukeMod.Survivors.Yusuke
 
             });
 
-            
-
 
         }
 
@@ -702,7 +700,7 @@ namespace YusukeMod.Survivors.Yusuke
             {
                 skillName = "YusukeDemonGun",
                 skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZOKUGUN_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
+                skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_GUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
@@ -734,7 +732,7 @@ namespace YusukeMod.Survivors.Yusuke
             {
                 skillName = "YusukeBackToBack",
                 skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZBACKTOBACK_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "FOLLOWUP_MELEEE_DESCRIPTION",
+                skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_BACKTOBACK_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
@@ -743,6 +741,38 @@ namespace YusukeMod.Survivors.Yusuke
                 interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 10f,
+                baseMaxStock = 2,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.swingCombo = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeSwingCombo",
+                skillNameToken = YUSUKE_PREFIX + "UTILTY_MAZSWINGCOMBO_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_SWINGCOMBO_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(SwingCombo)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 12f,
                 baseMaxStock = 2,
 
                 rechargeStock = 1,

@@ -117,7 +117,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
             else
             {
-                
+                SlowVelocity();
                 // if the target is found, then attack the grabbed enemy if they are not killed or a followup selection is made.
                 if(!hasSelectionMade) ConsecutiveAttack();
 
@@ -158,6 +158,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 Log.Info("Stop attacking (mazoku)");
                 outer.SetNextStateToMain();
             }
+        }
+
+        private void SlowVelocity()
+        {
+
+            float decelerateValue = 0.2f; // 50f  // 150
+
+            characterMotor.velocity *= decelerateValue;
+            float x = characterMotor.velocity.x;
+            float y = characterMotor.velocity.y;
+            float z = characterMotor.velocity.z;
+
+            base.characterMotor.velocity = new Vector3(x, y, z);
         }
 
         // removes the mazokucontroller and adds the knockback controller
@@ -222,7 +235,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void Fire()
         {
-            SearchForEnemies(); =
+            SearchForEnemies(); 
             float damageDivision = enemyTargets.Count(); // division based on enemy scan
 
             EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);

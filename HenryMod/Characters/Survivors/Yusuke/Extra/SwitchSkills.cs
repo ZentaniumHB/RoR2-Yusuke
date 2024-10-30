@@ -62,9 +62,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                     //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                     break;
-                case prefix + "SECONDARY_SHOTGUN_NAME":
-                    //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                case prefix + "UTILITY_WAVE_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
 
@@ -105,9 +105,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
                     //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritGunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
                     break;
-                case prefix + "SECONDARY_SHOTGUN_NAME":
-                    //skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.spiritShotgunFollowUp, GenericSkill.SkillOverridePriority.Contextual);
+                case prefix + "UTILTY_MAZSWINGCOMBO_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
 
