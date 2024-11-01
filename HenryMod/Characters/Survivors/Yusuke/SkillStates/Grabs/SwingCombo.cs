@@ -1,12 +1,15 @@
 ﻿using EntityStates;
 using EntityStates.Jellyfish;
-using IL.RoR2;
+using RoR2;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
+using YusukeMod.Survivors.Yusuke;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 {
@@ -26,6 +29,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
 
         private bool targetFound;
+        private bool isBodyFound;
+        private HurtBox target;
+
+        //animation variables
+        private bool startSwingAnimation;
+        private float animationTimer;
+        private bool canThrowEnemy;
+        private float actionStopwatch = 0;
+
+        private DivePunchController DivePunchController;
+        private KnockbackController knockbackController;
+        private MazokuGrabController mazokuGrabController;
+
+        //indicator
+        private Indicator indicator;
+        public GameObject targetIcon;
+        private bool hasSelectionBeenMade;
+        public const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
         public override void OnEnter()
         {
@@ -44,19 +65,186 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            Dash();
-            //if (!targetFound) SearchForBody();
-
-            if (dashTime >= duration && isAuthority)
+            
+            if (!targetFound)
             {
-                outer.SetNextStateToMain();
+                Dash();
+                SearchForBody();
             }
 
+            if (targetFound) SwingThrow();
+
+
+        }
+
+        private void SwingThrow()
+        {
+            animationTimer += Time.fixedDeltaTime;
+            if (!startSwingAnimation)
+            {
+                startSwingAnimation = true;
+                if (target)
+                {
+                    
+                    Log.Info("Setting maz controller. ");
+                    mazokuGrabController = target.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
+                    mazokuGrabController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
+                    PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 2f);
+                    Log.Info("maz settings done. ");
+                    
+                }
+                
+                
+                // maybe addtimedbuff
+            }
+
+            Log.Info("Animation Timer:");
+            if (animationTimer > 2f)
+            {
+                actionStopwatch += Time.fixedDeltaTime;
+                if (!canThrowEnemy)
+                {
+                    canThrowEnemy = true;
+                    mazokuGrabController.Remove();
+
+                    // create the indicator on the body to show which enemy will receive the follow up
+                    if (targetIcon == null)
+                    {
+                        targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
+                    }
+                    indicator = new Indicator(gameObject, targetIcon);
+                    indicator.targetTransform = target.transform;
+
+
+                    knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
+                    knockbackController.knockbackDirection = GetAimRay().direction;
+                    knockbackController.knockbackSpeed = moveSpeedStat * 1.8f;
+                    knockbackController.pivotTransform = characterBody.transform;
+
+                    // switch the icon to show the differnet outcomes, we don't need to use new entity states as we are not storing any stock count.
+                    SwapIcon();
+
+                }
+
+                if (inputBank.skill1.down)
+                {
+                    PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 2f);
+                    Log.Info("Clicked");
+                    // send to next state.
+                }
+                
+                indicator.active = true;
+
+                Log.Info("action timer: " + actionStopwatch);
+                if (actionStopwatch > knockbackController.knockbackDuration || hasSelectionBeenMade)
+                {
+                    // revert the icons. 
+                    RevertIcons();
+                    outer.SetNextStateToMain();
+                }
+
+            }
+
+            
+        }
+
+        
+
+        private void SwapIcon()
+        {
+            switch (skillLocator.primary.skillName)
+            {
+                case prefix + "PRIMARY_MAZOKUMELEE_NAME":
+                    //skillLocator.primary.skillDef.icon = YusukeSurvivor.mazMeleeFollowUpIcon;
+                    break;
+                case prefix + "PRIMARY_MAZOKUGUN_NAME":
+                    //skillLocator.primary.skillDef.icon = YusukeSurvivor.mazSpiritGunFollowUpIcon;
+                    break;
+            }
+
+            switch (skillLocator.secondary.skillName) {
+
+                case prefix + "SECONDARY_MAZOKUGUN_NAME":
+                    //skillLocator.secondary.skillDef.icon = YusukeSurvivor.mazSpiritGunFollowUpIcon;
+                    break;
+                case prefix + "SECONDARY_MAZBACKTOBACK_NAME":
+                    //skillLocator.secondary.skillDef.icon = YusukeSurvivor.mazSpiritShotgunFollowUpIcon;
+                    break;
+            }
+
+            switch (skillLocator.special.skillName) {
+                case prefix + "UTILITY_MAZ_BLINK_DASH_NAME":
+                    //skillLocator.special.skillDef.icon = YusukeSurvivor.mazSpiritMegaFollowUpIcon;
+                    break;
+
+            }
+        }
+
+        private void RevertIcons()
+        {
+            switch (skillLocator.primary.skillName)
+            {
+                case prefix + "PRIMARY_MAZOKUMELEE_NAME":
+                    //skillLocator.primary.skillDef.icon = YusukeSurvivor.mazMeleeFollowUpIcon;
+                    break;
+                case prefix + "PRIMARY_MAZOKUGUN_NAME":
+                    //skillLocator.primary.skillDef.icon = YusukeSurvivor.mazSpiritGunFollowUpIcon;
+                    break;
+            }
+
+            switch (skillLocator.secondary.skillName)
+            {
+
+                case prefix + "SECONDARY_MAZOKUGUN_NAME":
+                    //skillLocator.secondary.skillDef.icon = YusukeSurvivor.mazSpiritGunFollowUpIcon;
+                    break;
+                case prefix + "SECONDARY_MAZBACKTOBACK_NAME":
+                    //skillLocator.secondary.skillDef.icon = YusukeSurvivor.mazSpiritShotgunFollowUpIcon;
+                    break;
+            }
+
+            switch (skillLocator.special.skillName)
+            {
+                case prefix + "UTILITY_MAZ_BLINK_DASH_NAME":
+                    //skillLocator.special.skillDef.icon = YusukeSurvivor.mazSpiritMegaFollowUpIcon;
+                    break;
+
+            }
         }
 
         private void SearchForBody()
         {
-            
+            if (!isBodyFound)
+            {
+                Vector3 sphereCenter = transform.position + transform.forward;
+                Collider[] capturedBody;
+
+                capturedBody = Physics.OverlapSphere(sphereCenter, 2f, LayerIndex.entityPrecise.mask);
+
+                List<Collider> capturedColliders = capturedBody.ToList();
+
+                
+                foreach (Collider result in capturedColliders)
+                {
+                    
+                    HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
+
+                    if (capturedHurtbox.healthComponent && capturedHurtbox.healthComponent.alive)
+                    {
+                        if(capturedHurtbox.healthComponent.gameObject != gameObject)
+                        {
+                            target = capturedHurtbox;
+                            isBodyFound = true;
+                            targetFound = true;
+                            break;
+                        }
+                        
+                    }
+                    
+                }
+
+            }
+
         }
 
         private void Dash()
@@ -92,7 +280,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             base.OnExit();
-            
+            if (target)  // removes indicators if present
+            {
+                if (indicator != null) indicator.active = false;
+            }
+
         }
 
 

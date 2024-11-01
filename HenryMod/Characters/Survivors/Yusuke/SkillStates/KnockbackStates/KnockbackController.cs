@@ -26,7 +26,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
         public Vector3 knockbackDirection;
         public float knockbackSpeed;
 
-        private float knockbackDuration = 1f;
+        public readonly float knockbackDuration = 1f;
         private float knockbackStopwatch;
         private Vector3 knockbackVelocity;
         private bool grabPosition;

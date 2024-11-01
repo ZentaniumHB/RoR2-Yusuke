@@ -687,7 +687,7 @@ namespace YusukeMod.Survivors.Yusuke
             YUSUKE_PREFIX + "PRIMARY_MAZOKUMELEE_DESCRIPTION",
                     assetBundle.LoadAsset<Sprite>("texPrimaryIcon0"),
                     new EntityStates.SerializableEntityStateType(typeof(SkillStates.SlashCombo)),
-                    "Weapon",
+                    "Weapon2",
                     true
                 ));
             //custom Skilldefs can have additional fields that you can set manually

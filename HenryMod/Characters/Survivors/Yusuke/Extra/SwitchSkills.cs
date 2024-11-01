@@ -37,8 +37,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             switch (skillLocator.primary.skillNameToken)
             {
                 case prefix + "PRIMARY_SLASH_NAME":
-                    //skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual); //mazMelee
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.mazokuMelee, GenericSkill.SkillOverridePriority.Contextual); //mazMelee
                     break;
                 case prefix + "PRIMARY_GUN_NAME":
                     //skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
@@ -79,9 +79,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             Log.Info("Reverting mazoku skills");
             switch (skillLocator.primary.skillNameToken)
             {
-                case prefix + "PRIMARY_SLASH_NAME":
-                    //skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
-                    //skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual); //mazMelee
+                case prefix + "PRIMARY_MAZOKUMELEE_NAME":
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.mazokuMelee, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual); //mazMelee
                     break;
                 case prefix + "PRIMARY_GUN_NAME":
                     //skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
