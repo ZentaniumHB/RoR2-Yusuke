@@ -328,7 +328,31 @@ namespace YusukeMod.SkillStates
                     {
                         if (CheckMoveAvailability(equipedPrimarySlot))
                         {
+
                             chosenSkill = 1;
+                            followUpActivated = true;
+
+                            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_SLASH_NAME")
+                            {
+                                knockbackController.isFollowUpActive = true;
+                                if (!nextState)
+                                {
+                                    nextState = true;
+                                    outer.SetNextState(MeleeFollowUp());
+                                }
+                                return;
+                            }
+                            else
+                            {
+                                if (!nextState)
+                                {
+                                    nextState = true;
+                                    outer.SetNextState(GunFollowUp());
+                                }
+                                return;
+                            }
+
+                            /*chosenSkill = 1;
                             Log.Info("chosen move: " + chosenSkill);
                             followUpActivated = true;
                             //SwitchSkillsBack(1);
@@ -338,9 +362,10 @@ namespace YusukeMod.SkillStates
                                 nextState = true;
                                 outer.SetNextState(MeleeFollowUp());
                             }
-                            return;
+                            return;*/
+
                         }
-                                              
+
 
                     }
 
