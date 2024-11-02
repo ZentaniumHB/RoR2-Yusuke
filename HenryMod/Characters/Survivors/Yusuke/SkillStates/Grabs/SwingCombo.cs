@@ -8,6 +8,7 @@ using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Survivors.Yusuke;
 
@@ -98,13 +99,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 // maybe addtimedbuff
             }
 
-            Log.Info("Animation Timer:");
+            //Log.Info("Animation Timer:");
             if (animationTimer > 2f)
             {
                 actionStopwatch += Time.fixedDeltaTime;
                 if (!canThrowEnemy)
                 {
-                    canThrowEnemy = true;
+                    
                     mazokuGrabController.Remove();
 
                     // create the indicator on the body to show which enemy will receive the follow up
@@ -123,6 +124,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                     // switch the icon to show the differnet outcomes, we don't need to use new entity states as we are not storing any stock count.
                     SwapIcon();
+                    indicator.active = true;
+                    characterMotor.enabled = false;
+                    characterDirection.enabled = false;
+
+                    canThrowEnemy = true;
+
 
                 }
 
@@ -131,15 +138,33 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 2f);
                     Log.Info("Clicked");
                     // send to next state.
-                }
-                
-                indicator.active = true;
+                    characterMotor.enabled = false;
+                    characterDirection.enabled = false;
+                    outer.SetNextState(MazMeleeFollowUp());
 
-                Log.Info("action timer: " + actionStopwatch);
+
+                    
+                }
+
+                if (inputBank.skill2.down && isAuthority)
+                {
+                    Log.Info("Clicked skill 2");
+                    outer.SetNextState(DemonGunFollowUp());
+
+
+                }
+
+                if (inputBank.skill4.down)
+                {
+                    
+
+                }
+
+
+                //Log.Info("action timer: " + actionStopwatch);
                 if (actionStopwatch > knockbackController.knockbackDuration || hasSelectionBeenMade)
                 {
                     // revert the icons. 
-                    RevertIcons();
                     outer.SetNextStateToMain();
                 }
 
@@ -148,7 +173,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             
         }
 
-        
+        protected virtual EntityState MazMeleeFollowUp()
+        {
+            return new MazMeleeFollowUp
+            {
+                target = target
+            };
+        }
+
+        protected virtual EntityState DemonGunFollowUp()
+        {
+            return new DemonGunFollowUp
+            {
+                target = target
+            };
+        }
+
 
         private void SwapIcon()
         {
@@ -284,6 +324,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 if (indicator != null) indicator.active = false;
             }
+            characterMotor.velocity.y = 0f;
+            characterMotor.enabled = true;
+            characterDirection.enabled = true;
+            RevertIcons();
 
         }
 
