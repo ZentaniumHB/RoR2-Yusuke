@@ -20,7 +20,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public virtual int attackID { get; set; } = 2;
 
         private bool hasIconSwitch;
-        private int bullets;
+        public int bullets;
 
 
         public override void OnEnter()
@@ -158,13 +158,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         protected virtual bool IsKeyDown()
         {
-
             return IsKeyDownAuthority();
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Skill;
+            return InterruptPriority.Frozen;
         }
 
         protected virtual EntityState SpiritNextState()

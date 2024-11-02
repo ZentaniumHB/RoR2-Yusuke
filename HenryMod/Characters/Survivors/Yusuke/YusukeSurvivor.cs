@@ -82,11 +82,11 @@ namespace YusukeMod.Survivors.Yusuke
         // mazoku moves
         internal static SkillDef mazokuMelee;
         internal static SkillDef mazokuDemonGun;
+        internal static SkillDef mazokuDemonGunPrimary;
         internal static SkillDef backToBackStrikes;
         internal static SkillDef blinkDash;
         internal static SkillDef swingCombo;
         internal static SkillDef demonGunMega;
-        internal static SkillDef outOfLuck;
 
         //HUD
         internal static HUD hud = null;
@@ -702,7 +702,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillNameToken = YUSUKE_PREFIX + "SECONDARY_MAZOKUGUN_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_GUN_DESCRIPTION",
                 keywordTokens = new string[] { "KEYWORD_AGILE" },
-                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("texDemonGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGun)),
                 activationStateMachineName = "Weapon2",
@@ -727,6 +727,40 @@ namespace YusukeMod.Survivors.Yusuke
                 forceSprintDuringState = false,
 
             });
+
+
+            YusukeSurvivor.mazokuDemonGunPrimary = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeDemonGunPrimary",
+                skillNameToken = YUSUKE_PREFIX + "PRIMARY_MAZOKUGUN_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_GUN_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("texDemonGunIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunPrimary)),
+                activationStateMachineName = "Weapon2",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
+
+                baseRechargeInterval = 15f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = true,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
 
             YusukeSurvivor.backToBackStrikes = Skills.CreateSkillDef(new SkillDefInfo
             {

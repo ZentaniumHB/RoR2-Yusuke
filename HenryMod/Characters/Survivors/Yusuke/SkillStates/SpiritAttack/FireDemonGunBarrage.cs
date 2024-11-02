@@ -3,10 +3,11 @@ using YusukeMod.Survivors.Yusuke;
 using RoR2;
 using UnityEngine;
 using RoR2.Projectile;
+using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
-    public class FireDemonGunBarrage : BaseSkillState
+    public class FireDemonGunBarrage : BaseChargeSpirit
     {
 
         public GameObject projectilePrefab = YusukeAssets.basicSpiritGunPrefab;
