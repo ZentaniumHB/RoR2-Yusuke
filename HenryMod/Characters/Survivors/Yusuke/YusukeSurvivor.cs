@@ -833,7 +833,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillName = "YusukeDemonGunMega",
                 skillNameToken = YUSUKE_PREFIX + "SPECIAL_MAZ_MEGA_NAME",
                 skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_MAZ_MEGA_DESCRIPTION",
-                skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
+                skillIcon = assetBundle.LoadAsset<Sprite>("texScepterSpecialIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunMega)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine

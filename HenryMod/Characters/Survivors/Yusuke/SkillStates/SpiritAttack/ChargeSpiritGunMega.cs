@@ -28,9 +28,13 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private bool tier1Wave;
         private bool tier2Wave;
 
+        private YusukeMain mainstate;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            mainstate = new YusukeMain();
 
             // starting value, max value and how long to it takes to reach charge limit (in seconds)
             chargeValue = 0.0f;
@@ -54,6 +58,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 base.characterBody.AddBuff(YusukeBuffs.spiritMegaArmourBuff);
             }
 
+
         }
 
         public override void OnExit()
@@ -71,6 +76,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public override void FixedUpdate()
         {
+
             base.FixedUpdate();
 
             chargeIncrement = chargeLimit / baseChargeDuration * Time.fixedDeltaTime; // takes 'chargeDuration' seconds to get to chargeLimit

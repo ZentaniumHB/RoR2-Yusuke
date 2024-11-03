@@ -79,12 +79,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             if (isNoLongerTransformed)
             {
                 penaltyTimer += Time.fixedDeltaTime;
-                Log.Info("Penalty timer: " + penaltyTimer);
+                //Log.Info("Penalty timer: " + penaltyTimer);
             }
 
             chargeIncrement += Time.fixedDeltaTime * 10; // takes 'chargeDuration' seconds to get to chargeLimit
             totalCharge = chargeIncrement;
-            Log.Info($"Spirit Mega charge: " + totalCharge);
+            //Log.Info($"Spirit Mega charge: " + totalCharge);
 
             characterBody.SetAimTimer(1f);
 

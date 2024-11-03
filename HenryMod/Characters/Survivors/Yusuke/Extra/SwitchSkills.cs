@@ -125,9 +125,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             switch (skillLocator.special.skillNameToken)
             {
                 case prefix + "SPECIAL_MAZ_MEGA_NAME":
-                    skillLocator.special.UnsetSkillOverride(gameObject, YusukeSurvivor.demonGunMega, GenericSkill.SkillOverridePriority.Contextual);
-                    skillLocator.special.SetSkillOverride(gameObject, YusukeSurvivor.specialSpiritGunMega, GenericSkill.SkillOverridePriority.Contextual);
-                    break;
+                    if (inputBank.skill4.down)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        skillLocator.special.UnsetSkillOverride(gameObject, YusukeSurvivor.demonGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                        skillLocator.special.SetSkillOverride(gameObject, YusukeSurvivor.specialSpiritGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                        break;
+                    }
                 case prefix + "SPECIAL_SPIRITCUFF_NAME":
                     //skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
                     //skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);

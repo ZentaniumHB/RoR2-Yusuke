@@ -9,6 +9,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
+using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Modules.BaseStates
@@ -54,8 +55,10 @@ namespace YusukeMod.Modules.BaseStates
         private RaycastHit hit;
 
         // mazoku demon gun timer
+        const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
         private bool decrementPenaltyTimer;
         public float penaltyTimer;
+        private bool hasRevertedDemonGunMega;
 
         public void Start()
         {
@@ -136,14 +139,6 @@ namespace YusukeMod.Modules.BaseStates
             if(decrementPenaltyTimer) penaltyTimer -= Time.fixedDeltaTime;
         }
 
-        // this checks the current entity state if it's the charge spirit mega, if so it will prevent any other state to be entered.
-        public bool CheckForDemonGunMegaState()
-        {
-            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
-            if(stateMachine.state is ChargeDemonGunMega || stateMachine.state is FireDemonGunMega) return true;
-            return false;
-        }
-
         // transformation state
         private void TransformProperties()
         {
@@ -160,6 +155,7 @@ namespace YusukeMod.Modules.BaseStates
                             if(penaltyTimer <= 0)
                             {
                                 outer.SetNextState(new BeginMazokuTransformation());
+                                hasRevertedDemonGunMega = false;
                             }
                             else
                             {
@@ -190,6 +186,19 @@ namespace YusukeMod.Modules.BaseStates
                     outer.SetNextState(SwitchBackSkills(2));    // switching reverse so it reverts back to the skills it needs
 
                 }
+
+                if (!maz.hasTransformed && skillLocator.special.skillNameToken == prefix + "SPECIAL_MAZ_MEGA_NAME" && !inputBank.skill4.down)
+                {
+                    if (!hasRevertedDemonGunMega)
+                    {
+                        hasRevertedDemonGunMega = true;
+                        skillLocator.special.UnsetSkillOverride(gameObject, YusukeSurvivor.demonGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                        skillLocator.special.SetSkillOverride(gameObject, YusukeSurvivor.specialSpiritGunMega, GenericSkill.SkillOverridePriority.Contextual);
+
+                    }
+
+                }
+
             }
         }
 
