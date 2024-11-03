@@ -338,7 +338,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     punchStopwatch = 0;
 
                 }
-           
 
             }
             
@@ -364,7 +363,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.Death;
         }
 
     }

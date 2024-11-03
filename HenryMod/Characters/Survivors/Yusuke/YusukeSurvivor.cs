@@ -317,8 +317,8 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGunPrimary)),
-                activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 4,
@@ -359,8 +359,8 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGun)),
-                activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 4,
@@ -394,8 +394,8 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texSpiritShotgunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritShotgun)),
-                activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                activationStateMachineName = "Weapon",
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 2,
@@ -436,7 +436,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
                 activationStateMachineName = "Body",
-                interruptPriority = EntityStates.InterruptPriority.PrioritySkill,
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 1,
@@ -471,7 +471,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritWave)),
                 activationStateMachineName = "Weapon",
-                interruptPriority = EntityStates.InterruptPriority.Frozen,
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 5f,
                 baseMaxStock = 2,
@@ -838,7 +838,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunMega)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "MazokuWeapon",
-                interruptPriority = EntityStates.InterruptPriority.Frozen,
+                interruptPriority = EntityStates.InterruptPriority.Vehicle,
 
                 baseRechargeInterval = 25f,
                 baseMaxStock = 1,

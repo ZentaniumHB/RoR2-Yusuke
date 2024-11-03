@@ -39,7 +39,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             {
                 charge = totalCharge,
                 isPrimary = true
-};
+            };
         }
     }
 }
