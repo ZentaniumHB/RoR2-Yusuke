@@ -332,7 +332,7 @@ namespace YusukeMod.SkillStates
                             chosenSkill = 1;
                             followUpActivated = true;
 
-                            if (skillLocator.primary.skillNameToken == prefix + "PRIMARY_SLASH_NAME")
+                            if (skillLocator.primary.skillNameToken == prefix + "FOLLOWUP_MELEE_NAME")
                             {
                                 knockbackController.isFollowUpActive = true;
                                 if (!nextState)
