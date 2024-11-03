@@ -36,6 +36,7 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(MazBackToBackStrikes));
             Modules.Content.AddEntityState(typeof(FireDemonGunBarrage));
             Modules.Content.AddEntityState(typeof(SwingCombo));
+            Modules.Content.AddEntityState(typeof(ChargeDemonGunMega));
 
             Modules.Content.AddEntityState(typeof(SpiritGunDouble));
             Modules.Content.AddEntityState(typeof(SpiritGunFollowUp));

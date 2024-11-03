@@ -67,6 +67,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
+            switch (skillLocator.special.skillNameToken)
+            {
+                case prefix + "SPECIAL_SPIRITMEGA_NAME":
+                    skillLocator.special.UnsetSkillOverride(gameObject, YusukeSurvivor.specialSpiritGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.special.SetSkillOverride(gameObject, YusukeSurvivor.demonGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "SPECIAL_SPIRITCUFF_NAME":
+                    //skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    //skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+            }
+
 
             characterBody.GetComponent<SingleTracking>().TurnOn();    // enabling the tracker for the specific move needed. 
 
@@ -108,6 +120,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 case prefix + "UTILTY_MAZSWINGCOMBO_NAME":
                     skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
                     skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+            }
+            switch (skillLocator.special.skillNameToken)
+            {
+                case prefix + "SPECIAL_MAZ_MEGA_NAME":
+                    skillLocator.special.UnsetSkillOverride(gameObject, YusukeSurvivor.demonGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.special.SetSkillOverride(gameObject, YusukeSurvivor.specialSpiritGunMega, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "SPECIAL_SPIRITCUFF_NAME":
+                    //skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    //skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.swingCombo, GenericSkill.SkillOverridePriority.Contextual);
                     break;
             }
 

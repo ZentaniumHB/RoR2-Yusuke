@@ -91,6 +91,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                     /* checks whether the cuff state is released and changes the icon accordingly 
                      * This is mainly done for visual purposes. SO the player knows what type of spirit gun they are doing
                     */
+
                     if (cuffComponent)
                     {
                         if (cuffComponent.hasReleased)
@@ -111,30 +112,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             if (!IsKeyDown() && isAuthority)
             {
                 totalCharge = RoundTheFloat(totalCharge);
-
-                /*if (isMaxCharge)
-                {
-                    if (cuffComponent)
-                    {
-                        // if spiritcuff is activated, do spirit beam
-                        if (cuffComponent.hasReleased)
-                        {
-
-                            outer.SetNextState(BeamNextState());
-                        }
-                        else
-                        {
-                            // if not, do spirit gun double
-                            outer.SetNextState(DoubleNextState());
-                        }
-                    }
-
-                }
-                else
-                {
-                    // if neither, just do regular
-                    outer.SetNextState(SpiritNextState());
-                }*/
 
                 int bulletCount = (int)Mathf.Floor(totalCharge / 10);
                 Log.Info($"Total charge (rounded (regular)): " + totalCharge);
@@ -176,24 +153,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             };
         }
 
-        /*protected virtual EntityState DoubleNextState()
-        {
-            return new SpiritGunDouble
-            {
-                charge = totalCharge,
-                isMaxCharge = isMaxCharge
-            };
-        }
-
-        protected virtual EntityState BeamNextState()
-        {
-
-            return new FireSpiritBeam
-            {
-                charge = totalCharge,
-
-            };
-        }*/
 
     }
 }

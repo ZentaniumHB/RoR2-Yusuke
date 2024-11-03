@@ -208,6 +208,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
+            Prefabs.AddEntityStateMachine(bodyPrefab, "MazokuWeapon");
         }
 
         #region skills
@@ -512,7 +513,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGunMega)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "Weapon",
-                interruptPriority = EntityStates.InterruptPriority.Skill,
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
 
                 baseRechargeInterval = 15f,
                 baseMaxStock = 1,
@@ -705,7 +706,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texDemonGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGun)),
-                activationStateMachineName = "Weapon2",
+                activationStateMachineName = "MazokuWeapon",
                 interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 15f,
@@ -738,7 +739,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texDemonGunIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunPrimary)),
-                activationStateMachineName = "Weapon2",
+                activationStateMachineName = "MazokuWeapon",
                 interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 15f,
@@ -771,8 +772,8 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(MazBackToBackStrikes)),
-                activationStateMachineName = "Weapon2",
-                interruptPriority = EntityStates.InterruptPriority.Stun,
+                activationStateMachineName = "MazokuWeapon",
+                interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 10f,
                 baseMaxStock = 2,
@@ -803,7 +804,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SwingCombo)),
-                activationStateMachineName = "Weapon2",
+                activationStateMachineName = "MazokuWeapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 12f,
@@ -823,6 +824,39 @@ namespace YusukeMod.Survivors.Yusuke
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false,
+
+            });
+
+
+            YusukeSurvivor.demonGunMega = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeDemonGunMega",
+                skillNameToken = YUSUKE_PREFIX + "SPECIAL_MAZ_MEGA_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "SPECIAL_MAZ_MEGA_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("texSpecialIcon"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunMega)),
+                //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
+                activationStateMachineName = "MazokuWeapon",
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
+
+                baseRechargeInterval = 25f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false
 
             });
 
