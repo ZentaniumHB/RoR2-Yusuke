@@ -9,6 +9,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
+using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Modules.BaseStates
 {
@@ -52,8 +53,9 @@ namespace YusukeMod.Modules.BaseStates
         private Ray yDistanceRay;
         private RaycastHit hit;
 
-
-        private bool hasMazokuSwitchBegun;
+        // mazoku demon gun timer
+        private bool decrementPenaltyTimer;
+        public float penaltyTimer;
 
         public void Start()
         {
@@ -102,6 +104,7 @@ namespace YusukeMod.Modules.BaseStates
 
             CheckFollowUpIntervals();
             TransformProperties();
+            CheckPenaltyTimer();
 
             Chat.AddMessage("melee timer: "+meleeRechargeInterval);
             Chat.AddMessage("primary move status: "+isPrimaryReady);
@@ -112,10 +115,39 @@ namespace YusukeMod.Modules.BaseStates
 
         }
 
+        private void CheckPenaltyTimer()
+        {
+            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+            if (penaltyTimer > 0) {
+                if (maz != null)
+                {
+                    if (maz.previousValue == maz.maxMazokuValue)
+                    {
+                        //Log.Info("Penalty timer inside MAIN STATE: " + penaltyTimer);
+                        decrementPenaltyTimer = true;
+                    }
+                }
+            }
+            else
+            {
+                decrementPenaltyTimer = false;
+            }
+               
+            if(decrementPenaltyTimer) penaltyTimer -= Time.fixedDeltaTime;
+        }
+
+        // this checks the current entity state if it's the charge spirit mega, if so it will prevent any other state to be entered.
+        public bool CheckForDemonGunMegaState()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if(stateMachine.state is ChargeDemonGunMega || stateMachine.state is FireDemonGunMega) return true;
+            return false;
+        }
+
         // transformation state
         private void TransformProperties()
         {
-            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();  
             if (Input.GetKeyDown(KeyCode.V))
             {
                 
@@ -125,7 +157,15 @@ namespace YusukeMod.Modules.BaseStates
                     {
                         if (isGrounded)
                         {
-                            outer.SetNextState(new BeginMazokuTransformation());
+                            if(penaltyTimer <= 0)
+                            {
+                                outer.SetNextState(new BeginMazokuTransformation());
+                            }
+                            else
+                            {
+                                if (penaltyTimer != 0) Log.Info("Penalty Timer: " + Mathf.Round(penaltyTimer));
+                            }
+                            
                         }
                         else
                         {
@@ -135,6 +175,7 @@ namespace YusukeMod.Modules.BaseStates
                     else
                     {
                         Log.Info("Mazoku is not ready... sorry.");
+                        
                     }
                 }
             }

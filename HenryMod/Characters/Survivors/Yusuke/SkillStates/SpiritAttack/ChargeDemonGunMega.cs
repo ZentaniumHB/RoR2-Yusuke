@@ -76,7 +76,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             base.FixedUpdate();
 
             if (!isNoLongerTransformed) CheckTransformState();   // this is used to check whether the mazoku is still avtive, if not then it will notify the penalty
-            if (isNoLongerTransformed) penaltyTimer += Time.fixedDeltaTime;
+            if (isNoLongerTransformed)
+            {
+                penaltyTimer += Time.fixedDeltaTime;
+                Log.Info("Penalty timer: " + penaltyTimer);
+            }
 
             chargeIncrement += Time.fixedDeltaTime * 10; // takes 'chargeDuration' seconds to get to chargeLimit
             totalCharge = chargeIncrement;
