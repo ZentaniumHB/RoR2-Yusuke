@@ -140,6 +140,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     // send to next state.
                     characterMotor.enabled = false;
                     characterDirection.enabled = false;
+                    knockbackController.isFollowUpActive = true;
                     outer.SetNextState(MazMeleeFollowUp());
 
 
