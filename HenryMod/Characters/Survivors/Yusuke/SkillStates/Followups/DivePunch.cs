@@ -80,14 +80,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 //Log.Info("[DIVE PUNCH] - Adding to enemy.");
                 DivePunchController = target.healthComponent.body.gameObject.AddComponent<DivePunchController>();
-                //Log.Info("[DIVE PUNCH] - changing to fist controller");
-
-                /*if(characterMotor && characterDirection)
-                {
-                    characterMotor.velocity = target.transform.position * speed;
-                }
-                Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
-                previousPosition = transform.position - b;*/
 
                 characterMotor.Motor.ForceUnground();
 
