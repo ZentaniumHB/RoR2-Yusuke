@@ -1,4 +1,5 @@
 ﻿using EntityStates;
+using IL.RoR2.Achievements.FalseSon;
 using Rewired.Demos;
 using RoR2;
 using System;
@@ -16,6 +17,19 @@ namespace YusukeMod.Modules.BaseStates
 {
     public class YusukeMain : GenericCharacterMain
     {
+        // animation layer that references the layer index for animations
+        public enum AnimationLayerIndex
+        {
+            Body,
+            Hurt,
+            GunCharge,
+            ShotgunCharge,
+            WaveCharge,
+            MegaCharge,
+            Mazoku
+        }
+
+
         Vector3 currentPosition;
         Vector3 latestGroundPosition;
 
@@ -60,6 +74,10 @@ namespace YusukeMod.Modules.BaseStates
         public float penaltyTimer;
         private bool hasRevertedDemonGunMega;
 
+        //used for Animation layers
+        Animator animator = null;
+        bool isRestAnimationActive = false;
+
         public void Start()
         {
             
@@ -71,6 +89,9 @@ namespace YusukeMod.Modules.BaseStates
         {
             base.OnEnter();
             // setting the y-distance ray for spirit gun mega
+
+            // getting the animator component for the layer switching
+            animator = GetModelAnimator();
 
             meleeRechargeInterval = 0f;
             spiritGunRechargeInterval = 0f;
@@ -97,10 +118,14 @@ namespace YusukeMod.Modules.BaseStates
                 //Chat.AddMessage("Time standing still: " +timer);
             }
 
-            if (timer > 5)
+            if (hasIdleEnded)
             {
-                // play animation when...
-                //Chat.AddMessage("*whistling*");
+                isRestAnimationActive = false;
+            }
+
+            if (timer > 5 && !isRestAnimationActive)
+            {
+                // play the animation required. 
 
             }
 
@@ -497,8 +522,6 @@ namespace YusukeMod.Modules.BaseStates
             return 0;
         }
 
-<<<<<<< Updated upstream
-=======
         /* whenever there is a change in animations in the layer, this method will be called, this is used whenever there is an animation set that 
             needs to overwrite the current body layer animation set (walk, run, jump, etc)*/
         public void SwitchMovementAnimations(int animationLayerIndex, bool isSwitching)
@@ -517,7 +540,6 @@ namespace YusukeMod.Modules.BaseStates
                 Log.Info("Layer " + animationLayerIndex + " has been switched off. ");
             }
         }
->>>>>>> Stashed changes
 
     }
 }
