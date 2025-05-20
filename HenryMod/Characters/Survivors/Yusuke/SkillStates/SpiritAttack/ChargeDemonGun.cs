@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -22,10 +24,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private bool hasIconSwitch;
         public int bullets;
 
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            SwitchAnimationLayer();
 
             Log.Info("attack ID: " + attackID);
             cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
@@ -48,6 +53,35 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             chargeDuration = baseChargeDuration;
 
+        }
+
+        // the animation switching is done once the YusukeMain state is taken
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.GunCharge, true);
+
+                    // since one of the sync layers are already active (mazoku layer), it needs to be turned of temporarily so the sync layer can be used. 
+                    MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+                    if (maz.hasTransformed)
+                    {
+                        mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, false);
+                    }
+
+                }
+
+            }
         }
 
         public override void OnExit()

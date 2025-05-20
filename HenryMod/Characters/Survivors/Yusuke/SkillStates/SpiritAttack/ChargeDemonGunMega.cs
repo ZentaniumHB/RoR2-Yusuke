@@ -10,6 +10,7 @@ using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using RoR2;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -32,9 +33,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public bool isNoLongerTransformed;
         public float penaltyTimer = 0f;
 
+        private YusukeMain mainState;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            SwitchAnimationLayer();
 
             // starting value, max value and how long to it takes to reach charge limit (in seconds)
             chargeValue = 0.0f;
@@ -56,12 +61,45 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 characterBody.AddBuff(YusukeBuffs.spiritMegaArmourBuff);
             }
 
+            PlayAnimation("BothHands, Override", "SpiritMegaHandPose", "ShootGun.playbackRate", 1f);
+        }
+
+        // the animation switching is done once the YusukeMain state is taken
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, true);
+
+
+                    // since one of the sync layers are already active (mazoku layer), it needs to be turned of temporarily so the sync layer can be used
+                    MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+                    if (maz.hasTransformed)
+                    {
+                        mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, false);
+                    }
+
+                }
+
+            }
+
         }
 
         public override void OnExit()
         {
             base.OnExit();
             hasSlowVelocity = false;
+
             if (NetworkServer.active)
             {
                 characterBody.RemoveBuff(YusukeBuffs.spiritMegaSlowDebuff);
@@ -180,6 +218,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 if (currentStateType == typeof(YusukeMain))
                 {
                     YusukeMain targetState = (YusukeMain)stateMachine.state;
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, true);
                     //Chat.AddMessage("Result: " + targetState.CompareYAxis());
                     return (true, targetState.CompareYAxis());
                 }

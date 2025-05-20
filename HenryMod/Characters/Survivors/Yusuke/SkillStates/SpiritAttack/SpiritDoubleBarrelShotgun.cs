@@ -37,7 +37,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnEnter()
         {
             base.OnEnter();
-            Log.Info("INSIDE DOUBLE BARREL SHOTGUN");
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
             characterBody.SetAimTimer(2f);
@@ -45,7 +44,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             barrageStopWatch = 0f;
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
         }
 
         public override void OnExit()
@@ -85,6 +83,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             characterBody.AddSpreadBloom(1.5f);
             EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+
+            PlayAnimation("BothHands, Override", "ShootSpiritShotgun", "ShootGun.playbackRate", 1f);
+
+
             Util.PlaySound("HenryShootPistol", gameObject);
 
             Ray aimRay = GetAimRay();

@@ -5,8 +5,10 @@ using RoR2.Projectile;
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.SkillStates
 {
@@ -32,6 +34,7 @@ namespace YusukeMod.SkillStates
         public bool tier1Wave;
         public bool tier2Wave;
 
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
@@ -40,9 +43,8 @@ namespace YusukeMod.SkillStates
             base.characterBody.SetAimTimer(1f);
             PauseVelocity();
             this.duration = 0.6f;
-            this.fireTime = 0.5f;  
+            this.fireTime = 0.5f;
 
-            base.PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
 
             if(tier1Wave)
             {
@@ -69,12 +71,36 @@ namespace YusukeMod.SkillStates
 
         }
 
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, false);
+
+                }
+
+            }
+        }
+
         public override void OnExit()
         {
             base.OnExit();
-            
+            SwitchAnimationLayer();
+            PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);   
+
 
         }
+
+        
 
         private void Fire()
         {
@@ -85,6 +111,15 @@ namespace YusukeMod.SkillStates
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
                 Util.PlaySound("HenryShootPistol", base.gameObject);
+
+                if (isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "ShootSpiritMegaGrounded", "ShootGun.playbackRate", 1f);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1f);
+                }
 
                 if (base.isAuthority)
                 {

@@ -22,7 +22,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float maxInitialSpeed = 6f;
         private float finalSpeed = 1f;
 
-        private float dashTime; 
+        private float dashTime = 0f; 
         private float duration = 1f;
         private Vector3 forwardDirection;
         private Vector3 previousPosition;
@@ -61,12 +61,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
 
+            PlayAnimation("FullBody, Override", "MazokuSwingDashGrab", "Slide.playbackRate", duration);
+
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
             
+            dashTime += GetDeltaTime();
             if (!targetFound)
             {
                 Dash();
@@ -74,6 +77,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
 
             if (targetFound) SwingThrow();
+
+            if (dashTime > duration && !targetFound)
+            {
+                // revert the icons. 
+                outer.SetNextStateToMain();
+            }
 
 
         }
@@ -90,7 +99,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     Log.Info("Setting maz controller. ");
                     mazokuGrabController = target.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
                     mazokuGrabController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
-                    PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 2f);
+
+                    PlayAnimation("FullBody, Override", "MazokuSwing", "ShootGun.playbackRate", duration);
+
                     Log.Info("maz settings done. ");
                     
                 }
@@ -105,7 +116,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 actionStopwatch += Time.fixedDeltaTime;
                 if (!canThrowEnemy)
                 {
-                    
+                    PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
                     mazokuGrabController.Remove();
 
                     // create the indicator on the body to show which enemy will receive the follow up
@@ -135,7 +146,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 if (inputBank.skill1.down)
                 {
-                    PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 2f);
+                    PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", 2f);
                     Log.Info("Clicked");
                     // send to next state.
                     characterMotor.enabled = false;

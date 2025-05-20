@@ -19,6 +19,7 @@ using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.SkillStates
 {
@@ -72,8 +73,8 @@ namespace YusukeMod.SkillStates
 
 
         // animation settings
-        protected Animator animator;
         protected float hitStopDuration = 0.012f;
+        private bool hasPlayedImpactAnimation = false;
 
         // targeting and knockback
         private bool collision;
@@ -112,13 +113,14 @@ namespace YusukeMod.SkillStates
 
 
         private GenericSkill previousSecondarySkill;
-
-
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
             base.OnEnter();
-            animator = GetModelAnimator();
+
+            SwitchAnimationLayer();
+
             knockbackController = new KnockbackController();
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
 
@@ -147,11 +149,39 @@ namespace YusukeMod.SkillStates
             // prevent any movement if spirit wave is grouned
             if (isGrounded)
             {
+                
                 prevMovementVector = characterMotor.velocity;
                 vector = forwardDirection * dashSpeed;
                 characterMotor.enabled = false;
                 characterDirection.enabled = false;
                 groundedVersion = true;
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "DashWave", "Slide.playbackRate", duration);
+            }
+
+        }
+
+        // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.WaveCharge, false);
+
+                }
+
             }
 
         }
@@ -508,6 +538,19 @@ namespace YusukeMod.SkillStates
 
             float decelerationValue = 0.2f;
             characterMotor.velocity = new Vector3(decelerationValue, decelerationValue, decelerationValue);
+            if (!hasPlayedImpactAnimation)
+            {
+                hasPlayedImpactAnimation = true;
+                if (isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "DashYImpact", "Slide.playbackRate", actionTimeDuration);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "DashAirImpact", "Slide.playbackRate", actionTimeDuration);
+                }
+            }
+            
 
         }
 

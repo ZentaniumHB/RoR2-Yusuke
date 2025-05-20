@@ -155,6 +155,8 @@ namespace YusukeMod.Modules.BaseStates
                             if(penaltyTimer <= 0)
                             {
                                 outer.SetNextState(new BeginMazokuTransformation());
+                                // switching to the mazoku AnimationLayer
+                                SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, true);
                                 hasRevertedDemonGunMega = false;
                             }
                             else
@@ -178,11 +180,15 @@ namespace YusukeMod.Modules.BaseStates
 
 
             if(maz != null)
-            {   // checks if the reverse boolean is true, which indicates that the mazoku transformation duration has ended
+            {
+                
+                // checks if the reverse boolean is true, which indicates that the mazoku transformation duration has ended
                 if (maz.startReverse)
                 {
                     maz.startReverse = false;
                     Log.Info("Switching skills back from maz.");
+                    // Changing back the mazoku animation set
+                    SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, false);
                     outer.SetNextState(SwitchBackSkills(2));    // switching reverse so it reverts back to the skills it needs
 
                 }
@@ -491,6 +497,27 @@ namespace YusukeMod.Modules.BaseStates
             return 0;
         }
 
+<<<<<<< Updated upstream
+=======
+        /* whenever there is a change in animations in the layer, this method will be called, this is used whenever there is an animation set that 
+            needs to overwrite the current body layer animation set (walk, run, jump, etc)*/
+        public void SwitchMovementAnimations(int animationLayerIndex, bool isSwitching)
+        {
+            
+
+            if (animator && isSwitching)
+            {
+                animator.SetLayerWeight(animationLayerIndex, 1f);
+                Log.Info("Layer " + animationLayerIndex + " has been switched on. ");
+
+            }
+            else
+            {
+                animator.SetLayerWeight(animationLayerIndex, 0f);
+                Log.Info("Layer " + animationLayerIndex + " has been switched off. ");
+            }
+        }
+>>>>>>> Stashed changes
 
     }
 }

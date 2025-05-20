@@ -14,12 +14,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
     {
         public static float baseDuration = 1.25f;
 
-        private float duration = 2f;
+        private float duration = 12f;
 
         public override void OnEnter()
         {
             base.OnEnter();
-            PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", duration);
+            // if the transform count is greater than 2 (meaning raizen has passed) then do the other animation
+            PlayAnimation("FullBody, Override", "MazokuTransformRaizen", "ThrowBomb.playbackRate", duration);
 
         }
 
@@ -31,6 +32,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             {
                 outer.SetNextState(SkillSwitch(1));
             }
+
         }
 
         public override void OnExit()
@@ -41,6 +43,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             {
                 maz.hasTransformed = true;
             }
+
+            // AFTER switch to the other animation set (mazoku)
         }
 
         protected virtual EntityState SkillSwitch(int ID)

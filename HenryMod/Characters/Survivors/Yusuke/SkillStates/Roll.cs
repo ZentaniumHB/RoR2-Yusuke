@@ -47,7 +47,15 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
 
-            PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", duration);
+            if (isGrounded)
+            {
+                PlayAnimation("FullBody, Override", "Slide", "Slide.playbackRate", duration);
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
+            }
+            
             Util.PlaySound(dodgeSoundString, gameObject);
 
             if (NetworkServer.active)

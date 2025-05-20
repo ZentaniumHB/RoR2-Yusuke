@@ -16,10 +16,6 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using RoR2.UI;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
-using static YusukeMod.Modules.Skins;
-using HG;
-using EntityStates;
-using static RoR2.TeleporterInteraction;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using RoR2.Projectile;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
@@ -125,6 +121,25 @@ namespace YusukeMod.Survivors.Yusuke
                 new CustomRendererInfo
                 {
                     childName = "Model",
+<<<<<<< Updated upstream
+=======
+                }*/
+
+                new CustomRendererInfo
+                {
+                    childName = "Model",
+                    
+                },
+                new CustomRendererInfo
+                {
+                    childName = "YusukeHair1",
+                    
+                },
+                new CustomRendererInfo
+                {
+                    childName = "YusukeHair2",
+                    
+>>>>>>> Stashed changes
                 }
         };
 
@@ -525,7 +540,7 @@ namespace YusukeMod.Survivors.Yusuke
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
                 dontAllowPastMaxStocks = false,
-                mustKeyPress = false,
+                mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = true,
@@ -850,7 +865,7 @@ namespace YusukeMod.Survivors.Yusuke
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
                 dontAllowPastMaxStocks = false,
-                mustKeyPress = false,
+                mustKeyPress = true,
                 beginSkillCooldownOnSkillEnd = true,
 
                 isCombatSkill = true,

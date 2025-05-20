@@ -4,6 +4,10 @@ using RoR2;
 using UnityEngine;
 using RoR2.Projectile;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using YusukeMod.Modules.BaseStates;
+using System;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -33,9 +37,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private float barrageStopWatch;
         private int numberOfShots;
 
+        private YusukeMain mainState;
+
+
         public override void OnEnter()
         {
             base.OnEnter();
+
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
             characterBody.SetAimTimer(2f);
@@ -46,12 +54,42 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 projectilePrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
             }
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            
+        }
+
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.GunCharge, false);
+
+                    // since one of the sync layers are already active (mazoku layer), it needs to be turned of temporarily so the sync layer can be used
+                    MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+                    if (maz.hasTransformed)
+                    {
+                        mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, true);
+                    }
+
+                }
+
+            }
+
         }
 
         public override void OnExit()
         {
             base.OnExit();
+            SwitchAnimationLayer();
+
         }
 
         public override void FixedUpdate()
@@ -88,6 +126,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             characterBody.AddSpreadBloom(1.5f);
             EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+
+            PlayAnimation("BothHands, Override", "ShootSpiritGun", "ShootGun.playbackRate", 1.8f);
             Util.PlaySound("HenryShootPistol", gameObject);
 
             if (isAuthority)

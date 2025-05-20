@@ -2,12 +2,15 @@
 using EntityStates.Captain.Weapon;
 using RoR2;
 using RoR2.UI;
+using System;
 using UnityEngine;
 using YusukeMod;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -18,10 +21,13 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         protected float totalCharge { get; private set; }
         private bool isMaxCharge;
         private bool hasIconSwitch;
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            SwitchAnimationLayer();
 
             // starting value, max value and how fast to increment
             chargeValue = 0.0f;
@@ -41,6 +47,29 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 {
                     baseChargeDuration = 5.0f;
                 }
+            }
+
+        }
+
+        // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.ShotgunCharge, true);
+
+                }
+
             }
 
         }

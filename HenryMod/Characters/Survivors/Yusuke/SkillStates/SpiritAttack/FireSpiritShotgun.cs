@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq.JsonPath;
 using UnityEngine.UIElements;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
+using YusukeMod.Modules.BaseStates;
+using System;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -32,6 +35,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public List<HurtBox> targets;
         private int damageDivision;
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
@@ -41,12 +45,38 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             characterBody.SetAimTimer(2f);
             muzzleString = "Muzzle";
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            PlayAnimation("BothHands, Override", "ShootSpiritShotgun", "ShootGun.playbackRate", 1f);
         }
 
         public override void OnExit()
         {
             base.OnExit();
+            SwitchAnimationLayer();
+
+        }
+
+
+        // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.ShotgunCharge, false);
+
+                }
+
+            }
+
         }
 
         public override void FixedUpdate()

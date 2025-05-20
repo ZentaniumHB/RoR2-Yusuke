@@ -69,7 +69,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float stompCount = 0;
         private int maxPunches = 40;
         private int maxStomps = 4;
-        private bool hasTargetBeenFound;
+
+
+        // Animation flags
+        private bool hasStartUpPlayed;
+        private bool isFinalPunchAnimationActive;
+        private float finalPunchDelayStopwatch = 0f;
+        private float groundedAnimationStartupDelayValue = 0.6f;
+        private float groundedAnimationStopwatch;
+        private bool rapidPunchAnim;
 
         public override void OnEnter()
         {
@@ -116,7 +124,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 if (!playAnim)
                 {
                     attackFinisherID = Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
-                    PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", 0.6f);
+                    if(attackFinisherID == 1) PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
+                    if(attackFinisherID == 2) PlayAnimation("FullBody, Override", "StompDive", "Roll.playbackRate", 0.5f);
                     playAnim = true;
                 }
 
@@ -265,64 +274,158 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private void MachineGunPunch()
         {
             punchStopwatch += GetDeltaTime();
+            groundedAnimationStopwatch += GetDeltaTime(); // stopwatch that is used for allowing the animation to play out before the next animation interrupts
 
             if (target.healthComponent.alive)
             {
-                if (punchStopwatch > 0.05f) // reset the timer, and punch again
+                //If grounded, it will play the animation startup
+                if (!hasStartUpPlayed && !SkipDive && attackFinisherID == 1)
                 {
+                    hasStartUpPlayed = true;
+                    PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
+                }
 
-                    if (NetworkServer.active)
+
+                if (punchStopwatch > 0.05f && !isFinalPunchAnimationActive) // reset the timer, and attack again
+                {
+                    if (!hasStartUpPlayed && !SkipDive)
                     {
-                        //Log.Info("Animaton" );
-                        PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 0.05f);
-
-
+                        hasStartUpPlayed = true;
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
                     }
-                    EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
-                    {
-                        origin = target.gameObject.transform.position,
-                        scale = 8f
-                    }, transmit: true);
 
-                    attack = new OverlapAttack
+                    if (!SkipDive && groundedAnimationStopwatch > groundedAnimationStartupDelayValue)
                     {
-                        damageType = damageType,
-                        attacker = gameObject,
-                        inflictor = gameObject,
-                        teamIndex = GetTeam(),
-                        damage = damageCoefficient * damageStat,
-                        procCoefficient = procCoefficient,
-                        hitEffectPrefab = hitEffectPrefab,
-                        pushAwayForce = pushForce,
-                        hitBoxGroup = FindHitBoxGroup(hitboxGroupName),
-                        isCrit = RollCrit(),
-                        impactSound = impactSound
-                    };
-                    attack.Fire();
-                    punchCount++;
-                    punchStopwatch = 0;
+                        if (NetworkServer.active)
+                        {
+                            // this boolean is to allow the animation to play only once, since it is not connected to the "bufferEmpty" state in the animation layer, it will constantly loop the first few frames
+                            if (!rapidPunchAnim)
+                            {
+                                rapidPunchAnim = true;
+                                PlayAnimation("FullBody, Override", "MazokuDiveMachinePunchGrounded", "MazokuMachinePunch.playbackRate", 0.3f);
+                            }
+
+                        }
+                        ThrowPunch();
+                    }
+
+                    if (SkipDive)
+                    {
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchAir", "Roll.playbackRate", duration);
+                        ThrowPunch();
+                        Log.Info("barraged finished: " + hasBarrageFinished);
+                    }
+                    
+                    
 
                 }
 
 
             }
 
+            // when the target is not alive, then simply skip everything and exit the state.
+            if (!target.healthComponent.alive) hasBarrageFinished = true;
+
             // if the max punches is reached, or the enemy is killed, make the boolean true. Once true, it will return
-            if (attackFinisherID == 1 && punchCount == maxPunches || !target.healthComponent.alive)
+            if (attackFinisherID == 1 && punchCount == maxPunches-1 && target.healthComponent.alive)
             {
-                hasBarrageFinished = true;
-                Log.Info("TOTAL PUNCHES: " + punchCount);
-                Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
-                Log.Info("First deleting dive punch");
-                if (target.healthComponent.alive) DivePunchController.Remove();
+                DeliverFinalPunch();
+                if (hasBarrageFinished)
+                {
+                    Log.Info("TOTAL PUNCHES: " + punchCount);
+                    Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
+                    if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+                    Log.Info("First deleting dive punch");
+                    if (target.healthComponent.alive) DivePunchController.Remove();
+                }
+                
+                
             }
-
-
-
 
         }
 
+        private void DeliverFinalPunch()
+        {
+            finalPunchDelayStopwatch += GetDeltaTime(); // starts counting the delay before the final punch connects
+
+            // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
+            if (!isFinalPunchAnimationActive)
+            {
+                isFinalPunchAnimationActive = true;
+                if (NetworkServer.active)
+                {
+                    if (!SkipDive)
+                    {
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchGroundedFinsh", "Roll.playbackRate", 1);
+                    }
+                    else
+                    {
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchAirFinish", "Roll.playbackRate", 1);
+                    }
+
+                }
+
+            }
+            // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
+            if (finalPunchDelayStopwatch > 0.8f) hasBarrageFinished = true;
+        }
+
+        // placing the attack in a different method since the stomp and the punches will do differemt amounts of damage
+        private void ThrowPunch()
+        {
+            EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
+            {
+                origin = target.gameObject.transform.position,
+                scale = 8f
+            }, transmit: true);
+            attack = new OverlapAttack
+            {
+                damageType = damageType,
+                attacker = gameObject,
+                inflictor = gameObject,
+                teamIndex = GetTeam(),
+                damage = damageCoefficient * damageStat,
+                procCoefficient = procCoefficient,
+                hitEffectPrefab = hitEffectPrefab,
+                pushAwayForce = pushForce,
+                hitBoxGroup = FindHitBoxGroup(hitboxGroupName),
+                isCrit = RollCrit(),
+                impactSound = impactSound
+            };
+            attack.Fire();
+            punchCount++;
+            punchStopwatch = 0;
+        }
+
+        private void StompAttack()
+        {
+            EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
+            {
+                origin = target.gameObject.transform.position,
+                scale = 8f
+            }, transmit: true);
+
+
+            stompAttack = new OverlapAttack
+            {
+                damageType = stompDamageType,
+                attacker = gameObject,
+                inflictor = gameObject,
+                teamIndex = GetTeam(),
+                damage = stompDamageCoefficient * damageStat,
+                procCoefficient = stompProcCoefficient,
+                hitEffectPrefab = stompHitEffectPrefab,
+                pushAwayForce = stompPushForce,
+                hitBoxGroup = FindHitBoxGroup(stompHitboxGroupName),
+                isCrit = RollCrit(),
+                impactSound = stompImpactSound
+            };
+            stompAttack.Fire();
+            stompCount++;
+            stompStopwatch = 0f;
+        }
+
+        // stomps are different in terms of animation resets
         private void StompThemOut()
         {
             stompStopwatch += GetDeltaTime();
@@ -333,35 +436,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                     if (NetworkServer.active)
                     {
-                        //Log.Info("Animaton" );
-                        PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 0.5f);
+                        PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
 
 
                     }
-                    EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
-                    {
-                        origin = target.gameObject.transform.position,
-                        scale = 8f
-                    }, transmit: true);
-
-
-                    stompAttack = new OverlapAttack
-                    {
-                        damageType = stompDamageType,
-                        attacker = gameObject,
-                        inflictor = gameObject,
-                        teamIndex = GetTeam(),
-                        damage = stompDamageCoefficient * damageStat,
-                        procCoefficient = stompProcCoefficient,
-                        hitEffectPrefab = stompHitEffectPrefab,
-                        pushAwayForce = stompPushForce,
-                        hitBoxGroup = FindHitBoxGroup(stompHitboxGroupName),
-                        isCrit = RollCrit(),
-                        impactSound = stompImpactSound
-                    };
-                    stompAttack.Fire();
-                    stompCount++;
-                    stompStopwatch = 0f;
+                    StompAttack();
 
                 }
 
@@ -371,6 +450,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (attackFinisherID == 2 && stompCount == maxStomps || !target.healthComponent.alive)
             {
                 hasBarrageFinished = true;
+                PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   // this is needed since the stomp has no transition connection, without it will loop forever
                 Log.Info("TOTAL STOMPS: " + stompCount);
                 Log.Info("BARAGE (STOMP) HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
                 if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
@@ -379,7 +459,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             }
         }
 
-
+        
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {

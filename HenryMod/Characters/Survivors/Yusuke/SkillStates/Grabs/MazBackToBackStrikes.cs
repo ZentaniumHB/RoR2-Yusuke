@@ -9,11 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
-using YusukeMod.Survivors.Yusuke.SkillStates;
-using static UnityEngine.ParticleSystem.PlaybackState;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
@@ -73,10 +74,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         protected string hitboxGroupName = "SwordGroup";
         private bool hasAttackEnded;
         private bool hasLaunchedEnemy;
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            SwitchAnimationLayer();
+
             tracking = gameObject.GetComponent<SingleTracking>();
             mazokuGrabController = new MazokuGrabController();
             knockbackController = new KnockbackController();
@@ -89,6 +94,34 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             isEnemyKilled = false;
             hasSelectionMade = false;
             characterMotor.Motor.ForceUnground();
+        }
+
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+
+                    // need to re-enable the mazoku layer since the transformation is still active
+                    MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+                    if (maz.hasTransformed)
+                    {
+                        mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, false);
+                        mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, true);
+                    }
+
+
+                }
+
+            }
         }
 
         private void TeleportToTarget()
@@ -182,7 +215,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 mazokuGrabController.Remove();
                 PauseVelocity();
                 AddKnockbackController();
-                PlayAnimation("FullBody, Override", "Roll", "Roll.playbackRate", launchAnimationSpeed);
+                
+                PlayAnimation("BothHands, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f); //clearing the infinite looped gutpunch animation
+                if (isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "MazokuToss", "Roll.playbackRate", launchAnimationSpeed);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "MazokuTossAir", "Roll.playbackRate", launchAnimationSpeed);
+                }
+                
 
             }
 
@@ -216,7 +259,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void ShotgunAA12()
         {
-            PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 1f);
+            if (isGrounded)
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", 1f);
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1f);
+            }
+            
+
             shotgunFireStopwatch += Time.fixedDeltaTime;
 
             //fires six shots every x amount of seconds defined here.
@@ -308,10 +360,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                     if (NetworkServer.active)
                     {
-                        //Log.Info("Animaton" );
-                        PlayAnimation("Gesture, Override", "ThrowBomb", "ThrowBomb.playbackRate", 0.2f);
-
-
+                        PlayAnimation("BothHands, Override", "GutPunch", "ThrowBomb.playbackRate", 0.4f);
                     }
                     EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
                     {
@@ -416,8 +465,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public override void OnExit()
         {
             base.OnExit();
+            
             characterMotor.enabled = true;
             characterDirection.enabled = true;
+            mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, false);
+
+            // need to re-enable the mazoku layer since the transformation it's still active
+            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+            if (maz.hasTransformed)
+            {
+                mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, true);
+            }
         }
 
         

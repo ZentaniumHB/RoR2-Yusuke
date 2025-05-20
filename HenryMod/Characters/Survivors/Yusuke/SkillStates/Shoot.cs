@@ -3,6 +3,9 @@ using YusukeMod.Survivors.Yusuke;
 using RoR2;
 using UnityEngine;
 using RoR2.Projectile;
+using YusukeMod.Modules.BaseStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
+using System;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -28,9 +31,12 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public bool isPrimary;
 
+        private YusukeMain mainState;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
             characterBody.SetAimTimer(2f);
@@ -41,12 +47,38 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 projectilePrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
             }
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            
+            PlayAnimation("BothHands, Override", "ShootSpiritGun", "ShootGun.playbackRate", 1.8f);
         }
+
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.GunCharge, false);
+                    // make the ReleaseAnimation index true
+                }
+
+            }
+
+        }
+
 
         public override void OnExit()
         {
             base.OnExit();
+            SwitchAnimationLayer();
+
+
         }
 
         public override void FixedUpdate()

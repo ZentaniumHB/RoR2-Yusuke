@@ -2,10 +2,13 @@
 using EntityStates.Treebot.Weapon;
 using RoR2;
 using RoR2.Projectile;
+using System;
 using UnityEngine;
 using YusukeMod;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.SkillStates
 {
@@ -36,9 +39,13 @@ namespace YusukeMod.SkillStates
         public static GameObject regularSpiritGunPrefab;
         public static GameObject spiritGunPierceProjectile;
 
+        private YusukeMain mainState;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            SwitchAnimationLayer();
 
             barrageStopWatch = 0f;
 
@@ -57,13 +64,36 @@ namespace YusukeMod.SkillStates
             }
             
             spiritGunPierceProjectile = YusukeAssets.spiritGunPiercePrefab;
-            base.PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+
+        }
+
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.GunCharge, false);
+                    // make the ReleaseAnimation index true
+                }
+
+            }
+
         }
 
         public override void OnExit()
         {
             base.OnExit();
             ResumeVelocity();
+            // make the ReleaseAnimation index false here
+            
             numberOfShots = 0;
         }
 
@@ -71,9 +101,11 @@ namespace YusukeMod.SkillStates
         {
             if (isMaxCharge)
             {
-                
+
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
+
+                PlayAnimation("BothHands, Override", "ShootSpiritGun", "ShootGun.playbackRate", 1.8f);
                 Util.PlaySound("HenryShootPistol", base.gameObject);
 
                 if (base.isAuthority)

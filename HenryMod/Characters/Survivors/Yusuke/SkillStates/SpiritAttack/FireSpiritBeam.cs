@@ -48,7 +48,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             damageTypeDecider = Random.Range(1, 3);     // makes it pick either 1 or 2
             Log.Info("type move: " + damageTypeDecider);
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            if (isGrounded)
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
+            }
+            //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
 
         }
 
