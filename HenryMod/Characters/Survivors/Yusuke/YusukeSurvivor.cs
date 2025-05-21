@@ -36,8 +36,8 @@ namespace YusukeMod.Survivors.Yusuke
         public override string masterName => "YusukeMonsterMaster"; //if you do not
 
         //the names of the prefabs you set up in unity that we will use to build your character
-        public override string modelPrefabName => "mdlHenry";
-        public override string displayPrefabName => "HenryDisplay";
+        public override string modelPrefabName => "mdlYusukeUrameshi";
+        public override string displayPrefabName => "YusukeUrameshiDisplay";
 
         public const string YUSUKE_PREFIX = YusukePlugin.DEVELOPER_PREFIX + "_YUSUKE_";
 
@@ -109,7 +109,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         public override CustomRendererInfo[] customRendererInfos => new CustomRendererInfo[]
         {
-                new CustomRendererInfo
+                /*new CustomRendererInfo
                 {
                     childName = "SwordModel",
                     material = assetBundle.LoadMaterial("matHenry"),
@@ -121,10 +121,8 @@ namespace YusukeMod.Survivors.Yusuke
                 new CustomRendererInfo
                 {
                     childName = "Model",
-<<<<<<< Updated upstream
-=======
-                }*/
 
+                },*/
                 new CustomRendererInfo
                 {
                     childName = "Model",
@@ -139,7 +137,6 @@ namespace YusukeMod.Survivors.Yusuke
                 {
                     childName = "YusukeHair2",
                     
->>>>>>> Stashed changes
                 }
         };
 
