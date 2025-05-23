@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
@@ -14,6 +15,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
+using static Rewired.ComponentControls.Effects.RotateAroundAxis;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 
@@ -31,6 +33,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private PinnableList pinnableList;
         private MazokuGrabController mazokuGrabController;
         private KnockbackController knockbackController;
+        private Vector3 storedDirection; 
 
         private bool hasTargetBeenFound;
         private bool isEnemyKilled;
@@ -45,6 +48,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasLaunchAnaimationEnded;
         private float shotgunFireStopwatch;
         private int numberOfShots;
+        private float dashSpeed = 20f;
+        private float velocityDivider = 0.1f; 
 
         public float maxTrackingDistance = 60f;
         public float maxTrackingAngle = 60f;
@@ -75,6 +80,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasAttackEnded;
         private bool hasLaunchedEnemy;
         private YusukeMain mainState;
+
+        // boolean flags for kick 
+        private bool hasKickedEnemy;
+        private bool hasDashed;
 
         public override void OnEnter()
         {
@@ -165,7 +174,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     
                     if (mazokuGrabController.hasRevertedRotation)  
                     {
-                        if (numberOfShots != 6) // delay the shotgun barrage so the animation can play out, then start firing
+
+                        LaunchEnemy();
+                        if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
+
+
+                        /*if (numberOfShots != 6) // delay the shotgun barrage so the animation can play out, then start firing
                         {
                             LaunchEnemy();  
                             if(launchAnimationDuration > launchAnimationSpeed) ShotgunAA12();
@@ -177,7 +191,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                             hasAttackEnded = true;
                             
 
-                        }
+                        }*/
 
 
 
@@ -280,9 +294,83 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             }
 
+        }
 
+        private void DashAndKick()
+        {
+            characterMotor.enabled = true;
+            characterDirection.enabled = true;
+            Log.Info("Now dashing. ");
+            if(!hasDashed)
+            {
+                hasDashed = true;
+                PlayAnimation("FullBody, Override", "Dash", "ShootGun.playbackRate", 1f);
+            }
+
+            Vector3 enemyPosition = enemyHurtBox.gameObject.transform.position;
+
+            Vector3 directionToTarget = (enemyPosition - transform.position).normalized;
+
+            // Calculate the velocity in the direction of the target
+            Vector3 forwardSpeed = directionToTarget * (dashSpeed * moveSpeedStat);
+
+            // Apply the velocity to the character's motor
+            characterMotor.velocity = forwardSpeed;
+
+            Collider[] colliders;
+            colliders = Physics.OverlapSphere(transform.position, 2, LayerIndex.entityPrecise.mask);
+            List<Collider> capturedColliders = colliders.ToList();
+
+            // check each hurtbox and catpure the hurtbox they have, then compare the two for a match.
+            foreach (Collider result in capturedColliders)
+            {
+                HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
+
+                if (capturedHurtbox)
+                {
+                    if (capturedHurtbox == enemyHurtBox)
+                    {
+
+                        if(!hasKickedEnemy) KickEnemy();
+                        
+                    }
+
+
+                }
+            }
+        }
+
+        private void KickEnemy()
+        {
+            hasKickedEnemy = true;
+            PlayAnimation("FullBody, Override", "BackToBackMeleeFinish", "ShootGun.playbackRate", 1f);
+
+            // when doing the kick, grabbing the knockbackcontroller direction and applying a force vector which will be used for special knockback for the enemies
+            Vector3 forceVector = knockbackController.GetEnemyDirection();
+            forceVector = new Vector3(-forceVector.x, forceVector.y, -forceVector.z) * 20000f;
             
+            knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
+            AttackForce(forceVector);
+            hasAttackEnded = true;
+        }
 
+        // Applying force
+        private void AttackForce(Vector3 forceVector)
+        {
+
+            DamageInfo damageInfo = new DamageInfo
+            {
+                attacker = gameObject,
+                damage = damageCoefficient * damageStat,
+                crit = RollCrit(),
+                procCoefficient = procCoefficient,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.SlowOnHit,
+                position = characterBody.corePosition,
+                force = forceVector,
+                canRejectForce = false
+            };
+            enemyHurtBox.healthComponent.TakeDamage(damageInfo);
         }
 
         private void Fire()
@@ -468,6 +556,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             
             characterMotor.enabled = true;
             characterDirection.enabled = true;
+
+            // so the character doesn't go flying like crazy due to the velocity, the current velocity will be divided by the given percentage decimal (velocityDivider). 
+            Vector3 currentVelocity = characterMotor.velocity;
+            Vector3 velocityPercentage = currentVelocity * velocityDivider;
+            characterMotor.velocity = velocityPercentage;
+
             mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, false);
 
             // need to re-enable the mazoku layer since the transformation it's still active

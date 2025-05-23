@@ -187,6 +187,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates
             Destroy(this);
         }
 
+        public Vector3 GetEnemyDirection()
+        {
+            return direction.forward;
+        }
+
 
     }
 }
