@@ -97,11 +97,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             mazokuGrabController = new MazokuGrabController();
             knockbackController = new KnockbackController();
 
-            pinnableList = new PinnableList();
-            pinnableList = gameObject.AddComponent<PinnableList>();
-
-            knockbackController = new KnockbackController();
-
             isEnemyKilled = false;
             hasSelectionMade = false;
             characterMotor.Motor.ForceUnground();
@@ -150,7 +145,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 // get the enemies model that is marked and teleport to them.
                 enemyHurtBox = tracking.GetTrackingTarget();
-                if (!hasTargetBeenFound) TeleportToTarget();
+                if (enemyHurtBox)
+                {
+                    if (!hasTargetBeenFound) TeleportToTarget();
+                }
+                else
+                {
+                    Log.Error("No enemy found. ");
+                    outer.SetNextStateToMain();
+                }
+                
             }
 
 
