@@ -84,6 +84,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         // boolean flags for kick 
         private bool hasKickedEnemy;
         private bool hasDashed;
+        // flag to tell if the enemy can be grabbed or not
+        private bool skipGrab;
 
         public override void OnEnter()
         {
@@ -159,42 +161,46 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
             else
             {
-                SlowVelocity();
-                // if the target is found, then attack the grabbed enemy if they are not killed or a followup selection is made.
-                if(!hasSelectionMade) ConsecutiveAttack();
-
-                if (inputBank.skill1.down)
+                // if the enemy has a regular motor and can be grabbed
+                if (!skipGrab)
                 {
-                    hasSelectionMade = true;
-                    if (!mazokuGrabController.hasRevertedRotation) mazokuGrabController.EnemyRotation(mazokuGrabController.modelTransform, false);  //revert rotation so the enemey is back to normal
-                }
+                    SlowVelocity();
+                    // if the target is found, then attack the grabbed enemy if they are not killed or a followup selection is made.
+                    if (!hasSelectionMade) ConsecutiveAttack();
 
-                if (hasSelectionMade)   // once a selection is made (skill 1 selected), then it will continue
-                {
-                    
-                    if (mazokuGrabController.hasRevertedRotation)  
+                    if (inputBank.skill1.down)
+                    {
+                        hasSelectionMade = true;
+                        if (!mazokuGrabController.hasRevertedRotation) mazokuGrabController.EnemyRotation(mazokuGrabController.modelTransform, false);  //revert rotation so the enemey is back to normal
+                    }
+
+                    if (hasSelectionMade)   // once a selection is made (skill 1 selected), then it will continue
                     {
 
-                        LaunchEnemy();
-                        if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
-
-
-                        /*if (numberOfShots != 6) // delay the shotgun barrage so the animation can play out, then start firing
+                        if (mazokuGrabController.hasRevertedRotation)
                         {
-                            LaunchEnemy();  
-                            if(launchAnimationDuration > launchAnimationSpeed) ShotgunAA12();
+
+                            LaunchEnemy();
+                            if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
+
+
+                            /*if (numberOfShots != 6) // delay the shotgun barrage so the animation can play out, then start firing
+                            {
+                                LaunchEnemy();  
+                                if(launchAnimationDuration > launchAnimationSpeed) ShotgunAA12();
+
+                            }
+                            else
+                            {
+                                // once six shots are fired, the attack has ended and will return
+                                hasAttackEnded = true;
+
+
+                            }*/
+
+
 
                         }
-                        else
-                        {
-                            // once six shots are fired, the attack has ended and will return
-                            hasAttackEnded = true;
-                            
-
-                        }*/
-
-
-
                     }
                 }
                 
@@ -346,8 +352,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             PlayAnimation("FullBody, Override", "BackToBackMeleeFinish", "ShootGun.playbackRate", 1f);
 
             // when doing the kick, grabbing the knockbackcontroller direction and applying a force vector which will be used for special knockback for the enemies
-            Vector3 forceVector = knockbackController.GetEnemyDirection();
-            forceVector = new Vector3(-forceVector.x, forceVector.y, -forceVector.z) * 20000f;
+            Vector3 forceVector = GetAimRay().direction;    // for now the Aim Ray is based on the characters facing direction
+            forceVector *= 20000f;
             
             knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
             AttackForce(forceVector);
@@ -514,24 +520,26 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void GrabEnemy()
         {
-            mazokuGrabController = enemyHurtBox.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
-            if (pinnableList)
-            {
-                if (!pinnableList.CheckIfNotPinnable(enemyHurtBox.healthComponent.gameObject.name))
-                {
-                    Log.Info("This character is not in the list, gut punch."); 
-                    mazokuGrabController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
+            // try to get the enemies motor and rigid body
+            CharacterMotor enemyMotor = enemyHurtBox.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+            Rigidbody enemyRigidBody = enemyHurtBox.healthComponent.body.gameObject.GetComponent<Rigidbody>();
 
+            if (enemyRigidBody)
+            {
+                if (enemyMotor)
+                {
+                    // add the grab component and locate the pivot 
+                    mazokuGrabController = enemyHurtBox.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
+                    mazokuGrabController.pivotTransform = FindModelChild("HandR"); // make it pivot to a different bone or empty object (set it up in the editor)
                 }
                 else
                 {
-                    mazokuGrabController.pivotTransform = FindModelChild("HandR"); // make it pivot to a different bone or empty object (set it up in the editor)
-                    Log.Info("This character is  in the list, headbutt");
-
-
+                    // skip the grab stuff and just attack, as grabbing will cause issues. 
+                    skipGrab = true;
+                    KickEnemy();
                 }
-
             }
+
         }
 
         private void SearchForEnemies()
