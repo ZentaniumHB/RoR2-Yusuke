@@ -152,6 +152,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 else
                 {
                     Log.Error("No enemy found. ");
+                    // re-adding the stock since it was used.
+                    skillLocator.secondary.AddOneStock();
                     outer.SetNextStateToMain();
                 }
                 
