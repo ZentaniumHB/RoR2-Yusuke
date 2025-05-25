@@ -84,6 +84,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         // boolean flags for kick 
         private bool hasKickedEnemy;
         private bool hasDashed;
+
+        // boolean and floats for shotgun for ungrabbable enemies
+        private bool hasFiredShotgun;
+        private float shotGunEndLag;
+        private float shotGunEndLagDuration = 0.5f;
         // flag to tell if the enemy can be grabbed or not
         private bool skipGrab;
 
@@ -209,6 +214,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                         }
                     }
                 }
+                else
+                {
+                    // Count the shotgun suration for the shotgun as the emeny cannot be grabbed
+                    shotGunEndLag += Time.fixedDeltaTime;
+                    characterBody.SetAimTimer(0.1f);
+                    // after the shotgun duration (so the animation can be seen and not interruped), kick em
+                    if (shotGunEndLag > shotGunEndLagDuration)
+                    {
+                        TeleportToTarget();
+                        KickEnemy();
+                    }
+                }
                 
             }
 
@@ -276,7 +293,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         // pausing the velocity, so the character doesn't move (prevents any odd movements)
         private void PauseVelocity()
         {
-            characterBody.SetAimTimer(0.1f);
             characterMotor.velocity = Vector3.zero;
             characterMotor.enabled = false;
             characterDirection.enabled = false;
@@ -306,6 +322,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             }
 
+        }
+
+        private void ShotgunPunch()
+        {
+            if (!hasFiredShotgun)
+            {
+                hasFiredShotgun = true;
+                characterBody.SetAimTimer(0.1f);
+                characterMotor.enabled = false;
+                PlayAnimation("BothHands, Override", "ShootSpiritShotgun", "ShootGun.playbackRate", 1f);
+                Fire();
+            }
+            
         }
 
         private void DashAndKick()
@@ -542,7 +571,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     // skip the grab stuff and just attack, as grabbing will cause issues. 
                     skipGrab = true;
-                    KickEnemy();
+                    characterBody.SetAimTimer(0.1f);
+                    ShotgunPunch();
                 }
             }
 
