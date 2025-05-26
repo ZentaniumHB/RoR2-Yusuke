@@ -412,7 +412,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             float damageDivision = enemyTargets.Count(); // division based on enemy scan
 
             EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
-            Util.PlaySound("HenryShootPistol", gameObject);
+            if(enemyTargets.Count != 0) Util.PlaySound("HenryShootPistol", gameObject);
 
             Ray aimRay = GetAimRay();
 
