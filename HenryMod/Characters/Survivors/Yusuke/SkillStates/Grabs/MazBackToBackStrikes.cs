@@ -40,6 +40,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasSelectionMade;
         private float attackStopWatch;
         private float consecutiveDuration;
+        private float totalConsecutiveTime = 8f;
         private float attackInterval = 0.1f;
         private bool hasIncreaseAttackSpeed;
 
@@ -177,8 +178,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     SlowVelocity();
                     // if the target is found, then attack the grabbed enemy if they are not killed or a followup selection is made.
-                    if (!hasSelectionMade) ConsecutiveAttack();
+                    if (!hasSelectionMade) 
+                    {
+                        ConsecutiveAttack();
+                        if (consecutiveDuration > totalConsecutiveTime)
+                        {
+                            LaunchEnemy();
+                            if (launchAnimationDuration > launchAnimationSpeed)
+                            {
+                                PlayAnimation("FullBody, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                                PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                                outer.SetNextStateToMain();
+                            
+                            }
+                                
+                        }
 
+                    }
+                        
                     if (inputBank.skill1.down)
                     {
                         hasSelectionMade = true;
@@ -193,23 +210,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                             LaunchEnemy();
                             if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
-
-
-                            /*if (numberOfShots != 6) // delay the shotgun barrage so the animation can play out, then start firing
-                            {
-                                LaunchEnemy();  
-                                if(launchAnimationDuration > launchAnimationSpeed) ShotgunAA12();
-
-                            }
-                            else
-                            {
-                                // once six shots are fired, the attack has ended and will return
-                                hasAttackEnded = true;
-
-
-                            }*/
-
-
 
                         }
                     }
@@ -228,6 +228,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 }
                 
             }
+
+            
 
             if (isAuthority && fixedAge >= duration && hasAttackEnded || isEnemyKilled)
             {
@@ -301,24 +303,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void ShotgunAA12()
         {
-            if (isGrounded)
-            {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", 1f);
-            }
-            else
-            {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1f);
-            }
-            
 
             shotgunFireStopwatch += Time.fixedDeltaTime;
 
-            //fires six shots every x amount of seconds defined here.
-            if (shotgunFireStopwatch > 0.15)
+            //fires shots every x amount of seconds defined here.
+            if (shotgunFireStopwatch > 0.25f)
             {
-                if (numberOfShots != 6) Fire();
                 shotgunFireStopwatch = 0;
-                numberOfShots++;
+                Fire();
 
             }
 
@@ -480,7 +472,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 hasIncreaseAttackSpeed = true;
                 attackInterval /= 2;
+                
             }
+
+            // if the gut punch duration is still active, then fire the shotgun attack 
+            if(hasIncreaseAttackSpeed && consecutiveDuration < totalConsecutiveTime) ShotgunAA12();
 
             if (enemyHurtBox.healthComponent.alive)
             {
@@ -614,6 +610,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, true);
             }
+
         }
 
         
