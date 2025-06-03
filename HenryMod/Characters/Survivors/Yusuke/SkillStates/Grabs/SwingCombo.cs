@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
@@ -20,7 +21,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float dashSpeed;
 
         private float maxInitialSpeed = 6f;
-        private float finalSpeed = 1f;
+        private float finalSpeed = 1.5f;
+        private float exponent;
+
+        private Quaternion originalRotation;
+        private Vector3 finalRotation;
+
+        private float spinMinSpeed = 0.1f;
+        private float spinMaxSpeed = 60f;
 
         private float dashTime = 0f; 
         private float duration = 1f;
@@ -28,20 +36,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private Vector3 previousPosition;
         private float dashFOV = EntityStates.Commando.DodgeState.dodgeFOV;
 
-
+        // target (enemy) variables
         private bool targetFound;
         private bool isBodyFound;
         private HurtBox target;
+        private Transform targetModelTransform;
+
 
         //animation variables
         private bool startSwingAnimation;
         private float animationTimer;
+        private float spinDuration = 2f;
         private bool canThrowEnemy;
         private float actionStopwatch = 0;
 
         private DivePunchController DivePunchController;
         private KnockbackController knockbackController;
-        private MazokuGrabController mazokuGrabController;
+        private SwingController swingController;
 
         //indicator
         private Indicator indicator;
@@ -97,27 +108,31 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     
                     Log.Info("Setting maz controller. ");
-                    mazokuGrabController = target.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
-                    mazokuGrabController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
-
+                    swingController = target.healthComponent.body.gameObject.AddComponent<SwingController>();
+                    swingController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
+                    swingController.yusukeBody = characterBody; // giving the controller the characterbody so it knows the current forward vector for the rotation.
                     PlayAnimation("FullBody, Override", "MazokuSwing", "ShootGun.playbackRate", duration);
 
-                    Log.Info("maz settings done. ");
-                    
+                    Log.Info("target model transform... ");
+                    targetModelTransform = target.healthComponent.modelLocator.transform;
+
+                    originalRotation = characterBody.gameObject.transform.rotation;
                 }
                 
                 
                 // maybe addtimedbuff
             }
 
-            //Log.Info("Animation Timer:");
-            if (animationTimer > 2f)
+
+            if (animationTimer < spinDuration) SpinYusuke();
+
+            if (animationTimer > spinDuration)
             {
                 actionStopwatch += Time.fixedDeltaTime;
                 if (!canThrowEnemy)
                 {
                     PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
-                    mazokuGrabController.Remove();
+                    swingController.Remove();
 
                     // create the indicator on the body to show which enemy will receive the follow up
                     if (targetIcon == null)
@@ -125,16 +140,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                         targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
                     }
                     indicator = new Indicator(gameObject, targetIcon);
-                    indicator.targetTransform = target.transform;
-
+                    
 
                     knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
                     knockbackController.knockbackDirection = GetAimRay().direction;
-                    knockbackController.knockbackSpeed = moveSpeedStat * 1.8f;
+                    knockbackController.knockbackSpeed = moveSpeedStat + spinMaxSpeed;
                     knockbackController.pivotTransform = characterBody.transform;
 
                     // switch the icon to show the differnet outcomes, we don't need to use new entity states as we are not storing any stock count.
                     SwapIcon();
+
+                    indicator.targetTransform = target.transform;
                     indicator.active = true;
                     characterMotor.enabled = false;
                     characterDirection.enabled = false;
@@ -183,6 +199,38 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
 
             
+        }
+
+        private void SpinYusuke()
+        {
+
+            if (characterMotor)
+            {
+                inputBank.moveVector = Vector3.zero;
+                
+            }
+            //spinAngleFloat *= Time.fixedDeltaTime;
+            //finalRotation = Quaternion.AngleAxis(MathF.Max(spinAngleFloat, 360f) * Time.fixedDeltaTime, Vector3.up) * finalRotation;
+
+            
+            float transitionDuration = 2f;
+            float stopWatch = animationTimer;
+            float power = 2f;
+
+            /*
+             Creating the division between the stopWatch and transitionDuration
+             Exponent will gradually increase as time goes on due to the animationTimer, once reaching 1 it will stop increasing
+
+             */
+            float increase = Mathf.Clamp01(stopWatch / transitionDuration);
+            exponent = Mathf.Pow(increase, power);
+
+            // lerp will slowly increase to the max value in exponent time
+            float currentValue = Mathf.Lerp(spinMinSpeed, spinMaxSpeed, exponent);
+
+            Quaternion finalRotation = Quaternion.AngleAxis(currentValue, Vector3.up);
+            characterDirection.forward = finalRotation * characterDirection.forward;
+
         }
 
         protected virtual EntityState MazMeleeFollowUp()
