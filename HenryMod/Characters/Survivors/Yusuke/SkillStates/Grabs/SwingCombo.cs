@@ -1,8 +1,10 @@
 ﻿using EntityStates;
 using EntityStates.Jellyfish;
+using Rewired;
 using RoR2;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -24,7 +26,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float finalSpeed = 1.5f;
         private float exponent;
 
-        private Quaternion originalRotation;
+        private Vector3 originalCharacterForward;
         private Vector3 finalRotation;
 
         private float spinMinSpeed = 0.1f;
@@ -47,8 +49,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool startSwingAnimation;
         private float animationTimer;
         private float spinDuration = 2f;
-        private bool canThrowEnemy;
+        private bool hasThrownEnemy;
         private float actionStopwatch = 0;
+        private bool skipSwing;
 
         private DivePunchController DivePunchController;
         private KnockbackController knockbackController;
@@ -106,59 +109,44 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 startSwingAnimation = true;
                 if (target)
                 {
+                    if (GrabEnemy())
+                    {
+                        skipSwing = false;
+                        Log.Info("Setting maz controller. ");
+                        swingController = target.healthComponent.body.gameObject.AddComponent<SwingController>();
+                        swingController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
+                        swingController.yusukeBody = characterBody; // giving the controller the characterbody so it knows the current forward vector for the rotation.
+                        PlayAnimation("FullBody, Override", "MazokuSwing", "ShootGun.playbackRate", duration);
+
+                        Log.Info("target model transform... ");
+                        targetModelTransform = target.healthComponent.modelLocator.transform;
+
+                        originalCharacterForward = characterDirection.forward;
+                    }
+                    else
+                    {
+                        skipSwing = true;
+                        ReleaseSwing();
+                    }
                     
-                    Log.Info("Setting maz controller. ");
-                    swingController = target.healthComponent.body.gameObject.AddComponent<SwingController>();
-                    swingController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
-                    swingController.yusukeBody = characterBody; // giving the controller the characterbody so it knows the current forward vector for the rotation.
-                    PlayAnimation("FullBody, Override", "MazokuSwing", "ShootGun.playbackRate", duration);
-
-                    Log.Info("target model transform... ");
-                    targetModelTransform = target.healthComponent.modelLocator.transform;
-
-                    originalRotation = characterBody.gameObject.transform.rotation;
                 }
-                
-                
-                // maybe addtimedbuff
+
             }
 
+             
+            if (!skipSwing)
+            {
+                if (animationTimer < spinDuration) SpinYusuke();
+            }
 
-            if (animationTimer < spinDuration) SpinYusuke();
+            if (animationTimer > spinDuration && !skipSwing)
+            {
+                ReleaseSwing();
+            }
 
-            if (animationTimer > spinDuration)
+            if (hasThrownEnemy)
             {
                 actionStopwatch += Time.fixedDeltaTime;
-                if (!canThrowEnemy)
-                {
-                    PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
-                    swingController.Remove();
-
-                    // create the indicator on the body to show which enemy will receive the follow up
-                    if (targetIcon == null)
-                    {
-                        targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
-                    }
-                    indicator = new Indicator(gameObject, targetIcon);
-                    
-
-                    knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
-                    knockbackController.knockbackDirection = GetAimRay().direction;
-                    knockbackController.knockbackSpeed = moveSpeedStat + spinMaxSpeed;
-                    knockbackController.pivotTransform = characterBody.transform;
-
-                    // switch the icon to show the differnet outcomes, we don't need to use new entity states as we are not storing any stock count.
-                    SwapIcon();
-
-                    indicator.targetTransform = target.transform;
-                    indicator.active = true;
-                    characterMotor.enabled = false;
-                    characterDirection.enabled = false;
-
-                    canThrowEnemy = true;
-
-
-                }
 
                 if (inputBank.skill1.down)
                 {
@@ -169,9 +157,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     characterDirection.enabled = false;
                     knockbackController.isFollowUpActive = true;
                     outer.SetNextState(MazMeleeFollowUp());
-
-
-                    
                 }
 
                 if (inputBank.skill2.down && isAuthority)
@@ -184,10 +169,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 if (inputBank.skill4.down)
                 {
-                    
+
 
                 }
-
 
                 //Log.Info("action timer: " + actionStopwatch);
                 if (actionStopwatch > knockbackController.knockbackDuration || hasSelectionBeenMade)
@@ -195,9 +179,77 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     // revert the icons. 
                     outer.SetNextStateToMain();
                 }
+            }
+            
+        }
+
+        private void ReleaseSwing()
+        {
+            if (!hasThrownEnemy)
+            {
+                //characterDirection.forward = originalCharacterForward;
+                PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
+                if (!skipSwing) 
+                { 
+                    swingController.Remove();
+                }
+                else
+                {
+                    // Create another animation for this, more like a swing throw
+                    PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
+
+                }
+
+                // create the indicator on the body to show which enemy will receive the follow up
+                if (targetIcon == null)
+                {
+                    targetIcon = LegacyResourcesAPI.Load<GameObject>("Prefabs/HuntressTrackingIndicator");
+                }
+                indicator = new Indicator(gameObject, targetIcon);
+
+
+                knockbackController = target.healthComponent.body.gameObject.AddComponent<KnockbackController>();
+                knockbackController.knockbackDirection = GetAimRay().direction;
+                knockbackController.knockbackSpeed = moveSpeedStat + spinMaxSpeed;
+                knockbackController.pivotTransform = characterBody.transform;
+
+                // switch the icon to show the differnet outcomes, we don't need to use new entity states as we are not storing any stock count.
+                SwapIcon();
+
+                indicator.targetTransform = target.transform;
+                indicator.active = true;
+                characterMotor.enabled = false;
+                characterDirection.enabled = false;
+
+
+                // nabbed this from the bayonetta mod ngl, k thx 
+                Vector3 forwardDir = GetAimRay().direction;
+                characterDirection.forward = forwardDir;
+                inputBank.moveVector = Vector3.zero;
+                characterMotor.moveDirection = forwardDir;
+                characterDirection.moveVector = forwardDir;
+
+                hasThrownEnemy = true;
 
             }
+        }
 
+        private bool GrabEnemy()
+        {
+
+            CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+            Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
+
+            if (enemyRigidBody)
+            {
+                if (enemyMotor)
+                {
+                    return true;
+                }
+                
+            }
+            characterBody.SetAimTimer(0.1f);
+            return false;
             
         }
 
@@ -207,12 +259,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (characterMotor)
             {
                 inputBank.moveVector = Vector3.zero;
-                
-            }
-            //spinAngleFloat *= Time.fixedDeltaTime;
-            //finalRotation = Quaternion.AngleAxis(MathF.Max(spinAngleFloat, 360f) * Time.fixedDeltaTime, Vector3.up) * finalRotation;
 
-            
+
+            }
+
             float transitionDuration = 2f;
             float stopWatch = animationTimer;
             float power = 2f;
@@ -388,6 +438,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             characterMotor.enabled = true;
             characterDirection.enabled = true;
             RevertIcons();
+
+            Log.Info("Exiting the Swing Combo state. ");
 
         }
 

@@ -86,7 +86,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 }
 
-                //Log.Info("Checking motor");
                 if (motor)
                 {
                     if(direction) 
@@ -106,10 +105,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     } 
                 }
 
-                //Log.Info("checking rigidMotor");
                 if (rigidMotor)
                 {
-                    //Log.Info("This character has a rigid motor");
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
                     
@@ -117,30 +114,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 if (rigidbody)
                 {
-                    //Log.Info("This character has a rigidBody");
                     rigidbody.position = pivotTransform.position;
                     rigidbody.velocity = Vector3.zero;
-
-                    /*byte y = 0;
-                    Vector3 posit = pivotTransform.position;
-                    rigidbody.velocity = Vector3.zero;
-                    posit += Quaternion.AngleAxis(135f, Vector3.up) * pivotTransform.forward * y;
-                    rigidbody.position = posit;*/
                 }
 
-                if (pivotTransform)
-                {
-                    Log.Info("TRANSFORM EXISTS");
-                    transform.position = pivotTransform.position;
-                }
-
-                
-
-                if (hasStringEnded)
-                {
-
-                    //if (hasRevertedRotation) Remove();
-                }
 
             }
             else
@@ -153,7 +130,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         public void Remove()
         {
-            Log.Info("[backtoback strikes] enabling and destroying");
+            Log.Info("Enabling and destroying");
 
             if (modelLocator)modelLocator.enabled = true;
             if (modelTransform) modelTransform.rotation = originalRotation;
