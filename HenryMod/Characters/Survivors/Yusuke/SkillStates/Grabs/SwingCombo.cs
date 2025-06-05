@@ -53,6 +53,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float actionStopwatch = 0;
         private bool skipSwing;
 
+        // attack vearibales
+        protected float damageCoefficient = 30f;
+        protected float procCoefficient = 1f;
+
         private DivePunchController DivePunchController;
         private KnockbackController knockbackController;
         private SwingController swingController;
@@ -126,6 +130,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     else
                     {
                         skipSwing = true;
+                        
                         ReleaseSwing();
                     }
                     
@@ -183,10 +188,36 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             
         }
 
+
+        private void AttackForce(Vector3 forceVector)
+        {
+
+            DamageInfo damageInfo = new DamageInfo
+            {
+                attacker = gameObject,
+                damage = damageCoefficient * damageStat,
+                crit = RollCrit(),
+                procCoefficient = procCoefficient,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.SlowOnHit,
+                position = characterBody.corePosition,
+                force = forceVector,
+                canRejectForce = false
+            };
+            target.healthComponent.TakeDamage(damageInfo);
+        }
+
         private void ReleaseSwing()
         {
             if (!hasThrownEnemy)
             {
+
+                Vector3 forwardDir = GetAimRay().direction;
+                characterDirection.forward = forwardDir;
+                characterDirection.moveVector = forwardDir;
+                characterMotor.moveDirection = forwardDir;
+                inputBank.moveVector = Vector3.zero;
+
                 //characterDirection.forward = originalCharacterForward;
                 PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
                 if (!skipSwing) 
@@ -197,6 +228,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     // Create another animation for this, more like a swing throw
                     PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
+                    Vector3 forceVector = GetAimRay().direction;    // for now the Aim Ray is based on the characters facing direction
+                    forceVector *= 20000f;
+                    AttackForce(forceVector);
 
                 }
 
@@ -220,14 +254,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 indicator.active = true;
                 characterMotor.enabled = false;
                 characterDirection.enabled = false;
-
-
-                // nabbed this from the bayonetta mod ngl, k thx 
-                Vector3 forwardDir = GetAimRay().direction;
-                characterDirection.forward = forwardDir;
-                inputBank.moveVector = Vector3.zero;
-                characterMotor.moveDirection = forwardDir;
-                characterDirection.moveVector = forwardDir;
 
                 hasThrownEnemy = true;
 
