@@ -817,7 +817,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SwingCombo)),
                 activationStateMachineName = "MazokuWeapon",
-                interruptPriority = EntityStates.InterruptPriority.Death,
+                interruptPriority = EntityStates.InterruptPriority.Vehicle,
 
                 baseRechargeInterval = 12f,
                 baseMaxStock = 2,
