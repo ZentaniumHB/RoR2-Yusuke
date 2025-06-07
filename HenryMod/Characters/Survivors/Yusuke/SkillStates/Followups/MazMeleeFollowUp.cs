@@ -34,10 +34,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public int ID;
         public HurtBox target;
         public Collider enemyCollider;
-        private DivePunchController DivePunchController;
+        private DivePunchController divePunchController;
         private KnockbackController knockbackController;
         private PinnableList pinnableList;
-
 
 
         private OverlapAttack attack;
@@ -86,16 +85,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             characterMotor.enabled = true;
             characterDirection.enabled = true;
             //Log.Info("[DIVE PUNCH] - Creating controller");
-            DivePunchController = new DivePunchController();
+            divePunchController = new DivePunchController();
 
             pinnableList = new PinnableList();
             pinnableList = gameObject.AddComponent<PinnableList>();
 
-            DivePunchController = target.healthComponent.body.gameObject.AddComponent<DivePunchController>();
+            divePunchController = target.healthComponent.body.gameObject.AddComponent<DivePunchController>();
 
             characterMotor.Motor.ForceUnground();
 
             knockbackController = new KnockbackController();
+            attackFinisherID = Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
 
 
 
@@ -116,14 +116,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (!beginDive && !SkipDive) TeleportToEnemy();
 
-
             if (beginDive)
             {
                 SlowDownAndDescend();
 
                 if (!playAnim)
                 {
-                    attackFinisherID = Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
                     if(attackFinisherID == 1) PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
                     if(attackFinisherID == 2) PlayAnimation("FullBody, Override", "StompDive", "Roll.playbackRate", 0.5f);
                     playAnim = true;
@@ -136,7 +134,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                     if (isGrounded && fixedAge > 0.2f)
                     {
-                        DivePunchController.hasLanded = true;
+                        divePunchController.hasLanded = true;
                         characterMotor.enabled = false;
                         characterDirection.enabled = false;
 
@@ -215,32 +213,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
                     Log.Info("Enemy hurtbox exists. Now grabbing...");
 
-                    // a list of monsters that can be pinned and different actions will be done, depending if they are on the list or not
-                    if (pinnableList)
+                    CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+                    Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
+
+                    if (enemyRigidBody)
                     {
-                        if (!pinnableList.CheckIfNotPinnable(target.healthComponent.gameObject.name))
+                        if (enemyMotor)
                         {
-                            Log.Info("This character is not in the list, dive");
-                            DivePunchController.pivotTransform = FindModelChild("HandR");
-                            DivePunchController.Pinnable = true;
+                            if(attackFinisherID == 1) divePunchController.pivotTransform = FindModelChild("HandR");
+                            if(attackFinisherID == 2) divePunchController.pivotTransform = FindModelChild("FootR");
+                            divePunchController.Pinnable = true;
                             beginDive = true;
                             break;
                         }
                         else
                         {
                             Log.Info("This character is  in the list, punch instead");
-                            DivePunchController.pivotTransform = target.gameObject.transform;   // maybe make an empty object on the player and make it refernce it
-                            DivePunchController.hasLanded = true;
-                            DivePunchController.Pinnable = false;
+                            divePunchController.pivotTransform = target.gameObject.transform;   // maybe make an empty object on the player and make it refernce it
+                            divePunchController.hasLanded = true;
+                            divePunchController.Pinnable = false;
                             SkipDive = true;
                             break;
                         }
 
                     }
-
-
-
-
                 }
             }
         }
@@ -334,9 +330,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
                     Log.Info("TOTAL PUNCHES: " + punchCount);
                     Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                    if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+                    if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
                     Log.Info("First deleting dive punch");
-                    if (target.healthComponent.alive) DivePunchController.Remove();
+                    if (target.healthComponent.alive) divePunchController.Remove();
                 }
                 
                 
@@ -453,9 +449,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   // this is needed since the stomp has no transition connection, without it will loop forever
                 Log.Info("TOTAL STOMPS: " + stompCount);
                 Log.Info("BARAGE (STOMP) HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+                if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
                 Log.Info("First deleting dive punch");
-                if (target.healthComponent.alive) DivePunchController.Remove();
+                if (target.healthComponent.alive) divePunchController.Remove();
             }
         }
 
@@ -463,7 +459,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.Death;
         }
     }
 }
