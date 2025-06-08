@@ -182,29 +182,25 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             //Log.Info("Capturing target");
 
             PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
-            if (characterMotor && characterDirection)
+            CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+            Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
+
+            if (enemyRigidBody)
             {
-
-
-                Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
-
-                // Calculate the velocity in the direction of the target
-                Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat);
-
-                // Apply the velocity to the character's motor
-                characterMotor.velocity = forwardSpeed;
-
-
-
-                FindMatchingHurtbox();
+                if (enemyMotor) characterMotor.rootMotion += target.gameObject.transform.position - transform.position;
             }
             else
             {
-                //Log.Info("No character motor or direction");
+                if (characterMotor && characterDirection)
+                {
+                    Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+                    // Calculate the velocity in the direction of the target
+                    Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat);
+                    // Apply the velocity to the character's motor
+                    characterMotor.velocity = forwardSpeed;
+                }
             }
-
-
-           
+            FindMatchingHurtbox();
         }
 
         private void FindMatchingHurtbox()
