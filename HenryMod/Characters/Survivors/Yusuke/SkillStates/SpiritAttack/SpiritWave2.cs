@@ -619,17 +619,13 @@ namespace YusukeMod.SkillStates
                 // check each hurtbox and catpure the hurtbox they have, then compare the two for a match.
                 foreach (Collider result in capturedColliders)
                 {
-                    Log.Info("Collider: " + result.name);
                     HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
 
-                    if (capturedHurtbox.healthComponent && capturedHurtbox.healthComponent.alive)
+                    if (capturedHurtbox.healthComponent && capturedHurtbox.healthComponent.alive && capturedHurtbox.healthComponent.gameObject != gameObject)
                     {
-                        if (capturedHurtbox.healthComponent.gameObject != gameObject)
-                        {
-                            target = capturedHurtbox;
-                            isBodyFound = true;
-                            break;
-                        }
+                        target = capturedHurtbox;
+                        isBodyFound = true;
+                        break;
 
                     }
 

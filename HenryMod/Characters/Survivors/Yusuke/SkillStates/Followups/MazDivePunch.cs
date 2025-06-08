@@ -1,21 +1,25 @@
 ﻿using EntityStates;
-using RoR2.Audio;
+using RoR2.Projectile;
 using RoR2;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using UnityEngine.Networking;
 using UnityEngine;
-using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
-using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Survivors.Yusuke;
+using EntityStates.Croco;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
+using System.Linq;
+using UnityEngine.UIElements.UIR;
+using System.Runtime.CompilerServices;
+using System.Collections;
+using UnityEngine.Networking;
+using RoR2.Audio;
 using Random = UnityEngine.Random;
-using EntityStates.Jellyfish;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 {
-    internal class MazMeleeFollowUp : BaseSkillState
+    public class MazDivePunch : BaseSkillState
     {
 
         private float duration = 2;
@@ -115,7 +119,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             base.FixedUpdate();
 
-            if (!beginDive && !SkipDive) TeleportToEnemy();
+            if (!beginDive && !SkipDive) DashTowardsEnemy();
 
             if (beginDive)
             {
@@ -123,22 +127,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 if (!playAnim)
                 {
-                    if(attackFinisherID == 1) PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
-                    if(attackFinisherID == 2) PlayAnimation("FullBody, Override", "StompDive", "Roll.playbackRate", 0.5f);
+                    if (attackFinisherID == 1) PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
+                    if (attackFinisherID == 2) PlayAnimation("FullBody, Override", "StompDive", "Roll.playbackRate", 0.5f);
                     playAnim = true;
                 }
 
-
                 if (fixedAge >= fireTime)
                 {
-
-
                     if (isGrounded && fixedAge > 0.2f)
                     {
                         divePunchController.hasLanded = true;
                         characterMotor.enabled = false;
                         characterDirection.enabled = false;
-
 
                         if (!hasBarrageFinished)
                         {
@@ -146,14 +146,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             if (attackFinisherID == 2) StompThemOut();
 
                         }
-
                     }
-
-
-
                 }
-
-
             }
 
             if (SkipDive)
@@ -170,8 +164,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (fixedAge >= duration && isAuthority && hasBarrageFinished)
             {
-
-                Log.Info("Attack compolete");
+                Log.Info("Attack complete");
                 if (target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
                 if (knockbackController)
                 {
@@ -183,52 +176,47 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             }
 
-
-
         }
-
-        
-
-        private void TeleportToEnemy()
+        private void DashTowardsEnemy()
         {
             //Log.Info("Capturing target");
-            PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
-            CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
-            Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
 
-            if (enemyRigidBody)
+            PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
+            if (characterMotor && characterDirection)
             {
-                if(enemyMotor) characterMotor.rootMotion += target.gameObject.transform.position - transform.position;
+
+
+                Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+
+                // Calculate the velocity in the direction of the target
+                Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat);
+
+                // Apply the velocity to the character's motor
+                characterMotor.velocity = forwardSpeed;
+
+
+
+                FindMatchingHurtbox();
             }
             else
             {
-                
-                if (characterMotor && characterDirection)
-                {
-
-                    Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
-
-                    // Calculate the velocity in the direction of the target
-                    Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat) * 1.5f;
-
-                    // Apply the velocity to the character's motor
-                    characterMotor.velocity = forwardSpeed;
-
-                }
+                //Log.Info("No character motor or direction");
             }
 
-            FindMatchingHurtbox();
+
+           
         }
 
         private void FindMatchingHurtbox()
         {
-            // grab the enemy collders that are nearby
-            Collider[] collisions;
-            collisions = Physics.OverlapSphere(transform.position, 2, LayerIndex.entityPrecise.mask);
-            List<Collider> colliders = collisions.ToList();
+            Collider[] colliders;
+            //Log.Info("physics");
+            colliders = Physics.OverlapSphere(transform.position, 2, LayerIndex.entityPrecise.mask);
+            //Log.Info("converting to list");
+            List<Collider> capturedColliders = colliders.ToList();
 
             // check each hurtbox and catpure the hurtbox they have, then compare the two for a match.
-            foreach (Collider result in colliders)
+            foreach (Collider result in capturedColliders)
             {
                 HurtBox capturedHurtbox = result.GetComponent<HurtBox>();
 
@@ -253,6 +241,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             else
                             {
                                 Log.Info("This character is  in the list, punch instead");
+                                divePunchController.pivotTransform = FindModelChild("HandR");
                                 divePunchController.pivotTransform = target.gameObject.transform;   // maybe make an empty object on the player and make it refernce it
                                 divePunchController.hasLanded = true;
                                 divePunchController.Pinnable = false;
@@ -267,11 +256,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 }
             }
         }
-           
+
         private void SlowDownAndDescend()
         {
             Vector3 slowedVelocity = characterMotor.velocity;
-            float slowValue = 1f;
+            float slowValue = 2f;
             // Slow down the X and Z axes
 
             Vector3 direction = GetAimRay().direction;
@@ -307,7 +296,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
                 }
 
-
                 if (punchStopwatch > 0.05f && !isFinalPunchAnimationActive) // reset the timer, and attack again
                 {
                     if (!hasStartUpPlayed && !SkipDive)
@@ -337,8 +325,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         ThrowPunch();
                         Log.Info("barraged finished: " + hasBarrageFinished);
                     }
-                    
-                    
+
+
 
                 }
 
@@ -349,7 +337,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (!target.healthComponent.alive) hasBarrageFinished = true;
 
             // if the max punches is reached, or the enemy is killed, make the boolean true. Once true, it will return
-            if (attackFinisherID == 1 && punchCount == maxPunches-1 && target.healthComponent.alive)
+            if (attackFinisherID == 1 && punchCount == maxPunches - 1 && target.healthComponent.alive)
             {
                 DeliverFinalPunch();
                 if (hasBarrageFinished)
@@ -360,39 +348,42 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     Log.Info("First deleting dive punch");
                     if (target.healthComponent.alive) divePunchController.Remove();
                 }
-                
-                
+
+
             }
 
         }
 
-        private void DeliverFinalPunch()
+        private void StompThemOut()
         {
-            finalPunchDelayStopwatch += GetDeltaTime(); // starts counting the delay before the final punch connects
-
-            // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
-            if (!isFinalPunchAnimationActive)
+            stompStopwatch += GetDeltaTime();
+            if (target.healthComponent.alive)
             {
-                isFinalPunchAnimationActive = true;
-                if (NetworkServer.active)
+                if (stompStopwatch > 0.5f)
                 {
-                    if (!SkipDive)
+                    if (NetworkServer.active)
                     {
-                        PlayAnimation("FullBody, Override", "DiveMachinePunchGroundedFinsh", "Roll.playbackRate", 1);
+                        PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
                     }
-                    else
-                    {
-                        PlayAnimation("FullBody, Override", "DiveMachinePunchAirFinish", "Roll.playbackRate", 1);
-                    }
+                    StompAttack();
 
                 }
-
             }
-            // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
-            if (finalPunchDelayStopwatch > 0.8f) hasBarrageFinished = true;
+
+            if (attackFinisherID == 2 && stompCount == maxStomps || !target.healthComponent.alive)
+            {
+                hasBarrageFinished = true;
+                PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   // this is needed since the stomp has no transition connection, without it will loop forever
+                Log.Info("TOTAL STOMPS: " + stompCount);
+                Log.Info("BARAGE (STOMP) HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
+                if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
+                Log.Info("First deleting dive punch");
+                if (target.healthComponent.alive) divePunchController.Remove();
+            }
+
         }
 
-        // placing the attack in a different method since the stomp and the punches will do differemt amounts of damage
+
         private void ThrowPunch()
         {
             EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
@@ -400,13 +391,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 origin = target.gameObject.transform.position,
                 scale = 8f
             }, transmit: true);
+
             attack = new OverlapAttack
             {
                 damageType = damageType,
                 attacker = gameObject,
                 inflictor = gameObject,
                 teamIndex = GetTeam(),
-                damage = damageCoefficient * damageStat,
+                damage = damageCoefficient * damageStat + (charge / 6),
                 procCoefficient = procCoefficient,
                 hitEffectPrefab = hitEffectPrefab,
                 pushAwayForce = pushForce,
@@ -447,45 +439,37 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             stompStopwatch = 0f;
         }
 
-        // stomps are different in terms of animation resets
-        private void StompThemOut()
+        private void DeliverFinalPunch()
         {
-            stompStopwatch += GetDeltaTime();
-            if (target.healthComponent.alive)
+            finalPunchDelayStopwatch += GetDeltaTime(); // starts counting the delay before the final punch connects
+            
+            // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
+            if (!isFinalPunchAnimationActive)
             {
-                if (stompStopwatch > 0.5f)
+                isFinalPunchAnimationActive = true; 
+                if (NetworkServer.active)
                 {
-
-                    if (NetworkServer.active)
+                    if (!SkipDive)
                     {
-                        PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
-
-
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchGroundedFinsh", "Roll.playbackRate", 1);
                     }
-                    StompAttack();
+                    else
+                    {
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchAirFinish", "Roll.playbackRate", 1);
+                    }
 
                 }
 
-
             }
-
-            if (attackFinisherID == 2 && stompCount == maxStomps || !target.healthComponent.alive)
-            {
-                hasBarrageFinished = true;
-                PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   // this is needed since the stomp has no transition connection, without it will loop forever
-                Log.Info("TOTAL STOMPS: " + stompCount);
-                Log.Info("BARAGE (STOMP) HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
-                Log.Info("First deleting dive punch");
-                if (target.healthComponent.alive) divePunchController.Remove();
-            }
+            // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
+            if (finalPunchDelayStopwatch > 0.8f) hasBarrageFinished = true; 
+            
         }
-
-        
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
             return InterruptPriority.Death;
         }
+
     }
 }

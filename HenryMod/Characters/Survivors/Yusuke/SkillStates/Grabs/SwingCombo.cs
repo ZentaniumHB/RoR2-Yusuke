@@ -311,7 +311,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         protected virtual EntityState MazMeleeFollowUp()
         {
-            return new MazMeleeFollowUp
+            return new MazDivePunch
             {
                 target = target
             };
