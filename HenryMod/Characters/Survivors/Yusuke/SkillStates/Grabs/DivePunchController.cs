@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using EntityStates;
 using EntityStates.BrotherMonster;
+using MonoMod.RuntimeDetour;
 using RoR2;
 using UnityEngine;
 using static UnityEngine.UIElements.ListViewDragger;
@@ -15,6 +16,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public Transform pivotTransform;
         public Vector3 centerOfCollider;
         public Transform modelTransform;
+        public CharacterBody yusukeBody;
+        private Vector3 look;
 
         private CharacterBody body;
         private CharacterMotor motor;
@@ -106,19 +109,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             if(pivotTransform.position != Vector3.zero)
             {
-                if (!setBounds && Pinnable)
-                {
-                    //Log.Info("Setting bounds");
-                    setBounds = true;
-                    EnemyRotation(modelTransform, true);
 
-                }
+                EnemyRotation(modelTransform, true);
 
-
-                //Log.Info("Checking motor");
                 if (motor)
                 {
-                    //Log.Info("motor exists");
+                    Log.Info("motor exists");
                     motor.disableAirControlUntilCollision = true;
                     motor.velocity = Vector3.zero;
                     motor.rootMotion = Vector3.zero;
@@ -126,17 +122,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 }
 
-                //Log.Info("checking rigidMotor");
                 if (rigidMotor)
                 {
                     //Log.Info("motor exists");
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
-                    if (rigidbody)
-                    {
-                        rigidbody.position = pivotTransform.position;
-                        rigidbody.velocity = Vector3.zero;
-                    }
+                    
+                }
+
+                if (rigidbody)
+                {
+                    rigidbody.position = pivotTransform.position;
+                    rigidbody.velocity = Vector3.zero;
                 }
 
                 if (hasStringEnded)
@@ -156,8 +153,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
 
                 }
-
-
             }
             else
             {
@@ -173,59 +168,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         public void EnemyRotation(Transform model, bool pinned)
         {
+            
             if (modelTransform)
             {
                 Log.Info("Rotating character");
-                // ----------Rotating the character
-                oldModelRotation = model.localRotation; 
-
-                Vector3 forwardDirection = model.forward;
-                Quaternion worldRotation = model.rotation;
-
-                // convert the world rotation to local rotation (relative to the current forward direction)
-                Quaternion localRotation = Quaternion.Inverse(Quaternion.LookRotation(forwardDirection)) * worldRotation;
-
-                Log.Info("Pinned = " + pinned + " Model local rotation (befire): " + model.localRotation);
-
-                Quaternion faceTheSky = Quaternion.identity;
-                if(pinned) faceTheSky = Quaternion.Euler(-90f, 0f, 0f); // rotating so the enemy faces the sky
-                if(!pinned) faceTheSky = Quaternion.Euler(90f, 0f, 0f); // rotating so the enemy faces the sky
-
-                Quaternion newLocalRotation = localRotation * faceTheSky;
-                //from local to world space
-                Quaternion finalWorldRotation = Quaternion.LookRotation(forwardDirection) * newLocalRotation;
-
-                model.localRotation = finalWorldRotation;
-
-                Log.Info("Pinned = " +pinned+ " Model local rotation (after): " + model.localRotation);
-
-                if(pinned)
+                /* Look is the direction yusukes model is facing, so the inverse of look will make the model face yusuke instead of facing the same direction
+                 * Look rotation needs to be done first before rotating the character on the X axis, this will also need to be placed in fixedUpdate as yusukes body keeps updating
+                 * when moving.
+                 */
+                Log.Info("Vector3");
+                if(yusukeBody)
                 {
-
-                    float pivotX = pivotTransform.position.x;
-                    float colliderY = centerOfCollider.x;
-
-                    if (pivotX > colliderY)
-                    {
-                        changeInY = pivotX - colliderY;
-                    }
-
-                    if (colliderY > pivotX)
-                    {
-                        changeInY = colliderY - pivotX;
-                    }
-
-                    
-
+                    look = yusukeBody.characterDirection.forward;
                 }
-
+                
+                Log.Info("If motor...");
+                if (rigidbody && motor) model.rotation = Quaternion.LookRotation(-look) * Quaternion.Euler(-90f, 0f, 0f);
+                Log.Info("pinned.");
                 if (!pinned) 
                 { 
-
                     hasRevertedRotation = true;
                     
                 }
-                    
 
             }
             else
@@ -238,14 +202,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             Log.Info("[Dive punch] enabling and destroying");
             if (modelLocator) modelLocator.enabled = true;
-            if (modelTransform) modelTransform.rotation = originalRotation;
+            if (rigidbody && motor) modelTransform.rotation = originalRotation;
             if (direction) direction.enabled = true;
             if (collider) collider.enabled = true;
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
-
-
             
             Destroy(this);
         }

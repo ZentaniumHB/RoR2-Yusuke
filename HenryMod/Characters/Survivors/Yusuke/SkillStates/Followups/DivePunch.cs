@@ -238,6 +238,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                                         DivePunchController.pivotTransform = FindModelChild("HandR");
                                         DivePunchController.centerOfCollider = result.bounds.center;
                                         DivePunchController.Pinnable = true;
+                                        DivePunchController.yusukeBody = characterBody;
                                         beginDive = true;
                                         break;
                                     }

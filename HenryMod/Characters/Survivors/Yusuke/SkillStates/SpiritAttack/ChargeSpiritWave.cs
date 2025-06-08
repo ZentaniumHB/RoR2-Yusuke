@@ -121,7 +121,7 @@ namespace YusukeMod.SkillStates
 
         protected virtual EntityState SpiritWaveState()
         {
-            return new SpiritWave
+            return new SpiritWave2
             {
                 charge = totalCharge,
                 isMaxCharge = isMaxCharge
