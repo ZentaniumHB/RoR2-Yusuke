@@ -109,6 +109,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public override void OnExit()
         {
             base.OnExit();
+
+            // this is needed since the animations here has no transition connection, without it there is a chance that an animation will loop forever, unless interrupted again
+            PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   
             characterMotor.enabled = true;
             characterDirection.enabled = true;
 
@@ -118,6 +121,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+             
 
             if (!beginDive && !SkipDive) DashTowardsEnemy();
 
@@ -182,6 +187,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             //Log.Info("Capturing target");
 
             PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
+
+            if (!target.healthComponent.alive) outer.SetNextStateToMain();    // if the enemy is killed whilst the dash is happening, then simple exit the state.
+
             CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
             Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
 
