@@ -46,7 +46,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private Vector3 vector;
 
 
-
         private OverlapAttack attack;
         protected DamageType damageType = DamageType.Stun1s;
         protected float damageCoefficient = 8f;
@@ -60,6 +59,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private bool hasBarrageFinished;
         private float punchStopwatch;
+        private float punchReset = 0.2f;
         private float punchCount = 0;
         private int maxPunches = 6;
 
@@ -67,9 +67,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         // Animation flags used to play animations when needed. 
         private bool hasStartUpPlayed;
         private bool isFinalPunchAnimationActive;
+        private float finalPunchStartup = 0.8f;
         private float finalPunchDelayStopwatch = 0f;
         private float groundedAnimationStartupDelayValue = 0.6f;
+
         private float groundedAnimationStopwatch;
+
+        // Net
+        private bool hasAppliedStun;
+        
 
         public override void OnEnter()
         {
@@ -113,7 +119,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (ID != 0)
             {
-
                 if(!beginDive && !SkipDive) DashTowardsEnemy();
 
                 if (beginDive)
@@ -126,17 +131,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         playAnim = true;
                     }
 
-
                     if (fixedAge >= fireTime)
                     {
-
-
                         if (isGrounded && fixedAge > 0.2f)
                         {
                             DivePunchController.hasLanded = true;
                             characterMotor.enabled = false;
                             characterDirection.enabled = false;
 
+                            ApplyStun();
 
                             if (!hasBarrageFinished)
                             {
@@ -144,14 +147,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                                 MachineGunPunch(charge);
 
                             }
-
                         }
-
-
-
                     }
-
-                    
                 }
 
                 if (SkipDive)
@@ -182,18 +179,42 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         moveID = ID
 
                     });
-
                 }
-
             }
             else
             {
                 outer.SetNextStateToMain();     // this is only because for some reason this state gets called more than once, dunno why yet.
             }
-
-
-
         }
+
+        // Applies a stun to the enemy. 
+        private void ApplyStun()
+        {
+            if (!hasAppliedStun)
+            {
+                hasAppliedStun = true;
+                if (NetworkServer.active)
+                {
+                    // the sum is based on the amount of time the enemy is pinned by Yusuke (once landed on the ground). Including all the startup and punch animation intervals 
+                    float stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup);
+                    target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(stunDuration);
+
+                    // for bosses, the state needs to be set manually as they lack the SetStateOnHurt component
+                    if(target.healthComponent.body.isChampion || target.healthComponent.body.isChampion)
+                    {
+                        EntityStateMachine enemyMachine = target.healthComponent.body.GetComponent<EntityStateMachine>();
+                        if (enemyMachine != null)
+                        {
+                            Log.Info("Setting the state for boss. ");
+                            StunState stunState = new StunState();
+                            stunState.duration = stunDuration;
+                            enemyMachine.SetState(stunState);
+                        }
+                    }
+                }
+            }
+        }
+
         private void DashTowardsEnemy()
         {
             //Log.Info("Capturing target");
@@ -264,9 +285,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     //Log.Info("No character motor or direction");
                 }
 
-
-                
-
             }
             
         }
@@ -290,6 +308,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             {
                 resetY = true;
                 slowedVelocity.y = 0f;
+                // places a stun on the enemy
+                if (NetworkServer.active)
+                {
+                    target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStun(5);
+                }
             }
 
             // Set the updated velocity back
@@ -410,7 +433,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             }
             // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
-            if (finalPunchDelayStopwatch > 0.8f) hasBarrageFinished = true; 
+            if (finalPunchDelayStopwatch > finalPunchStartup) hasBarrageFinished = true; 
             
         }
 

@@ -25,13 +25,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float duration = 2;
         private float fireTime;
 
-        public float charge;
+        public float charge = 2f;
 
         private float speed = 10f;
         private bool beginDive;
         private bool SkipDive;
         private bool playAnim;
-        private int attackFinisherID;
+        private byte attackFinisherID;
 
         private bool resetY;
 
@@ -68,11 +68,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private bool hasBarrageFinished;
         private float punchStopwatch;
+        
         private float stompStopwatch;
+        private float punchReset = 0.05f;
+        private float stompReset = 0.5f;
         private float punchCount = 0;
         private float stompCount = 0;
         private int maxPunches = 40;
         private int maxStomps = 4;
+        private float finalPunchStartup = 0.8f;   // for the final punch animation
 
 
         // Animation flags
@@ -82,6 +86,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float groundedAnimationStartupDelayValue = 0.6f;
         private float groundedAnimationStopwatch;
         private bool rapidPunchAnim;
+
+        // Net
+        private bool hasAppliedStun;
 
         public override void OnEnter()
         {
@@ -100,7 +107,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             characterMotor.Motor.ForceUnground();
 
             knockbackController = new KnockbackController();
-            attackFinisherID = Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
+            attackFinisherID = (byte)Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
 
 
 
@@ -145,6 +152,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         characterMotor.enabled = false;
                         characterDirection.enabled = false;
 
+                        ApplyStun();
+
                         if (!hasBarrageFinished)
                         {
                             if (attackFinisherID == 1) MachineGunPunch();
@@ -182,6 +191,40 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             }
 
         }
+
+        private void ApplyStun()
+        {
+            if (!hasAppliedStun)
+            {
+                hasAppliedStun = true;
+                if (NetworkServer.active)
+                {
+                    /* the sum is based on the amount of time the enemy is pinned by Yusuke (once landed on the ground). Including all the startup and punch animation intervals 
+                     *  In this case the stun will vary for each attack with a different ID.
+                     */
+                    float stunDuration = 0;
+                    if(attackFinisherID == 1) stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup);
+                    if(attackFinisherID == 2) stunDuration = (maxStomps * stompReset) + (stompStopwatch);
+
+                    target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(stunDuration);
+
+                    // for bosses, the state needs to be set manually as they lack the SetStateOnHurt component
+                    if (target.healthComponent.body.isChampion || target.healthComponent.body.isChampion)
+                    {
+                        EntityStateMachine enemyMachine = target.healthComponent.body.GetComponent<EntityStateMachine>();
+                        if (enemyMachine != null)
+                        {
+                            Log.Info("Setting the state for boss. ");
+                            StunState stunState = new StunState();
+                            stunState.duration = stunDuration;
+                            enemyMachine.SetState(stunState);
+                        }
+                    }
+
+                }
+            }
+        }
+
         private void DashTowardsEnemy()
         {
             //Log.Info("Capturing target");
@@ -193,21 +236,31 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
             Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
 
+
             if (enemyRigidBody)
-            {
-                if (enemyMotor) characterMotor.rootMotion += target.gameObject.transform.position - transform.position;
-            }
-            else
-            {
-                if (characterMotor && characterDirection)
+            {   // I believe most if not all enemies have a rigid body so... if there is a motor, then teleport; otherwise dash instead.
+                if (enemyMotor) 
                 {
-                    Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
-                    // Calculate the velocity in the direction of the target
-                    Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat);
-                    // Apply the velocity to the character's motor
-                    characterMotor.velocity = forwardSpeed;
+                    characterMotor.rootMotion += target.gameObject.transform.position - transform.position;
+                }
+                else
+                {   // setting the attackFinisher to 1 will ensure it does finish the attack, since non-motor characters will always be punched
+                    attackFinisherID = 1;
+                    if (characterMotor && characterDirection)
+                    {
+                        Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+                        // Calculate the velocity in the direction of the target
+                        Vector3 forwardSpeed = directionToTarget * (speed * moveSpeedStat) * charge;
+                        // Apply the velocity to the character's motor
+                        characterMotor.velocity = forwardSpeed;
+
+                    }
                 }
             }
+
+            
+            Log.Info("Attack finisher: " + attackFinisherID);
+
             FindMatchingHurtbox();
         }
 
@@ -244,8 +297,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             }
                             else
                             {
-                                Log.Info("This character is  in the list, punch instead");
-                                divePunchController.pivotTransform = FindModelChild("HandR");
                                 divePunchController.pivotTransform = target.gameObject.transform;   // maybe make an empty object on the player and make it refernce it
                                 divePunchController.hasLanded = true;
                                 divePunchController.Pinnable = false;
@@ -300,7 +351,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
                 }
 
-                if (punchStopwatch > 0.05f && !isFinalPunchAnimationActive) // reset the timer, and attack again
+                if (punchStopwatch > punchReset && !isFinalPunchAnimationActive) // reset the timer, and attack again
                 {
                     if (!hasStartUpPlayed && !SkipDive)
                     {
@@ -363,7 +414,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             stompStopwatch += GetDeltaTime();
             if (target.healthComponent.alive)
             {
-                if (stompStopwatch > 0.5f)
+                if (stompStopwatch > stompReset)
                 {
                     if (NetworkServer.active)
                     {
@@ -466,7 +517,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             }
             // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
-            if (finalPunchDelayStopwatch > 0.8f) hasBarrageFinished = true; 
+            if (finalPunchDelayStopwatch > finalPunchStartup) hasBarrageFinished = true; 
             
         }
 

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UIElements;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
@@ -44,6 +45,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private HurtBox target;
         private Transform targetModelTransform;
 
+        //Net
+        private bool hasAppliedStun;
 
         //animation variables
         private bool startSwingAnimation;
@@ -124,8 +127,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                         Log.Info("target model transform... ");
                         targetModelTransform = target.healthComponent.modelLocator.transform;
-
                         originalCharacterForward = characterDirection.forward;
+
+                        
                     }
                     else
                     {
@@ -188,6 +192,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             
         }
 
+        private void ApplyStun()
+        {
+            // places a stun on the enemy for the attacks option timer.
+            if (!hasAppliedStun)
+            {
+                hasAppliedStun = true;
+                if (NetworkServer.active)
+                {
+                    target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStun(spinDuration + actionStopwatch);
+                }
+            }
+        }
 
         private void AttackForce(Vector3 forceVector)
         {
@@ -211,7 +227,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             if (!hasThrownEnemy)
             {
-
                 Vector3 forwardDir = GetAimRay().direction;
                 characterDirection.forward = forwardDir;
                 characterDirection.moveVector = forwardDir;
@@ -256,6 +271,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 characterDirection.enabled = false;
 
                 hasThrownEnemy = true;
+                ApplyStun();
+
 
             }
         }
@@ -289,7 +306,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             }
 
-            float transitionDuration = 2f;
+            float transitionDuration = spinDuration;
             float stopWatch = animationTimer;
             float power = 2f;
 

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
+using UnityEngine.Networking;
 using YusukeMod;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
@@ -521,6 +522,13 @@ namespace YusukeMod.SkillStates
                 {
                     PlayAnimation("FullBody, Override", "DashAirImpact", "Slide.playbackRate", actionTimeDuration);
                 }
+
+                // places a stun on the enemy for the attacks option timer.
+                if (NetworkServer.active)
+                {
+                    target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStun(actionStopwatch);
+                }
+                
             }
             
 
