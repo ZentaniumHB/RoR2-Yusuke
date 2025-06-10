@@ -506,7 +506,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             {
                 hasAppliedForce = true;
                 // grabbing the facing direction and applying a force to the enemy
-                Vector3 forceVector = characterDirection.forward;    // for now the Aim Ray is based on the characters facing direction
+                Vector3 forceVector = characterDirection.forward;    // for now the direction is based on the characters forward direction
                 forceVector *= 20000f;
 
                 knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
