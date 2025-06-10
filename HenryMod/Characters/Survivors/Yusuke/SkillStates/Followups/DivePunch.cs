@@ -21,7 +21,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
     public class DivePunch : BaseSkillState
     {
 
-
         private float duration = 2;
         private float fireTime;
         
@@ -33,7 +32,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private bool playAnim;
 
         private bool resetY;
-
+        private float velocityDivider = 0.1f;
 
         public int ID;
         public HurtBox target;
@@ -75,7 +74,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         // Net
         private bool hasAppliedStun;
-        
+        private bool hasAppliedForce;
 
         public override void OnEnter()
         {
@@ -107,8 +106,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public override void OnExit()
         {
             base.OnExit();
+
             characterMotor.enabled = true;
             characterDirection.enabled = true;
+
+            // so the character doesn't go flying like crazy due to the velocity, the current velocity will be divided by the given percentage decimal (velocityDivider). 
+            Vector3 currentVelocity = characterMotor.velocity;
+            Vector3 velocityPercentage = currentVelocity * velocityDivider;
+            characterMotor.velocity = velocityPercentage;
 
 
         }
@@ -408,6 +413,40 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             punchStopwatch = 0;
         }
 
+        private void ApplyForce()
+        {
+            if (!hasAppliedForce)
+            {
+                hasAppliedForce = true;
+                // grabbing the facing direction and applying a force to the enemy
+                Vector3 forceVector = characterDirection.forward;    // for now the direction is based on the characters forward direction
+                forceVector *= 20000f;
+
+                knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
+                AttackForce(forceVector);
+            }
+            
+        }
+
+        // Applying force
+        private void AttackForce(Vector3 forceVector)
+        {
+
+            DamageInfo damageInfo = new DamageInfo
+            {
+                attacker = gameObject,
+                damage = damageCoefficient * damageStat,
+                crit = RollCrit(),
+                procCoefficient = procCoefficient,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.SlowOnHit,
+                position = characterBody.corePosition,
+                force = forceVector,
+                canRejectForce = false
+            };
+            target.healthComponent.TakeDamage(damageInfo);
+        }
+
 
 
         private void DeliverFinalPunch()
@@ -433,8 +472,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             }
             // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
-            if (finalPunchDelayStopwatch > finalPunchStartup) hasBarrageFinished = true; 
-            
+            if (finalPunchDelayStopwatch > finalPunchStartup)
+            {
+                ApplyForce();
+                hasBarrageFinished = true;
+            }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
