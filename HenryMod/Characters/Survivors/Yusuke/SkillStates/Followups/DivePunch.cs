@@ -257,12 +257,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         {
                             if (capturedHurtbox == target)
                             {
-                                if (pinnableList)
+                                CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+                                Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
+
+                                if (enemyRigidBody)
                                 {
-                                    if (!pinnableList.CheckIfNotPinnable(target.healthComponent.gameObject.name)){
-                                        Log.Info("This character is not in the list, dive");
+                                    if (enemyMotor)
+                                    {
                                         DivePunchController.pivotTransform = FindModelChild("HandR");
-                                        DivePunchController.centerOfCollider = result.bounds.center;
                                         DivePunchController.Pinnable = true;
                                         DivePunchController.yusukeBody = characterBody;
                                         beginDive = true;
@@ -270,14 +272,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                                     }
                                     else
                                     {
-                                        Log.Info("This character is  in the list, punch instead");
-                                        DivePunchController.pivotTransform = target.gameObject.transform;
+                                        DivePunchController.pivotTransform = target.gameObject.transform;   // maybe make an empty object on the player and make it refernce it
                                         DivePunchController.hasLanded = true;
                                         DivePunchController.Pinnable = false;
-                                        DivePunchController.centerOfCollider = result.bounds.center;
                                         SkipDive = true;
+                                        break;
                                     }
-                                    
+
                                 }
                             }
                                 
@@ -421,6 +422,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 // grabbing the facing direction and applying a force to the enemy
                 Vector3 forceVector = characterDirection.forward;    // for now the direction is based on the characters forward direction
                 forceVector *= 20000f;
+                if (target.healthComponent.body.isChampion || target.healthComponent.body.isBoss) forceVector = characterDirection.forward *= 35000f;
 
                 knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
                 AttackForce(forceVector);

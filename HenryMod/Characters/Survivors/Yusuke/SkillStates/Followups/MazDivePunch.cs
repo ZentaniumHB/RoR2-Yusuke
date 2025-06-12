@@ -508,7 +508,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 // grabbing the facing direction and applying a force to the enemy
                 Vector3 forceVector = characterDirection.forward;    // for now the direction is based on the characters forward direction
                 forceVector *= 20000f;
-
+                if (target.healthComponent.body.isChampion || target.healthComponent.body.isBoss) forceVector = characterDirection.forward *= 35000f;
                 knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
                 AttackForce(forceVector);
             }
