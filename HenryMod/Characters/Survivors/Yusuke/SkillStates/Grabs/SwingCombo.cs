@@ -25,6 +25,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private float maxInitialSpeed = 6f;
         private float finalSpeed = 1.5f;
+        private Vector3 vector;
         private float exponent;
 
         private Vector3 originalCharacterForward;
@@ -60,7 +61,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         protected float damageCoefficient = 30f;
         protected float procCoefficient = 1f;
 
-        private DivePunchController DivePunchController;
         private KnockbackController knockbackController;
         private SwingController swingController;
 
@@ -74,6 +74,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             base.OnEnter();
 
+            UpdateDashSpeed(maxInitialSpeed, finalSpeed);
             forwardDirection = GetAimRay().direction;
             if (characterMotor && characterDirection)
             {
@@ -302,12 +303,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (characterMotor)
             {
                 inputBank.moveVector = Vector3.zero;
-
-
+                characterMotor.moveDirection = Vector3.zero;
             }
 
             float transitionDuration = spinDuration;
-            float stopWatch = animationTimer;
+            float stopWatch = animationTimer;   // increased by time.fixedDeltaTime
             float power = 2f;
 
             /*
@@ -323,6 +323,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             Quaternion finalRotation = Quaternion.AngleAxis(currentValue, Vector3.up);
             characterDirection.forward = finalRotation * characterDirection.forward;
+
+            // decelerate movement speed when spinning
+            float decelerateValue = 0.95f; 
+            characterMotor.velocity *= decelerateValue;
+
 
         }
 
@@ -446,19 +451,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             UpdateDashSpeed(maxInitialSpeed, finalSpeed);
             forwardDirection = GetAimRay().direction;
             characterDirection.moveVector = forwardDirection;
+
             if (cameraTargetParams) cameraTargetParams.fovOverride = Mathf.Lerp(dashFOV, 60f, fixedAge / duration);
 
             dashTime += Time.fixedDeltaTime;
             Vector3 normalized = (transform.position - previousPosition).normalized;
             if (characterMotor && characterDirection && normalized != Vector3.zero)
             {
-                Vector3 vector = normalized * dashSpeed;
+                vector = normalized * dashSpeed;
                 float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
                 vector = forwardDirection * d;
-                characterMotor.velocity = vector;
+                
             }
 
-            
+            characterMotor.velocity = vector;
             previousPosition = transform.position;
 
 
@@ -466,7 +472,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void UpdateDashSpeed(float max, float final)
         {
-            dashSpeed = (moveSpeedStat * 1.2f) * Mathf.Lerp(max, final, fixedAge / duration);
+            dashSpeed = (moveSpeedStat) * Mathf.Lerp(max, final, fixedAge / duration);
         }
 
         public override void OnExit()
