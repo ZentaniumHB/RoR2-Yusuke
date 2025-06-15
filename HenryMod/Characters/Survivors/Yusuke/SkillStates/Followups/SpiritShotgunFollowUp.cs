@@ -10,8 +10,7 @@ using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Survivors.Yusuke;
-using static Rewired.ComponentControls.Effects.RotateAroundAxis;
-using static UnityEngine.ParticleSystem.PlaybackState;
+
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 {
@@ -56,8 +55,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
 
         }
-
-
 
         public override void FixedUpdate()
         {

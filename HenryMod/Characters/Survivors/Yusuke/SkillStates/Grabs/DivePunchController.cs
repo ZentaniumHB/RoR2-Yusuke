@@ -25,7 +25,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private Rigidbody rigidbody;
         private RigidbodyMotor rigidMotor;
         private ModelLocator modelLocator;
-        
+
         private Quaternion originalRotation;
         private Collider collider;
         private SphereCollider sphCollider;
@@ -107,7 +107,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private void FixedUpdate()
         {
 
-            if(pivotTransform.position != Vector3.zero)
+            if (pivotTransform.position != Vector3.zero)
             {
 
                 EnemyRotation(modelTransform, true);
@@ -126,7 +126,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     //Log.Info("motor exists");
                     rigidMotor.moveVector = Vector3.zero;
                     rigidMotor.rootMotion = Vector3.zero;
-                    
+
                 }
 
                 if (rigidbody)
@@ -137,8 +137,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 if (hasStringEnded)
                 {
-
-                    if(hasRevertedRotation) Remove();
+                    if (hasRevertedRotation) Remove();
                 }
 
                 if (hasLanded)
@@ -149,8 +148,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (modelTransform)
                 {
                     modelTransform.position = pivotTransform.position;
-
-
                 }
             }
             else
@@ -159,7 +156,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 Destroy(this);
 
             }
-            
+
 
 
         }
@@ -167,24 +164,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         public void EnemyRotation(Transform model, bool pinned)
         {
-            
+
             if (modelTransform)
             {
                 /* Look is the direction yusukes model is facing, so the inverse of look will make the model face yusuke instead of facing the same direction
                  * Look rotation needs to be done first before rotating the character on the X axis, this will also need to be placed in fixedUpdate as yusukes body keeps updating
                  * when moving.
                  */
-                if(yusukeBody)
+                if (yusukeBody)
                 {
                     look = yusukeBody.characterDirection.forward;
                 }
-                
+
                 if (rigidbody && motor) model.rotation = Quaternion.LookRotation(-look) * Quaternion.Euler(-90f, 0f, 0f);
 
-                if (!pinned) 
-                { 
+                if (!pinned)
+                {
                     hasRevertedRotation = true;
-                    
+
                 }
 
             }
@@ -204,7 +201,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (sphCollider) sphCollider.enabled = true;
             if (capCollider) capCollider.enabled = true;
             if (rigidMotor) rigidMotor.moveVector = oldMoveVec;
-            
+
             Destroy(this);
         }
 
