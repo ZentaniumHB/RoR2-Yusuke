@@ -1,6 +1,7 @@
 ﻿using EntityStates;
 using EntityStates.Bison;
 using EntityStates.Commando.CommandoWeapon;
+using Rewired.Demos;
 using RoR2;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private bool hasFiredShotgun;
         private bool foundTarget;
+        private bool hasAddedController;
+        private bool isMostLikelyFlyingEnemy;
+
+        //slow down variables
+        private float slowDownStopWatch;
+        private float slowDownDuration = 1f;
+
+        private ShotgunController controller;
 
         public static float force = 800f;
         public static float recoil = 3f;
@@ -39,6 +48,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private string muzzleString;
         public static float procCoefficient = 1f;
         public static float damageCoefficient = YusukeStaticValues.gunDamageCoefficient;
+        private bool hasAppliedForce;
 
         public override void OnEnter()
         {
@@ -46,6 +56,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (ID != 0)
             {
+                controller = new ShotgunController();
                 characterMotor.enabled = true;
                 characterDirection.enabled = true;
                 characterMotor.Motor.ForceUnground();
@@ -62,16 +73,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (ID != 0)
             {
-
                 if (!foundTarget) DashTowardsEnemy();
 
                 if (foundTarget)
                 {
-                    Log.Info("target found searching for targets");
-                    characterMotor.velocity = Vector3.zero;
+                    AddController();
+                    if(slowDownStopWatch > slowDownDuration)
+                    {
+                        SearchForTargets(out var targets);
+                        ShootShotGun(targets);
+                        controller.Remove();
+                        ApplyForce();
+                        outer.SetNextState(new RevertSkills
+                        {
+                            moveID = ID
 
-                    SearchForTargets(out var targets);
-                    ShootShotGun(targets);
+                        });
+                    }
+                    else
+                    {
+                        SlowDown();
+                    }
+                    
 
                 }
 
@@ -83,25 +106,103 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         moveID = ID
 
                     });
-
                 }
-
             }
             else
             {
                 outer.SetNextStateToMain();     // this is only because for some reason this state gets called more than once, dunno why yet.
             }
-
-
-
         }
 
+        private void ApplyForce()
+        {
+            if (!hasAppliedForce)
+            {
+                hasAppliedForce = true;
+                Vector3 forceVector = (characterDirection.forward + -transform.up);    
+                forceVector *= 20000f;
+                if (target.healthComponent.body.isChampion || target.healthComponent.body.isBoss) forceVector = characterDirection.forward *= 35000f;
+
+                AttackForce(forceVector);
+            }
+        }
+
+        private void AttackForce(Vector3 forceVector)
+        {
+            DamageInfo damageInfo = new DamageInfo
+            {
+                attacker = gameObject,
+                damage = damageCoefficient * damageStat,
+                crit = RollCrit(),
+                procCoefficient = procCoefficient,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.SlowOnHit,
+                position = characterBody.corePosition,
+                force = forceVector,
+                canRejectForce = false
+            };
+            target.healthComponent.TakeDamage(damageInfo);
+        }
+
+        private void AddController()
+        {
+            if (!hasAddedController)
+            {
+                hasAddedController = true;
+
+                if (target)
+                {
+                    CharacterMotor enemyMotor = target.healthComponent.body.gameObject.GetComponent<CharacterMotor>();
+                    Rigidbody enemyRigidBody = target.healthComponent.body.gameObject.GetComponent<Rigidbody>();
+
+                    if (enemyRigidBody)
+                    {
+                        if (enemyMotor)
+                        {
+                            Log.Info("Adding shotgun controller");
+                            controller = target.healthComponent.body.gameObject.AddComponent<ShotgunController>();
+                            controller.pivotTransform = FindModelChild("FootL");
+                            controller.Pinnable = true;
+                            controller.yusukeBody = characterBody;
+                        }
+                        else
+                        {
+                            isMostLikelyFlyingEnemy = true;
+                            slowDownStopWatch = slowDownDuration + 1;
+                        }
+
+                    }
+
+                    
+                }
+                // the knockback controller that is on the body will have an effect on the characters rotation and enabling. So remove it after adding the Shotgun controller
+                KnockbackController knockBack = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
+                if (knockBack) knockBack.ForceDestory();
+
+            }
+        }
+
+        private void SlowDown()
+        {
+            // slows down the velocity Yusuke is traveling
+            slowDownStopWatch += GetDeltaTime();
+            float decelerateValue = 0.95f;
+            float finalVal = 0.75f;
+
+            float time = slowDownStopWatch / slowDownDuration;
+            float val = Mathf.Lerp(decelerateValue, finalVal, time);
+            Log.Info("Value: " + val);
+            characterMotor.velocity *= val;
+            
+        }
 
         private void ShootShotGun(List<HurtBox> targets)
         {
             if (!hasFiredShotgun)
             {
                 hasFiredShotgun = true;
+                SendDiagonally();
+
                 Log.Info("Firing shotgun");
                 characterBody.AddSpreadBloom(1.5f);
                 EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
@@ -110,8 +211,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 Ray aimRay = GetAimRay();
 
                 int damageDivision = targets.Count;
+                
 
-                characterMotor.velocity = -characterDirection.moveVector * 18f;
                 foreach (HurtBox enemy in targets)
                 {
                     //do a check if its a max charge, it SlowOnHit. If not, then regular.
@@ -155,12 +256,25 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             }
         }
 
+        // send Yusuke diagonally backwards based on the character direciton
+        private void SendDiagonally()
+        {
+            
+            if (isMostLikelyFlyingEnemy) 
+            { 
+                characterMotor.velocity = (transform.up) * 40f;
+            }
+            else
+            {
+                characterMotor.velocity = (-characterDirection.forward + transform.up) * 20f;
+            }
+                
+        }
 
         public void SearchForTargets(out List<HurtBox> currentHurtbox)
         {
 
             Log.Info("Searching for targets");
-            Log.Info("ID:" + ID);
             Ray aimRay = GetAimRay();
             search.teamMaskFilter = TeamMask.all;
             search.teamMaskFilter.RemoveTeam(teamComponent.teamIndex);
@@ -200,6 +314,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             //Log.Info("Capturing target");
 
+            if (!target.healthComponent.alive) 
+            {   // if the enemy is killed whilst the dash is happening, then simple exit the state.
+                outer.SetNextState(new RevertSkills
+                {
+                    moveID = ID
+
+                });    
+            }
+
             if (ID != 0)
             {
 
@@ -220,7 +343,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     //Log.Info("creating collider");
                     Collider[] colliders;
                     //Log.Info("physics");
-                    colliders = Physics.OverlapSphere(transform.position, 2, LayerIndex.entityPrecise.mask);
+                    colliders = Physics.OverlapSphere(transform.position, 4, LayerIndex.entityPrecise.mask);
                     //Log.Info("converting to list");
                     List<Collider> capturedColliders = colliders.ToList();
 
@@ -256,7 +379,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.Death;
         }
 
 
