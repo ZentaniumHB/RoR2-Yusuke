@@ -9,32 +9,33 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
     internal class MazokuGrabController : MonoBehaviour
     {
         public Transform pivotTransform;
-        public Vector3 centerOfCollider;
         public Transform modelTransform;
-        private CharacterBody body;
+
         private CharacterMotor motor;
+
         private CharacterDirection direction;
         private Rigidbody rigidbody;
         private RigidbodyMotor rigidMotor;
+
         private ModelLocator modelLocator;
-        private Quaternion originalRotation;
+        public CharacterBody yusukeBody;
+
         private Collider collider;
         private SphereCollider sphCollider;
         private CapsuleCollider capCollider;
-        private Vector3 centerOfMass;
-        private BaseState state;
-        private bool setBounds;
-        public bool Pinnable;
+
         private Vector3 oldMoveVec;
+        private Quaternion originalRotation;
+
         public bool hasStringEnded;
         public bool hasLanded;
         public bool hasRevertedRotation;
         public float changeInY = 0;
+        private bool setBounds;
         private Quaternion finalRotation;
 
         private void Awake()
         {
-            body = GetComponent<CharacterBody>();
             motor = GetComponent<CharacterMotor>();
             direction = GetComponent<CharacterDirection>();
             rigidMotor = gameObject.GetComponent<RigidbodyMotor>();
@@ -43,7 +44,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             sphCollider = gameObject.GetComponent<SphereCollider>();
             capCollider = gameObject.GetComponent<CapsuleCollider>();
             rigidbody = gameObject.GetComponent<Rigidbody>();
-            state = gameObject.GetComponent<BaseState>();
+
             if (collider)
             {
                 collider.enabled = false;
@@ -63,17 +64,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (direction) direction.enabled = false;
             if (modelLocator)
             {
-                if (modelLocator.modelTransform)
-                {
-                    modelTransform = modelLocator.modelTransform;
-                    originalRotation = modelTransform.rotation;
-                    if (modelLocator.gameObject.name == "GreaterWispBody(Clone)")
-                    {
-                        modelLocator.dontDetatchFromParent = true;
-                        modelLocator.dontReleaseModelOnDeath = true;
-                    }
-                    modelLocator.enabled = false;
-                }
+                modelTransform = modelLocator.modelTransform;
+                originalRotation = modelTransform.rotation;
             }
             hasRevertedRotation = false;
             setBounds = false;
@@ -91,17 +83,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                 }
 
-
-
-                //Log.Info("Checking motor");
                 if (motor)
                 {
-                    //Log.Info("motor exists");
+                    //Log.Info("This character has a motor");
                     motor.disableAirControlUntilCollision = true;
                     motor.velocity = Vector3.zero;
                     motor.rootMotion = Vector3.zero;
                     motor.Motor.SetPosition(pivotTransform.position, true);
 
+                    // Checks for the yusukeBody, if exist it will get the forward direction, this currently doesn't make the enemies completely flat with the x and z axis (need to figure it out)
+                    if (yusukeBody)
+                    {
+                        // look vector makes sure the character model is always facing yusukes model
+                        Vector3 look = yusukeBody.characterDirection.forward;
+                        // Quaternion.Look rotation attempts to face the characters forward vector (issue above)
+                        motor.Motor.SetRotation(Quaternion.LookRotation(-look), true);
+                    }
                 }
 
                 //Log.Info("checking rigidMotor");
@@ -144,31 +141,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         }
         public void EnemyRotation(Transform model, bool rotate)
         {
-            if (modelTransform)
+            if (model)
             {
-                Log.Info("Rotating character");
-                // ----------Rotating the character
-                //oldModelRotation = model.localRotation;
-                Vector3 forwardDirection = model.forward;
-                Quaternion worldRotation = model.rotation;
-                // convert the world rotation to local rotation (relative to the current forward direction)
-                Quaternion localRotation = Quaternion.Inverse(Quaternion.LookRotation(forwardDirection)) * worldRotation;
-                Log.Info("Pinned = " + rotate + " Model local rotation (befire): " + model.localRotation);
-                Quaternion alteredRotation = Quaternion.identity;   // resets the rotation of the object
-                if (rotate) alteredRotation = Quaternion.Euler(0f, -180f, 0f); // rotating so the enemy faces the sky
-                if (!rotate) alteredRotation = Quaternion.Euler(0f, 180f, 0f); // rotating so the enemy faces the sky
-                Quaternion newLocalRotation = localRotation * alteredRotation;
-                //from local to world space
-                Quaternion finalWorldRotation = Quaternion.LookRotation(forwardDirection) * newLocalRotation;
-                model.localRotation = finalWorldRotation;
-                finalRotation = finalWorldRotation;
-                Log.Info("Pinned = " + rotate + " Model local rotation (after): " + model.localRotation);
-
-                if (!rotate)
-                {
-                    hasRevertedRotation = true;
-
-                }
+                
             }
             else
             {

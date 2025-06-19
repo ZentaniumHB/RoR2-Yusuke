@@ -1,6 +1,7 @@
 ﻿using EntityStates;
 using EntityStates.NewtMonster;
 using IL.RoR2.Achievements.Bandit2;
+using Newtonsoft.Json.Bson;
 using RoR2;
 using RoR2.Audio;
 using System;
@@ -173,6 +174,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
             else
             {
+
                 // if the enemy has a regular motor and can be grabbed
                 if (!skipGrab)
                 {
@@ -186,8 +188,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                             LaunchEnemy();
                             if (launchAnimationDuration > launchAnimationSpeed)
                             {
-                                PlayAnimation("FullBody, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
-                                PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                                EndAnimationLoops();
                                 outer.SetNextStateToMain();
                             
                             }
@@ -196,22 +197,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
                     }
                         
-                    if (inputBank.skill1.down)
+                    if (inputBank.skill1.down) 
                     {
                         hasSelectionMade = true;
-                        if (!mazokuGrabController.hasRevertedRotation) mazokuGrabController.EnemyRotation(mazokuGrabController.modelTransform, false);  //revert rotation so the enemey is back to normal
+                        mazokuGrabController.Remove();
                     }
 
                     if (hasSelectionMade)   // once a selection is made (skill 1 selected), then it will continue
                     {
-
-                        if (mazokuGrabController.hasRevertedRotation)
-                        {
-
-                            LaunchEnemy();
-                            if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
-
-                        }
+                        LaunchEnemy();
+                        if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
                     }
                 }
                 else
@@ -236,6 +231,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 Log.Info("Stop attacking (mazoku)");
                 outer.SetNextStateToMain();
             }
+        }
+
+        // This method prevents any animaions looping as most of the looped ones are not linked to bufferEmpty. 
+        private void EndAnimationLoops()
+        {
+            Log.Info("Removing the animation loop;");
+            PlayAnimation("FullBody, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+            PlayAnimation("BothHands, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f); 
         }
 
         private void SlowVelocity()
@@ -517,8 +520,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             if (!enemyHurtBox.healthComponent.alive)
             {
-                if (enemyHurtBox.healthComponent.health < 1) //using alive doesn't work here
+                if (enemyHurtBox.healthComponent.health < 0.1) //using alive doesn't work here
                 {
+                    EndAnimationLoops(); // force end prevents the 
                     mazokuGrabController.Remove();
                     isEnemyKilled = true;
                 }
@@ -561,7 +565,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     // add the grab component and locate the pivot 
                     mazokuGrabController = enemyHurtBox.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
-                    mazokuGrabController.pivotTransform = FindModelChild("HandR"); // make it pivot to a different bone or empty object (set it up in the editor)
+                    mazokuGrabController.yusukeBody = characterBody;
+                    mazokuGrabController.pivotTransform = FindModelChild("HandL"); // make it pivot to a different bone or empty object (set it up in the editor)
                 }
                 else
                 {
