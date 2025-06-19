@@ -563,10 +563,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 if (enemyMotor)
                 {
-                    // add the grab component and locate the pivot 
-                    mazokuGrabController = enemyHurtBox.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
-                    mazokuGrabController.yusukeBody = characterBody;
-                    mazokuGrabController.pivotTransform = FindModelChild("HandL"); // make it pivot to a different bone or empty object (set it up in the editor)
+
+                    if (enemyHurtBox.healthComponent.body.isChampion || enemyHurtBox.healthComponent.body.isChampion)
+                    {
+                        // skip the grab stuff and just attack, as grabbing will cause issues. 
+                        skipGrab = true;
+                        characterBody.SetAimTimer(0.1f);
+                        ShotgunPunch();
+                    }
+                    else
+                    {
+                        // add the grab component and locate the pivot 
+                        mazokuGrabController = enemyHurtBox.healthComponent.body.gameObject.AddComponent<MazokuGrabController>();
+                        mazokuGrabController.yusukeBody = characterBody;
+                        mazokuGrabController.pivotTransform = FindModelChild("HandL"); // make it pivot to a different bone or empty object (set it up in the editor)
+                    }
+
+                    
                 }
                 else
                 {
