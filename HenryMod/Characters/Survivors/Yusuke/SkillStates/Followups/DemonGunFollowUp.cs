@@ -142,7 +142,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.Death;
         }
 
     }

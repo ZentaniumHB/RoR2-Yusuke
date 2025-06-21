@@ -174,7 +174,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Stun;
+            return InterruptPriority.Frozen;
         }
 
         protected virtual EntityState SpiritNextState()

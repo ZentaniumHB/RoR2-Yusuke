@@ -785,7 +785,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(MazBackToBackStrikes)),
                 activationStateMachineName = "MazokuWeapon",
-                interruptPriority = EntityStates.InterruptPriority.Vehicle,
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 10f,
                 baseMaxStock = 2,
@@ -817,7 +817,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(SwingCombo)),
                 activationStateMachineName = "MazokuWeapon",
-                interruptPriority = EntityStates.InterruptPriority.Vehicle,
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 12f,
                 baseMaxStock = 2,
@@ -850,7 +850,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeDemonGunMega)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "MazokuWeapon",
-                interruptPriority = EntityStates.InterruptPriority.Vehicle,
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 25f,
                 baseMaxStock = 1,
