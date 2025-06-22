@@ -1,6 +1,4 @@
 ﻿using EntityStates;
-using EntityStates.Jellyfish;
-using Rewired;
 using RoR2;
 using System;
 using System.Collections.Generic;
@@ -90,7 +88,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            
+
             dashTime += GetDeltaTime();
             if (!targetFound)
             {
@@ -461,7 +459,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 vector = normalized * dashSpeed;
                 float d = Mathf.Max(Vector3.Dot(vector, forwardDirection), 0f);
                 vector = forwardDirection * d;
-                
+
             }
 
             characterMotor.velocity = vector;

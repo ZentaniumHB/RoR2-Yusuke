@@ -8,6 +8,7 @@ using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
+using static Rewired.ComponentControls.Effects.RotateAroundAxis;
 using Random = UnityEngine.Random;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
@@ -26,12 +27,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public static GameObject tracerEffectPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerLunarWispMinigun"); //"Prefabs/Effects/Tracers/TracerGoldGat"
 
         private float duration;
+        private float knockBackTime = 1f;
         private float fireTime;
         private bool hasFired;
         private string muzzleString;
         public float charge;
 
         public bool isPrimary;
+        private Ray aimRay;
 
         private int damageTypeDecider;
         private BulletAttack beamBullet;
@@ -42,7 +45,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             base.OnEnter();
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
-            characterBody.SetAimTimer(2f);
             muzzleString = "Muzzle";
 
             damageTypeDecider = Random.Range(1, 3);     // makes it pick either 1 or 2
@@ -50,11 +52,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             if (isGrounded)
             {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
             }
             else
             {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
             }
             //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
 
@@ -63,6 +65,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnExit()
         {
             base.OnExit();
+            characterDirection.enabled = true;
             
         }
 
@@ -76,10 +79,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 Fire();
             }
 
+            if (hasFired)
+            {
+                characterDirection.moveVector = Vector3.zero;   // prevents character movement
+                knockBackTime += GetDeltaTime();
+                if (!isGrounded)
+                {
+                    //characterBody.gameObject.transform.rotation = Quaternion.LookRotation(GetAimRay().direction);
+                    // reverse the direction, so it seems it has a knockback effect.
+                    Vector3 awayFromDirection = (-aimRay.direction).normalized;
+                    Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
+                    // Apply the velocity to the character's motor
+                    characterMotor.velocity = backWardSpeed;
+                }
+                
+            }
+
             if (fixedAge >= duration && isAuthority)
             {
-                outer.SetNextStateToMain();
-                return;
+                if (knockBackTime > 1) 
+                {
+                    outer.SetNextStateToMain();
+                    return;
+                }
+                
             }
         }
 
@@ -95,9 +118,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
                 if (isAuthority)
                 {
-                    Ray aimRay = GetAimRay();
+                    aimRay = GetAimRay();
+                    //instantly look towards the direction
+                    characterDirection.forward = aimRay.direction;
+                    characterDirection.moveVector = aimRay.direction;
                     AddRecoil(-1f * recoil, -2f * recoil, -0.5f * recoil, 0.5f * recoil);
-                    characterMotor.velocity = -aimRay.direction * 18f;  // pushback
+                    //characterMotor.velocity = -aimRay.direction * 18f;  // pushback
                     
 
                     beamBullet = new BulletAttack
@@ -144,6 +170,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                     beamBullet.Fire();
                     
                 }
+
             }
 
 
