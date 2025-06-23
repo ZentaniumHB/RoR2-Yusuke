@@ -7,8 +7,10 @@ using System.Text;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using static Rewired.ComponentControls.Effects.RotateAroundAxis;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 using Random = UnityEngine.Random;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
@@ -39,6 +41,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private int damageTypeDecider;
         private BulletAttack beamBullet;
 
+        private YusukeMain mainState;
+
 
         public override void OnEnter()
         {
@@ -66,7 +70,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             base.OnExit();
             characterDirection.enabled = true;
-            
+            SwitchAnimationLayer();
+
         }
 
 
@@ -174,6 +179,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             }
 
 
+
+        }
+
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.GunCharge, false);
+                    // make the ReleaseAnimation index true
+                }
+
+            }
 
         }
 
