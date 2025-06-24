@@ -29,7 +29,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public static GameObject tracerEffectPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerLunarWispMinigun"); //"Prefabs/Effects/Tracers/TracerGoldGat"
 
         private float duration;
-        private float knockBackTime = 1f;
         private float fireTime;
         private bool hasFired;
         private string muzzleString;
@@ -43,6 +42,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private YusukeMain mainState;
 
+        private float knockBackTime;
+        private float knockBackDuration = 1f;
 
         public override void OnEnter()
         {
@@ -69,7 +70,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnExit()
         {
             base.OnExit();
-            characterDirection.enabled = true;
             SwitchAnimationLayer();
 
         }
@@ -90,7 +90,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 knockBackTime += GetDeltaTime();
                 if (!isGrounded)
                 {
-                    //characterBody.gameObject.transform.rotation = Quaternion.LookRotation(GetAimRay().direction);
                     // reverse the direction, so it seems it has a knockback effect.
                     Vector3 awayFromDirection = (-aimRay.direction).normalized;
                     Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
@@ -102,7 +101,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             if (fixedAge >= duration && isAuthority)
             {
-                if (knockBackTime > 1) 
+                if (knockBackTime > knockBackDuration) 
                 {
                     outer.SetNextStateToMain();
                     return;

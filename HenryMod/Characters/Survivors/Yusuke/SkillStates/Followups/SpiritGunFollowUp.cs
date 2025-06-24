@@ -28,16 +28,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private bool hasFired;
         private string muzzleString;
         public float charge;
+        private Ray aimRay;
 
         public int ID;
         public HurtBox target;
+        private float knockBackTime;
+        private float knockBackDuration = 1f;
 
         public override void OnEnter()
         {
             base.OnEnter();
 
+            duration = baseDuration / attackSpeedStat;
             Log.Info("ENTERED SPIRIT FOLLOW UP");
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            if (isGrounded)
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
+            }
         }
 
         public override void OnExit()
@@ -57,15 +68,34 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     Fire();
                 }
 
+                if (hasFired)
+                {
+                    characterDirection.moveVector = Vector3.zero;   // prevents character movement
+                    knockBackTime += GetDeltaTime();
+                    if (!isGrounded)
+                    {
+                        // reverse the direction, so it seems it has a knockback effect.
+                        Vector3 awayFromDirection = (-aimRay.direction).normalized;
+                        Vector3 backWardSpeed = awayFromDirection * moveSpeedStat * 5;
+                        // Apply the velocity to the character's motor
+                        characterMotor.velocity = backWardSpeed;
+                    }
+
+                }
+
                 if (fixedAge >= duration && isAuthority)
                 {
 
-                    Log.Info("ID IN Spirit follow up: " + ID);
-                    outer.SetNextState(new RevertSkills
+                    if(knockBackTime > knockBackDuration)
                     {
-                        moveID = ID
+                        Log.Info("ID IN Spirit follow up: " + ID);
+                        outer.SetNextState(new RevertSkills
+                        {
+                            moveID = ID
 
-                    });
+                        });
+                    }
+                    
 
                 }
             }
@@ -89,7 +119,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
                 Util.PlaySound("HenryShootPistol", gameObject);
 
-                Ray aimRay = GetAimRay();
+                aimRay = GetAimRay();
 
 
                 EffectManager.SpawnEffect(spiritImpactEffect, new EffectData

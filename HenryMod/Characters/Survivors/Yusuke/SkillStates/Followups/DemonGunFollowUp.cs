@@ -30,19 +30,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private float bulletTime = 0.2f;
         public bool isPrimary;
-        public float totalBullets = 3f;
+        public int totalBullets = 3;
         public bool hasBarrageEnded;
         private float barrageStopWatch;
         private int numberOfShots;
         public HurtBox target;
+
+        private Ray aimRay;
+        private float knockBackTime;
+        private float knockBackDuration = 1f;
 
         public override void OnEnter()
         {
             base.OnEnter();
             // pausing velocity so the character doesn't fall 
             characterMotor.velocity.y = 0f;
-            characterMotor.enabled = false;
-            characterDirection.enabled = false;
+            characterMotor.enabled = true;
+            
 
         }
 
@@ -65,22 +69,39 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (fixedAge >= fireTime)
             {
-
-                if (barrageStopWatch > bulletTime)
+                KnockBackEffect();
+                if (barrageStopWatch > bulletTime && numberOfShots != totalBullets)
                 {
                     // fires a bullet then increments
-                    PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", bulletTime);    // make sure the last bullet is normal speed, othewise it will look weird
-                    if (numberOfShots != totalBullets) Fire();
+                    if (isGrounded) // make sure the last bullet is normal speed, othewise it will look weird
+                    {
+                        PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", 1);
+                    }
+                    else
+                    {
+                        PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1);
+                    }
+
+                    Fire();
+
                     barrageStopWatch = 0;
                     numberOfShots++;
+                    Log.Info("total bullets: " + totalBullets);
                     Log.Info("number of shots: " + numberOfShots);
-                }
 
+                }
+                
             }
 
-            // once it reaches the max shot, it then sets the boolean to true and returns
-            if (numberOfShots == totalBullets) hasBarrageEnded = true;
 
+            // once it reaches the max shot, it then sets the boolean to true and returns
+            if (numberOfShots >= totalBullets) 
+            {
+                knockBackTime += GetDeltaTime();
+                Log.Info("knockbackTimer: " + knockBackTime);
+                if (knockBackTime > knockBackDuration) hasBarrageEnded = true;
+            }
+                
             if (hasBarrageEnded && isAuthority)
             {
                 Log.Info($"Returning from demon barrage");
@@ -92,6 +113,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         }
 
+        private void KnockBackEffect()
+        {
+            characterDirection.moveVector = Vector3.zero;   // prevents character movement
+            if (!isGrounded)
+            {
+                // reverse the direction, so it seems it has a knockback effect.
+                Vector3 awayFromDirection = (-aimRay.direction).normalized;
+                Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
+                // Apply the velocity to the character's motor
+                characterMotor.velocity = backWardSpeed;
+            }
+        }
+
         private void Fire()
         {
    
@@ -99,8 +133,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
             Util.PlaySound("HenryShootPistol", gameObject);
 
-            Ray aimRay = GetAimRay();
-
+            aimRay = GetAimRay();
 
             EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
             {
