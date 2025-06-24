@@ -115,7 +115,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private void KnockBackEffect()
         {
-            characterDirection.moveVector = Vector3.zero;   // prevents character movement
+            characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
             if (!isGrounded)
             {
                 // reverse the direction, so it seems it has a knockback effect.

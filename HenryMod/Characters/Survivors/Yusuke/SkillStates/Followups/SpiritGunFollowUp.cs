@@ -70,7 +70,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 if (hasFired)
                 {
-                    characterDirection.moveVector = Vector3.zero;   // prevents character movement
+                    characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
                     knockBackTime += GetDeltaTime();
                     if (!isGrounded)
                     {

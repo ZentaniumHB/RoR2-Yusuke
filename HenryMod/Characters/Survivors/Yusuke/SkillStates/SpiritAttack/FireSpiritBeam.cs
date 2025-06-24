@@ -86,7 +86,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             if (hasFired)
             {
-                characterDirection.moveVector = Vector3.zero;   // prevents character movement
+                characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
                 knockBackTime += GetDeltaTime();
                 if (!isGrounded)
                 {

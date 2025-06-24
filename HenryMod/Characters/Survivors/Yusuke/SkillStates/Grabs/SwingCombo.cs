@@ -300,7 +300,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             if (characterMotor)
             {
-                inputBank.moveVector = Vector3.zero;
+                characterDirection.moveVector = Vector3.zero;
                 characterMotor.moveDirection = Vector3.zero;
             }
 
