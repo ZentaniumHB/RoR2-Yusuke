@@ -66,6 +66,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             barrageStopWatch += Time.fixedDeltaTime;   // start count 
             //Log.Info($"watch: " + barrageStopWatch);
 
+            if (!target.healthComponent.alive) 
+            {
+                outer.SetNextStateToMain();    // if the enemy is killed whilst the follow up is happening, then simply exit the state.
+                return;
+            }
+                
 
             if (fixedAge >= fireTime)
             {

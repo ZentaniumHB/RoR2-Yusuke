@@ -16,6 +16,7 @@ using System.Collections;
 using UnityEngine.Networking;
 using RoR2.Audio;
 using Random = UnityEngine.Random;
+using UnityEngine.Networking.NetworkSystem;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 {
@@ -76,20 +77,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float stompCount = 0;
         private int maxPunches = 40;
         private int maxStomps = 4;
-        private float finalPunchStartup = 0.8f;   // for the final punch animation
+        private float finalPunchStartup = 0.6f;   // for the final punch animation
+        private float finalKickStartup = 0.8f;   // for the final punch animation
 
 
         // Animation flags
-        private bool hasStartUpPlayed;
-        private bool isFinalPunchAnimationActive;
-        private float finalPunchDelayStopwatch = 0f;
+
         private float groundedAnimationStartupDelayValue = 0.6f;
         private float groundedAnimationStopwatch;
+        private bool hasStartUpPlayed;
+
+        private bool isFinalPunchAnimationActive;
+        private float finalPunchDelayStopwatch = 0f;
         private bool rapidPunchAnim;
+
+        private bool isFinalKickAnimationActive;
+        private float finalKickDelayStopwatch = 0f;
+
+        private float animationEndLag;
+
 
         // Net
         private bool hasAppliedStun;
         private bool hasAppliedForce;
+        
 
         public override void OnEnter()
         {
@@ -192,7 +203,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     knockbackController.ForceDestory();
 
                 }
-                outer.SetNextStateToMain();
+
+                inputBank.moveVector = Vector3.zero;
+
+                // for both animations there are different cooldowns for the animations, these timers will delay the next state to be active (the main state)
+                animationEndLag += GetDeltaTime();
+                if (attackFinisherID == 1)
+                {
+                    if (animationEndLag > 0.8f) outer.SetNextStateToMain();
+                }
+                else
+                {
+                    if (animationEndLag > 1.8f) outer.SetNextStateToMain();
+                }
+                
 
             }
 
@@ -351,12 +375,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (target.healthComponent.alive)
             {
                 //If grounded, it will play the animation startup
-                if (!hasStartUpPlayed && !SkipDive && attackFinisherID == 1)
-                {
-                    hasStartUpPlayed = true;
-                    PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
-                }
-
                 if (punchStopwatch > punchReset && !isFinalPunchAnimationActive) // reset the timer, and attack again
                 {
                     if (!hasStartUpPlayed && !SkipDive)
@@ -404,10 +422,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 if (hasBarrageFinished)
                 {
                     Log.Info("TOTAL PUNCHES: " + punchCount);
-                    Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                    if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
-                    Log.Info("First deleting dive punch");
-                    if (target.healthComponent.alive) divePunchController.Remove();
+                    RemoveControllerOnEnemy();
                 }
 
 
@@ -418,32 +433,71 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private void StompThemOut()
         {
             stompStopwatch += GetDeltaTime();
+            groundedAnimationStopwatch += GetDeltaTime(); // stopwatch that is used for allowing the animation to play out before the next animation interrupts
+
             if (target.healthComponent.alive)
             {
-                if (stompStopwatch > stompReset)
+                if (!hasStartUpPlayed && !SkipDive)
                 {
-                    if (NetworkServer.active)
+                    hasStartUpPlayed = true;
+                    PlayAnimation("FullBody, Override", "StompDiveStartUp", "Roll.playbackRate", duration);
+                }
+
+                if (stompStopwatch > stompReset && !isFinalKickAnimationActive)
+                {
+                    if (!SkipDive && groundedAnimationStopwatch > groundedAnimationStartupDelayValue)
                     {
-                        PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
+                        if (NetworkServer.active)
+                        {
+                            // this boolean is to allow the animation to play only once, since it is not connected to the "bufferEmpty" state in the animation layer, it will constantly loop the first few frames
+                            if (!rapidPunchAnim)
+                            {
+                                rapidPunchAnim = true;
+                                PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
+                            }
+
+                        }
+                        StompAttack();
                     }
-                    StompAttack();
+
+                    /*if ()
+                    {
+                        if (NetworkServer.active)
+                        {
+                            PlayAnimation("FullBody, Override", "StompThemOut", "ThrowBomb.playbackRate", 1f);
+                        }
+                        StompAttack();
+
+                    }*/
+                }
+                
+            }
+
+            // when the target is not alive, then simply skip everything and exit the state.
+            if (!target.healthComponent.alive) hasBarrageFinished = true;
+
+            Log.Info("stompCount: " + stompCount);
+
+            if (attackFinisherID == 2 && stompCount >= maxStomps - 1 && target.healthComponent.alive)
+            {
+                DeliverFinalKick();
+                if (hasBarrageFinished)
+                {
+                    Log.Info("TOTAL Stomps: " + stompCount);
+                    RemoveControllerOnEnemy();
 
                 }
             }
 
-            if (attackFinisherID == 2 && stompCount == maxStomps || !target.healthComponent.alive)
-            {
-                hasBarrageFinished = true;
-                PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   // this is needed since the stomp has no transition connection, without it will loop forever
-                Log.Info("TOTAL STOMPS: " + stompCount);
-                Log.Info("BARAGE (STOMP) HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
-                Log.Info("First deleting dive punch");
-                if (target.healthComponent.alive) divePunchController.Remove();
-            }
-
         }
 
+        private void RemoveControllerOnEnemy()
+        {
+            Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
+            if (beginDive) divePunchController.EnemyRotation(divePunchController.modelTransform, false);
+            Log.Info("First deleting dive punch");
+            if (target.healthComponent.alive) divePunchController.Remove();
+        }
 
         private void ThrowPunch()
         {
@@ -563,6 +617,40 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 hasBarrageFinished = true; 
             } 
             
+        }
+
+        private void DeliverFinalKick()
+        {
+            finalKickDelayStopwatch += GetDeltaTime(); // starts counting the delay before the final kick connects
+            Log.Info("finalKickDelayStopwatch: "+ finalKickDelayStopwatch);
+
+            // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
+            if (!isFinalKickAnimationActive)
+            {
+                StompAttack();
+                isFinalKickAnimationActive = true;
+                if (NetworkServer.active)
+                {
+                    if (!SkipDive)
+                    {
+                        PlayAnimation("FullBody, Override", "StompFinish", "Roll.playbackRate", 1);
+                    }
+                    else
+                    {
+                        PlayAnimation("FullBody, Override", "DiveMachinePunchAirFinish", "Roll.playbackRate", 1);
+                    }
+
+                }
+
+            }
+            // if and ONLY if the time passes (which should be enough time for the animation to play) will then the boolean will be true exiting the state in the fixedUpdate
+            if (finalKickDelayStopwatch > finalKickStartup)
+            {
+                Log.Info("Attack kick has ended, so make barrage true");
+                ApplyForce();
+                hasBarrageFinished = true;
+            }
+
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

@@ -122,7 +122,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                         swingController = target.healthComponent.body.gameObject.AddComponent<SwingController>();
                         swingController.pivotTransform = FindModelChild("HandR");  // make it pivot to a different bone or empty object(set it up in the editor)
                         swingController.yusukeBody = characterBody; // giving the controller the characterbody so it knows the current forward vector for the rotation.
-                        PlayAnimation("FullBody, Override", "MazokuSwing", "ShootGun.playbackRate", duration);
+                        PlayAnimation("FullBody, Override", "MazokuSwingStartUp", "ShootGun.playbackRate", duration);
 
                         Log.Info("target model transform... ");
                         targetModelTransform = target.healthComponent.modelLocator.transform;
@@ -241,7 +241,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 else
                 {
                     // Create another animation for this, more like a swing throw
-                    PlayAnimation("FullBody, Override", "SwingRelease", "Roll.playbackRate", 2f);
+                    PlayAnimation("FullBody, Override", "MazokuSingleSwingToss", "Roll.playbackRate", 2f);
                     Vector3 forceVector = GetAimRay().direction;    // for now the Aim Ray is based on the characters facing direction
                     forceVector *= 20000f;
                     AttackForce(forceVector);
