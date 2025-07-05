@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.Networking;
 using YusukeMod;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
@@ -47,6 +48,7 @@ namespace YusukeMod.SkillStates
         private float duration;
         private float minDuration = 0.3f;
         private float maxDuration = 0.8f;
+        private float searchDuration = 1f;
 
         public float maxTrackingDistance = 12f;
         public float maxTrackingAngle = 60f;
@@ -116,6 +118,8 @@ namespace YusukeMod.SkillStates
 
         private GenericSkill previousSecondarySkill;
         private YusukeMain mainState;
+        private float recoupTime;
+        private bool hasRecoup;
 
         public override void OnEnter()
         {
@@ -153,10 +157,13 @@ namespace YusukeMod.SkillStates
             {
 
                 prevMovementVector = characterMotor.velocity;
-                vector = forwardDirection * dashSpeed;
+                //vector = forwardDirection * dashSpeed;
                 characterMotor.enabled = false;
                 characterDirection.enabled = false;
+                inputBank.moveVector = Vector3.zero;
                 groundedVersion = true;
+
+                PlayAnimation("FullBody, Override", "WaveGroundedStance", "Slide.playbackRate", 1f);
             }
             else
             {
@@ -357,11 +364,29 @@ namespace YusukeMod.SkillStates
             {
                 if (!collision)
                 {
-                    outer.SetNextStateToMain();
-                    return;
+                    // recouperating from the spirit wave charge as there 
+                    if(!hasRecoup) PlayAnimation("FullBody, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                    hasRecoup = true;
+
+                    if (groundedVersion) 
+                    {   // this is only for the grounded version, might make it for both versions
+                        RevertGroundedChanges();
+                        outer.SetNextState(new Recoup
+                        {
+                            recoupID = 1,
+                        });
+                        return;
+
+                    }
+                    else
+                    {
+                        outer.SetNextStateToMain();
+                        return;
+                    }
+
+                    
+
                 }
-
-
             }
         }
 
@@ -568,23 +593,10 @@ namespace YusukeMod.SkillStates
             base.OnExit();
             Log.Info("LEAVING SPIRIT WAVE");
 
-            // removes the fov change and allows aircontrol 
-            characterMotor.disableAirControlUntilCollision = false;
-            if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
-            if (target && isBodyFound)  // removes indicators if present
-            {
-                if(indicator != null) indicator.active = false;
-            }
-
-            if (groundedVersion)
-            {
-                characterMotor.enabled = true;
-                characterDirection.enabled = true;
-                characterMotor.velocity = prevMovementVector;
-            }
+            RevertGroundedChanges();
 
             // if the player made no decision then pass this value
-            if (!followUpActivated)
+            if (!followUpActivated && collision)
             {
                 outer.SetNextState(new RevertSkills
                 {
@@ -593,6 +605,26 @@ namespace YusukeMod.SkillStates
             }
 
             
+        }
+
+        private void RevertGroundedChanges()
+        {
+            // removes the fov change and allows aircontrol 
+            characterMotor.disableAirControlUntilCollision = false;
+            if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
+            if (target && isBodyFound)  // removes indicators if present
+            {
+                if (indicator != null) indicator.active = false;
+            }
+
+            if (groundedVersion)
+            {
+                characterMotor.enabled = true;
+                characterDirection.enabled = true;
+                characterMotor.velocity = Vector3.zero;
+                groundedVersion = true;
+
+            }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
