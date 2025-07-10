@@ -4,6 +4,7 @@ using RoR2.Audio;
 using RoR2.Skills;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,6 +13,8 @@ namespace YusukeMod.Modules.BaseStates
     public abstract class BaseMeleeAttack : BaseSkillState, SteppedSkillDef.IStepSetter
     {
         public int swingIndex;
+        public bool isMainString;
+        public bool isAttacking;
 
         protected string hitboxGroupName = "SwordGroup";
 
@@ -35,6 +38,8 @@ namespace YusukeMod.Modules.BaseStates
         protected string hitSoundString = "";
         protected string muzzleString = "SwingCenter";
         protected string playbackRateParam = "Slash.playbackRate";
+        protected string interruptPlaybackRate = "animInterrupt.playbackRate";
+
         protected GameObject swingEffectPrefab;
         protected GameObject hitEffectPrefab;
         protected NetworkSoundEventIndex impactSound = NetworkSoundEventIndex.Invalid;
@@ -49,6 +54,8 @@ namespace YusukeMod.Modules.BaseStates
         protected Animator animator;
         private HitStopCachedState hitStopCachedState;
         private Vector3 storedVelocity;
+
+        private bool hasSwitchedAnim;
 
         public override void OnEnter()
         {
@@ -151,6 +158,35 @@ namespace YusukeMod.Modules.BaseStates
 
             hitPauseTimer -= Time.deltaTime;
 
+            if (animator.GetBool("isMoving"))
+            {
+                // the layer that has the idle attack animations is layer 7 in the editor
+                AnimatorStateInfo animState = animator.GetCurrentAnimatorStateInfo(7);
+                if (animState.IsName("FullBodyAttack1") || animState.IsName("FullBodyAttack2") || animState.IsName("FullBodyAttack3") || animState.IsName("FullBodyAttack4"))
+                {
+                    // issue here is that the animations will play twice, and only the animator.play works locally. so still need to alter this
+                    if (!hasSwitchedAnim)
+                    {
+                        hasSwitchedAnim = true;
+                        float normTime = animState.normalizedTime % 1f; //normalised is required to play the gesture version of the animation so it overides and continues from the fullbody version
+                        PlayCrossfade("FullBody, Override", "BufferEmpty", interruptPlaybackRate, duration, 0.1f);
+                        if (characterBody.isSprinting && isGrounded) 
+                        {
+                            PlayCrossfade("Gesture, Override", "SprintAttack" + swingIndex, interruptPlaybackRate, duration, 0.1f);
+                            animator.Update(0f);
+                            animator.Play("SprintAttack" + swingIndex, 8, normTime);
+                        }
+                        else
+                        {
+                            PlayCrossfade("Gesture, Override", "Attack" + swingIndex, interruptPlaybackRate, duration, 0.1f);
+                            animator.Update(0f);
+                            animator.Play("Attack" + swingIndex, 8, normTime);
+                        }
+                            
+                    }
+                }
+            }
+
             if (hitPauseTimer <= 0f && inHitPause)
             {
                 RemoveHitstop();
@@ -191,6 +227,8 @@ namespace YusukeMod.Modules.BaseStates
             ConsumeHitStopCachedState(hitStopCachedState, characterMotor, animator);
             inHitPause = false;
             characterMotor.velocity = storedVelocity;
+            
+            hasSwitchedAnim = false;
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
