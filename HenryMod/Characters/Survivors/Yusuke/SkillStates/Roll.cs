@@ -24,6 +24,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnEnter();
             animator = GetModelAnimator();
+            PlayAnimation("FullBody, Override", "BufferEmpty", "Slide.playbackRate", duration);
+            PlayAnimation("Gesture, Override", "BufferEmpty", "Slide.playbackRate", duration);
 
             if (isAuthority && inputBank && characterDirection)
             {
