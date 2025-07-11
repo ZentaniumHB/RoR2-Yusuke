@@ -75,8 +75,11 @@ namespace YusukeMod.Modules.BaseStates
         private bool hasRevertedDemonGunMega;
 
         //used for Animation layers
-        Animator animator = null;
-        bool isRestAnimationActive = false;
+        private Animator animator = null;
+        private bool isRestAnimationActive = false;
+        private MazokuComponent mazokuComponent;
+
+        private string playbackRateParam = "animInterrupt.playbackRate";
 
         public void Start()
         {
@@ -99,6 +102,7 @@ namespace YusukeMod.Modules.BaseStates
 
             isPrimaryReady = true;
             isSecondaryReady = true;
+            mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
 
         }
 
@@ -109,24 +113,29 @@ namespace YusukeMod.Modules.BaseStates
             if (isGrounded) latestGroundPosition = transform.position;
 
             //checking for any movement, including skill activations 
-            if (CheckIdle() && rigidbody.velocity == Vector3.zero) StartIdleTime();
-            if (!CheckIdle() || !rigidbody.velocity.Equals(Vector3.zero)) ResetIdleTime();
+            if (!CheckForMovement() && !CheckForInputs() && rigidbody.velocity == Vector3.zero) StartIdleTime();
+            if (CheckForMovement() || CheckForInputs() || !rigidbody.velocity.Equals(Vector3.zero)) ResetIdleTime();
+
 
             if (hasIdleBegun)
             {
                 timer += Time.deltaTime;
-                //Chat.AddMessage("Time standing still: " +timer);
             }
 
             if (hasIdleEnded)
             {
+                if(isRestAnimationActive) PlayAnimation("FullBody, Override", "BufferEmpty", playbackRateParam, 1f);
                 isRestAnimationActive = false;
             }
 
-            if (timer > 5 && !isRestAnimationActive)
+            if (timer > 5)
             {
                 // play the animation required. 
-
+                if (!isRestAnimationActive)
+                {
+                    isRestAnimationActive = true;
+                    PlayAnimation("FullBody, Override", "IdleToRest", playbackRateParam, 1f);
+                }
             }
 
 
@@ -145,11 +154,10 @@ namespace YusukeMod.Modules.BaseStates
 
         private void CheckPenaltyTimer()
         {
-            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             if (penaltyTimer > 0) {
-                if (maz != null)
+                if (mazokuComponent != null)
                 {
-                    if (maz.previousValue == maz.maxMazokuValue)
+                    if (mazokuComponent.previousValue == mazokuComponent.maxMazokuValue)
                     {
                         //Log.Info("Penalty timer inside MAIN STATE: " + penaltyTimer);
                         decrementPenaltyTimer = true;
@@ -167,13 +175,12 @@ namespace YusukeMod.Modules.BaseStates
         // transformation state
         private void TransformProperties()
         {
-            MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();  
             if (Input.GetKeyDown(KeyCode.V))
             {
                 
-                if (maz != null) 
+                if (mazokuComponent != null) 
                 {
-                    if (maz.previousValue == maz.maxMazokuValue)
+                    if (mazokuComponent.previousValue == mazokuComponent.maxMazokuValue)
                     {
                         if (isGrounded)
                         {
@@ -204,13 +211,13 @@ namespace YusukeMod.Modules.BaseStates
             }
 
 
-            if(maz != null)
+            if(mazokuComponent != null)
             {
                 
                 // checks if the reverse boolean is true, which indicates that the mazoku transformation duration has ended
-                if (maz.startReverse)
+                if (mazokuComponent.startReverse)
                 {
-                    maz.startReverse = false;
+                    mazokuComponent.startReverse = false;
                     Log.Info("Switching skills back from maz.");
                     // Changing back the mazoku animation set
                     SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, false);
@@ -218,7 +225,7 @@ namespace YusukeMod.Modules.BaseStates
 
                 }
 
-                if (!maz.hasTransformed && skillLocator.special.skillNameToken == prefix + "SPECIAL_MAZ_MEGA_NAME" && !inputBank.skill4.down)
+                if (!mazokuComponent.hasTransformed && skillLocator.special.skillNameToken == prefix + "SPECIAL_MAZ_MEGA_NAME" && !inputBank.skill4.down)
                 {
                     if (!hasRevertedDemonGunMega)
                     {
@@ -247,16 +254,20 @@ namespace YusukeMod.Modules.BaseStates
 
         }
 
-        private bool CheckIdle()
+        // returns the animators status on movement. 
+        private bool CheckForMovement()
         {
-            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.interact.down || inputBank.jump.down || inputBank.sprint.down || inputBank.activateEquipment.down)
-                return false;
-            else
-            {
-                return true;
-            }
-
+            return animator.GetBool("isMoving");
         }
+
+        private bool CheckForInputs()
+        {
+            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.jump.down || inputBank.sprint.down)
+                return true;
+            else
+                return false;
+        }
+
         private void StartIdleTime()
         {
             if (!hasIdleBegun)
