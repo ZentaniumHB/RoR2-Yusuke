@@ -9,6 +9,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.SkillStates;
 using static Rewired.ComponentControls.Effects.RotateAroundAxis;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 using Random = UnityEngine.Random;
@@ -48,6 +49,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnEnter()
         {
             base.OnEnter();
+
+            // get the stateMachine related to the customName Body
+            EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
+            if (entityStateMachine.state is Roll)
+            {
+                // means the roll state is currently active on that activation state, change the animations playing accordingly
+                if (!isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "BufferEmpty", "anim.interruptPlaybackRate", 1f);
+                }
+
+            }
+
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
             muzzleString = "Muzzle";

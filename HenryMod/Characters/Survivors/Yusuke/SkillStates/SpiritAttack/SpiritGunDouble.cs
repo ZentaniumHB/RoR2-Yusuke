@@ -47,6 +47,18 @@ namespace YusukeMod.SkillStates
 
             SwitchAnimationLayer();
 
+            // get the stateMachine related to the customName Body
+            EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
+            if (entityStateMachine.state is Roll)
+            {
+                // means the roll state is currently active on that activation state, change the animations playing accordingly
+                if (!isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "BufferEmpty", "anim.interruptPlaybackRate", 1f);
+                }
+
+            }
+
             barrageStopWatch = 0f;
 
             this.duration = FireSpiritShotgun.baseDuration / this.attackSpeedStat;

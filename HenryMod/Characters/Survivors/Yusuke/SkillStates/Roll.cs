@@ -3,6 +3,12 @@ using YusukeMod.Survivors.Yusuke;
 using RoR2;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections.Generic;
+using System.Collections;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
+using System;
+using YusukeMod.SkillStates;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -20,51 +26,104 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private Animator animator;
         private Vector3 previousPosition;
 
+        private bool shouldSkip;
+
+        private List<Type> AvoidedStates;
+
         public override void OnEnter()
         {
             base.OnEnter();
-            animator = GetModelAnimator();
-            PlayAnimation("FullBody, Override", "BufferEmpty", "Slide.playbackRate", duration);
-            PlayAnimation("Gesture, Override", "BufferEmpty", "Slide.playbackRate", duration);
-
-            if (isAuthority && inputBank && characterDirection)
+            shouldSkip = ListAndCheckAllAvoidedStates();
+            if (shouldSkip)
             {
-                forwardDirection = (inputBank.moveVector == Vector3.zero ? characterDirection.forward : inputBank.moveVector).normalized;
-            }
-
-            Vector3 rhs = characterDirection ? characterDirection.forward : forwardDirection;
-            Vector3 rhs2 = Vector3.Cross(Vector3.up, rhs);
-
-            float num = Vector3.Dot(forwardDirection, rhs);
-            float num2 = Vector3.Dot(forwardDirection, rhs2);
-
-            RecalculateRollSpeed();
-
-            if (characterMotor && characterDirection)
-            {
-                characterMotor.velocity.y = 0f;
-                characterMotor.velocity = forwardDirection * rollSpeed;
-            }
-
-            Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
-            previousPosition = transform.position - b;
-
-            if (isGrounded)
-            {
-                PlayAnimation("FullBody, Override", "Slide", "Slide.playbackRate", duration);
+                skillLocator.utility.AddOneStock();
+                outer.SetNextStateToMain();
+                return;
             }
             else
             {
-                PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
-            }
-            
-            Util.PlaySound(dodgeSoundString, gameObject);
+                animator = GetModelAnimator();
+                PlayAnimation("FullBody, Override", "BufferEmpty", "Slide.playbackRate", duration);
+                PlayAnimation("Gesture, Override", "BufferEmpty", "Slide.playbackRate", duration);
 
-            if (NetworkServer.active)
-            {
-                characterBody.AddTimedBuff(YusukeBuffs.armorBuff, 3f * duration);
-                characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.5f * duration);
+                if (isAuthority && inputBank && characterDirection)
+                {
+                    forwardDirection = (inputBank.moveVector == Vector3.zero ? characterDirection.forward : inputBank.moveVector).normalized;
+                }
+
+                Vector3 rhs = characterDirection ? characterDirection.forward : forwardDirection;
+                Vector3 rhs2 = Vector3.Cross(Vector3.up, rhs);
+
+                float num = Vector3.Dot(forwardDirection, rhs);
+                float num2 = Vector3.Dot(forwardDirection, rhs2);
+
+                RecalculateRollSpeed();
+
+                if (characterMotor && characterDirection)
+                {
+                    characterMotor.velocity.y = 0f;
+                    characterMotor.velocity = forwardDirection * rollSpeed;
+                }
+
+                Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
+                previousPosition = transform.position - b;
+
+                if (isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "Slide", "Slide.playbackRate", duration);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
+                }
+
+                Util.PlaySound(dodgeSoundString, gameObject);
+
+                if (NetworkServer.active)
+                {
+                    characterBody.AddTimedBuff(YusukeBuffs.armorBuff, 3f * duration);
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.5f * duration);
+                }
+
             }
+
+        }
+
+        private bool ListAndCheckAllAvoidedStates()
+        {
+            // these are the animations that should not be interrupted 
+            AvoidedStates = new List<Type>
+            {
+                typeof(MazBackToBackStrikes),
+                typeof(ChargeDemonGunMega),
+                typeof(ChargeSpiritGunMega),
+                typeof(FireDemonGunBarrage),
+                typeof(FireDemonGunMega),
+                typeof(FireSpiritBeam),
+                typeof(FireSpiritMega),
+                typeof(FireSpiritShotgun),
+                typeof(SpiritDoubleBarrelShotgun),
+                typeof(SpiritGunDouble),
+                typeof(Shoot)
+            };
+
+
+            EntityState state = EntityStateMachine.FindByCustomName(gameObject, "Weapon").state;
+            foreach (Type s in AvoidedStates) 
+            {
+                if (state.GetType() == s)
+                {
+                    characterDirection.forward = GetAimRay().direction;
+                    characterDirection.moveVector = GetAimRay().direction;
+
+                    Log.Info("cannot activate... ");
+                    // means you cannot activate the roll when the skill is active
+                    return true;
+                }
+
+            }
+            return false;
+           
         }
 
         private void RecalculateRollSpeed()
@@ -75,6 +134,18 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+            if (shouldSkip) 
+            {
+                characterDirection.forward = GetAimRay().direction;
+                characterDirection.moveVector = GetAimRay().direction;
+
+                Log.Info("Roll is unavilable during move. ");
+                outer.SetNextStateToMain();
+                return;
+            }
+                
+
             RecalculateRollSpeed();
 
             if (characterDirection) characterDirection.forward = forwardDirection;

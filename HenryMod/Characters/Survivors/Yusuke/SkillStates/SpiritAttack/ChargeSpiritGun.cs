@@ -86,7 +86,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnExit();
             if(isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(2);
-            
+
 
 
         }

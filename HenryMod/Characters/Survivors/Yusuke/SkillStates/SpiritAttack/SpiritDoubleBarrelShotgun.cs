@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -37,6 +38,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnEnter()
         {
             base.OnEnter();
+
+            // get the stateMachine related to the customName Body
+            EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
+            if (entityStateMachine.state is Roll)
+            {
+                // means the roll state is currently active on that activation state, change the animations playing accordingly
+                if (!isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "BufferEmpty", "anim.interruptPlaybackRate", 1f);
+                }
+
+            }
+
             duration = baseDuration / attackSpeedStat;
             fireTime = firePercentTime * duration;
             characterBody.SetAimTimer(2f);
