@@ -107,13 +107,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             base.OnExit();
 
+            PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);
+
             characterMotor.enabled = true;
             characterDirection.enabled = true;
-
+            
             // so the character doesn't go flying like crazy due to the velocity, the current velocity will be divided by the given percentage decimal (velocityDivider). 
             Vector3 currentVelocity = characterMotor.velocity;
             Vector3 velocityPercentage = currentVelocity * velocityDivider;
             characterMotor.velocity = velocityPercentage;
+
+
 
 
         }

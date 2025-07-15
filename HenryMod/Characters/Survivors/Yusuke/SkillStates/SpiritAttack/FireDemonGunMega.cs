@@ -34,21 +34,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public bool tier1Wave;
         public bool tier2Wave;
 
+        private float animationTime;
+        private float maxAnimationTime = 2.5f;
+        private Ray fixedAimRay;
+
         public float penaltyTime;
         private EntityStateMachine stateMachine;
         private YusukeMain mainState;
+        private Transform modelTransform;
+        private AimAnimator aimAnim;
 
         public override void OnEnter()
         {
             base.OnEnter();
 
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
+
             characterBody.SetAimTimer(1f);
+            modelTransform = GetModelTransform();
+            aimAnim = modelTransform.GetComponent<AimAnimator>();
+
             PauseVelocity();
             duration = 0.6f;
             fireTime = 0.5f;
 
-            PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
 
             if (tier1Wave)
             {
@@ -79,6 +88,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             base.OnExit();
             SwitchAnimationLayer();
+            aimAnim.enabled = true;
             PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
         }
@@ -118,8 +128,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             if (!hasFired)
             {
                 hasFired = true;
+                PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
-                Log.Info("Firing gun");
+
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
                 Util.PlaySound("HenryShootPistol", gameObject);
@@ -136,7 +147,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
                 if (isAuthority)
                 {
-                    Ray aimRay = GetAimRay();
+                    fixedAimRay = base.GetAimRay();
+
+                    if (characterDirection)
+                    {
+                        characterDirection.forward = fixedAimRay.direction;
+                        characterDirection.moveVector = fixedAimRay.direction;
+
+                    }
+
                     AddRecoil(-1f * recoil, -2f * FireSpiritShotgun.recoil, -0.5f * FireSpiritShotgun.recoil, 0.5f * FireSpiritShotgun.recoil);
 
 
@@ -144,8 +163,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                     FireProjectileInfo fireProjectileInfo = new FireProjectileInfo
                     {
                         projectilePrefab = prefab,
-                        position = aimRay.origin,
-                        rotation = Util.QuaternionSafeLookRotation(aimRay.direction),
+                        position = fixedAimRay.origin,
+                        rotation = Util.QuaternionSafeLookRotation(fixedAimRay.direction),
                         owner = gameObject,
                         damage = damageStat * damageCoefficient + (charge),
                         damageTypeOverride = value,
@@ -157,6 +176,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
 
                 }
+
+                // I can either set the giveupDuration to 0f or I can simple disable and re-enable it, or even both.
+                /*originalGiveUpDuration = aimAnim.giveupDuration;
+                aimAnim.giveupDuration = 0f;*/
+                aimAnim.enabled = false;
+
+                // animation time in the air is shorter due to the animation itself being shorter. 
+                if (!isGrounded) maxAnimationTime = 1.2f;
+
             }
         }
 
@@ -165,18 +193,40 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             base.FixedUpdate();
 
+            animationTime += GetDeltaTime();
+
             //Log.Info("fixedAge:" + fixedAge);
             if (fixedAge >= fireTime)
             {
-                ResumeVelocity();
+                characterBody.SetAimTimer(0.1f);
                 Fire();
+                //inputBank.moveVector = Vector3.zero;
+                characterDirection.moveVector = Vector3.zero;
+                characterMotor.moveDirection = Vector3.zero;
+
+                if (!isGrounded)
+                {
+                    ResumeVelocity();
+                    characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
+
+                    // reverse the direction, so it seems it has a knockback effect.
+                    Vector3 awayFromDirection = (-fixedAimRay.direction).normalized;
+                    Vector3 backWardSpeed = awayFromDirection * moveSpeedStat * (0.9f);
+                    // Apply the velocity to the character's motor
+                    characterMotor.velocity = backWardSpeed;
+                }
+
             }
 
             if (fixedAge >= duration && isAuthority)
             {
-                CheckPenaltyTimer();
-                outer.SetNextStateToMain();
-                return;
+                if (animationTime > maxAnimationTime)
+                {
+                    ResumeVelocity();
+                    CheckPenaltyTimer();
+                    outer.SetNextStateToMain();
+                    return;
+                }
 
             }
 
@@ -224,7 +274,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.Death;
         }
     }
 }
