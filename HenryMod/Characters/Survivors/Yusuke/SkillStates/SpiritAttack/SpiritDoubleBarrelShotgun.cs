@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -35,6 +37,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private float barrageStopWatch;
         private int numberOfShots = 0;
 
+        private YusukeMain mainState;
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -63,6 +67,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnExit()
         {
             base.OnExit();
+            SwitchAnimationLayer();
+        }
+
+        // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
+        private void SwitchAnimationLayer()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    // goes through the animation layers and switches them within the main state.
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.ShotgunCharge, false);
+
+                }
+
+            }
+
         }
 
         public override void FixedUpdate()
