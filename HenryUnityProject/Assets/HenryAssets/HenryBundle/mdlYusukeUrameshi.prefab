@@ -419,22 +419,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.5
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.5
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.5
+      value: 1.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.2635975
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -444,7 +444,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.6212666
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -3410,6 +3410,27 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7981441051467802938}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &4587289988792964267
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7062400167147230315}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: d89b752d6d6490046aa21637b8ba4cb5, type: 3}
+  m_Controller: {fileID: 9100000, guid: 6451ab98e2f03e14ca67e968fd3a17b5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &7307021469897926664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3483,27 +3504,6 @@ MonoBehaviour:
     transform: {fileID: 6379011149398955120}
   - name: ToeR
     transform: {fileID: 805592317547500128}
---- !u!95 &4587289988792964267
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7062400167147230315}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: d89b752d6d6490046aa21637b8ba4cb5, type: 3}
-  m_Controller: {fileID: 9100000, guid: 6451ab98e2f03e14ca67e968fd3a17b5, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &7268898622169888725 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8492778920247664913, guid: d89b752d6d6490046aa21637b8ba4cb5,

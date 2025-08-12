@@ -45,7 +45,7 @@ Material:
     - _GlowStrength: 1.57
     - _Rotation: 1.57
     - _Threshold: 0.6
-    - _Transparency: 0.51
+    - _Transparency: 0.5
     m_Colors:
     - _Direction: {r: -1, g: 0, b: 0, a: 0}
     - _GlowColour: {r: 0, g: 0.1687707, b: 14.156946, a: 0}
