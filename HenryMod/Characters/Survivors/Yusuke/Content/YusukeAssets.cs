@@ -19,6 +19,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject bombExplosionEffect;
 
         public static GameObject spiritGunExplosionEffect;
+        public static GameObject spiritGunMegaExplosionEffect;
 
         // networked hit sounds
         public static NetworkSoundEventDef swordHitSoundEvent;
@@ -99,6 +100,24 @@ namespace YusukeMod.Survivors.Yusuke
 
             shakeEmitter.wave = new Wave
             {
+                amplitude = 0.5f,
+                frequency = 20f,
+                cycleOffset = 0f
+            };
+
+            spiritGunMegaExplosionEffect = _assetBundle.LoadEffect("spiritgunMegaExplosion", "spiritgunMegaExplosion");
+
+            if (!spiritGunExplosionEffect)
+                return;
+
+            ShakeEmitter megaShakeEmitter = spiritGunMegaExplosionEffect.AddComponent<ShakeEmitter>();
+            megaShakeEmitter.amplitudeTimeDecay = true;
+            megaShakeEmitter.duration = 1.5f;
+            megaShakeEmitter.radius = 600f;
+            megaShakeEmitter.scaleShakeRadiusWithLocalScale = false;
+
+            megaShakeEmitter.wave = new Wave
+            {
                 amplitude = 1f,
                 frequency = 40f,
                 cycleOffset = 0f
@@ -163,9 +182,20 @@ namespace YusukeMod.Survivors.Yusuke
 
             // add screen shake?
 
+
             // settings for the appearance
             ProjectileController spiritgunAesthetics = basicSpiritGunPrefab.GetComponent<ProjectileController>();
-            spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+
+            // changing the prefab appearance for now
+            if (_assetBundle.LoadAsset<GameObject>("spiritGunProjectile") != null)
+            {
+                spiritgunAesthetics.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("spiritGunProjectile");
+            }
+            else
+            {
+                spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+            }
+
 
             // speed and duration
             ProjectileSimple spiritGunSpeed = basicSpiritGunPrefab.GetComponent<ProjectileSimple>();
@@ -247,7 +277,17 @@ namespace YusukeMod.Survivors.Yusuke
 
             // settings for the appearance
             ProjectileController spiritgunAesthetics = spiritGunMegaPrefab.GetComponent<ProjectileController>();
-            spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/MageLightningBombGhost");
+
+            // changing the prefab appearance for now
+            if (_assetBundle.LoadAsset<GameObject>("spiritGunProjectile") != null)
+            {
+                spiritgunAesthetics.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("spiritMegaProjectile");
+            }
+            else
+            {
+                spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+            }
+
 
             // speed and duration
             ProjectileSimple spiritGunSpeed = spiritGunMegaPrefab.GetComponent<ProjectileSimple>();
@@ -258,7 +298,7 @@ namespace YusukeMod.Survivors.Yusuke
             ProjectileImpactExplosion spiritGunImpact = spiritGunMegaPrefab.GetComponent<ProjectileImpactExplosion>();
             spiritGunImpact.blastRadius = 40f;
             GameObject explosion = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/VagrantCannonExplosion");
-            spiritGunImpact.impactEffect = explosion;
+            spiritGunImpact.impactEffect = spiritGunMegaExplosionEffect;
 
 
 

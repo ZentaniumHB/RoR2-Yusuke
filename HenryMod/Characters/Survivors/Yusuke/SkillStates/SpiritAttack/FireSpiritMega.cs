@@ -60,7 +60,7 @@ namespace YusukeMod.SkillStates
                 Wave wave = new Wave
                 {
                     amplitude = 0.5f,
-                    frequency = 30f,
+                    frequency = 10f,
                     cycleOffset = 0f
                 };
                 RoR2.ShakeEmitter.CreateSimpleShakeEmitter(GetAimRay().origin, wave, 1.5f, 20f, true);
@@ -72,7 +72,7 @@ namespace YusukeMod.SkillStates
                 Wave wave = new Wave
                 {
                     amplitude = 0.8f,
-                    frequency = 31f,
+                    frequency = 20f,
                     cycleOffset = 0f
                 };
                 RoR2.ShakeEmitter.CreateSimpleShakeEmitter(GetAimRay().origin, wave, 1.5f, 20f, true);
