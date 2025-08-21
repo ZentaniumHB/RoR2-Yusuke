@@ -15,6 +15,17 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject swordSwingEffect;
         public static GameObject swordHitImpactEffect;
 
+        //spirit effects
+        public static GameObject spiritGunChargeEffect;
+        public static GameObject spiritGunChargePotentEffect;
+        public static GameObject spiritGunMuzzleFlashEffect;
+
+        public static GameObject spiritGunMegaChargeEffect;
+        public static GameObject spiritGunMegaChargePotentEffect;
+        public static GameObject spiritGunMegaMuzzleFlashEffect;
+
+
+
         //explosion effects
         public static GameObject bombExplosionEffect;
 
@@ -56,9 +67,22 @@ namespace YusukeMod.Survivors.Yusuke
         {
             CreateBombExplosionEffect();
             CreateSpiritExplosionEffects();
+            CreateSpiritEnergyEffects();
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
+        }
+
+        private static void CreateSpiritEnergyEffects()
+        {
+            // last parameter determins if effectData should be skipped or not, some cases spawning effects are not using EffectManager, such as the charge effects. 
+            spiritGunChargeEffect = _assetBundle.LoadEffect("spiritGunCharge", "spiritGunCharge", false, true);
+            spiritGunChargePotentEffect = _assetBundle.LoadEffect("spiritGunChargePotent", "spiritGunChargePotent", false, true);
+            spiritGunMegaChargeEffect = _assetBundle.LoadEffect("spiritMegaCharge", "spiritMegaCharge", true, true);
+            spiritGunMegaChargePotentEffect = _assetBundle.LoadEffect("spiritMegaChargePotent", "spiritMegaChargePotent", true, true);
+
+            spiritGunMuzzleFlashEffect = _assetBundle.LoadEffect("spiritGunMuzzleFlash", "spiritGunMuzzleFlash", true, false);
+            spiritGunMegaMuzzleFlashEffect = _assetBundle.LoadEffect("spiritMegaMuzzle", "spiritMegaMuzzle", true, false);
         }
 
         private static void CreateBombExplosionEffect()
@@ -105,7 +129,7 @@ namespace YusukeMod.Survivors.Yusuke
                 cycleOffset = 0f
             };
 
-            spiritGunMegaExplosionEffect = _assetBundle.LoadEffect("spiritgunMegaExplosion", "spiritgunMegaExplosion");
+            spiritGunMegaExplosionEffect = _assetBundle.LoadEffect("spiritgunMegaExplosionBigger", "spiritgunMegaExplosionBigger");
 
             if (!spiritGunExplosionEffect)
                 return;

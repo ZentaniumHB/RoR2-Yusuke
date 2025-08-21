@@ -3,6 +3,7 @@ using YusukeMod.Survivors.Yusuke;
 using R2API.Utils;
 using RoR2;
 using System.Collections.Generic;
+using UnityEngine;
 using System.Security;
 using System.Security.Permissions;
 
@@ -44,6 +45,17 @@ namespace YusukeMod
 
             // make a content pack and add it. this has to be last
             new Modules.ContentPacks().Initialize();
+        }
+
+        // the creation of charge effect objects are done here.
+        public static GameObject CreateEffectObject(GameObject objectPrefab, Transform locPositon)
+        {
+            GameObject effectObject = null;
+            if(objectPrefab != null)
+            {
+                effectObject = Object.Instantiate(objectPrefab, locPositon);
+            }
+            return effectObject;
         }
     }
 }

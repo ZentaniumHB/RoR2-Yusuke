@@ -39,11 +39,16 @@ namespace YusukeMod.SkillStates
         public static GameObject regularSpiritGunPrefab;
         public static GameObject spiritGunPierceProjectile;
 
+        private readonly string fingerTipString = "fingerTipR";
+        private GameObject spiritGunMuzzleFlashPrefab;
+
         private YusukeMain mainState;
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
 
             SwitchAnimationLayer();
 
@@ -77,6 +82,20 @@ namespace YusukeMod.SkillStates
             
             spiritGunPierceProjectile = YusukeAssets.spiritGunPiercePrefab;
 
+            SpawnChargeEffect();
+
+        }
+
+        private void SpawnChargeEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = spiritGunMuzzleFlashPrefab.GetComponent<EffectComponent>();
+            spiritGunMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+
+            if (component)
+            {
+                component.parentToReferencedTransform = true;
+            }
         }
 
         private void SwitchAnimationLayer()
@@ -116,7 +135,7 @@ namespace YusukeMod.SkillStates
 
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
-
+                EffectManager.SimpleMuzzleFlash(spiritGunMuzzleFlashPrefab, gameObject, fingerTipString, false);
                 PlayAnimation("BothHands, Override", "ShootSpiritGun", "ShootGun.playbackRate", 1.8f);
                 Util.PlaySound("HenryShootPistol", base.gameObject);
 

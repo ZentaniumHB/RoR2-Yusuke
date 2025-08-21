@@ -31,9 +31,20 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private YusukeMain mainState;
 
+        private GameObject spiritGunMegaChargeEffectPrefab;
+        private GameObject spiritGunMegaChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject spiritGunMegaChargeEffectPotentPrefab;
+        private GameObject spiritGunMegaChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
+
         public override void OnEnter()
         {
-            base.OnEnter();
+            
+            spiritGunMegaChargeEffectPrefab = YusukeAssets.spiritGunMegaChargeEffect;
+            spiritGunMegaChargeEffectPotentPrefab = YusukeAssets.spiritGunMegaChargePotentEffect;
 
             SwitchAnimationLayer();
 
@@ -60,7 +71,25 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
 
             PlayAnimation("BothHands, Override", "SpiritMegaHandPose", "ShootGun.playbackRate", 1f);
+            SpawnChargeEffect(false);
 
+            base.OnEnter();
+        }
+
+        private void SpawnChargeEffect(bool isMaxCharge) 
+        {
+            if (!isMaxCharge)
+            {
+                hasRegularEffectSpawned = true;
+                if (spiritGunMegaChargeEffectPrefab == null) Log.Info("Mega effect does not exist........");
+                if (spiritGunMegaChargeEffectPrefab != null) spiritGunMegaChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunMegaChargeEffectPrefab, FindModelChild("fingerTipR"));
+            }
+            else
+            {
+                hasMaxChargeEffectSpawned = true;
+                if (spiritGunMegaChargeEffectPotentPrefab != null) spiritGunMegaChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritGunMegaChargeEffectPotentPrefab, FindModelChild("fingerTipR"));
+
+            }
         }
 
         // the animation switching is done once the YusukeMain state is taken
@@ -96,7 +125,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 base.characterBody.RemoveBuff(YusukeBuffs.spiritMegaArmourBuff);
             }
 
-            
+
         }
 
         public override void FixedUpdate()
@@ -146,6 +175,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             ChangeWave();
 
+            if (isMaxCharge)
+            {
+                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
+                DestroyCurrentEffect();
+            }
 
             if (!IsKeyDown() && isAuthority)
             {
@@ -156,6 +190,18 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
 
 
+        }
+
+        // deleting the first effect so the second effect can be created and shown
+        private void DestroyCurrentEffect()
+        {
+            
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                Log.Info("Removing effect:");
+                EntityState.Destroy(spiritGunMegaChargeEffectObject);
+            }
         }
 
         public override void Update()
@@ -254,8 +300,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 charge = totalCharge,
                 isMaxCharge = isMaxCharge,
                 tier1Wave = tier1Wave,
-                tier2Wave = tier2Wave
+                tier2Wave = tier2Wave,
+                spiritGunMegaChargeEffectObject = spiritGunMegaChargeEffectObject,
+                spiritGunMegaChargeEffectPotentObject = spiritGunMegaChargeEffectPotentObject
                 
+
             };
         }
 

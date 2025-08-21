@@ -5,6 +5,7 @@ using RoR2.Skills;
 using RoR2.UI;
 using System;
 using UnityEngine;
+using UnityEngine.Networking.NetworkSystem;
 using YusukeMod;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
@@ -28,9 +29,23 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         Animator animator = null;
         private YusukeMain mainState;
 
+
+
+        private GameObject spiritGunChargeEffectPrefab;
+        private GameObject spiritGunChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject spiritGunChargeEffectPotentPrefab;
+        private GameObject spiritGunChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
+        private DestroyOnTimer destroyRegularChargeTimer;
+        private readonly string fingerTipString = "fingerTipR";
+
         public override void OnEnter()
         {
-            base.OnEnter();
+            spiritGunChargeEffectPrefab = YusukeAssets.spiritGunChargeEffect;
+            spiritGunChargeEffectPotentPrefab = YusukeAssets.spiritGunChargePotentEffect;
 
             SwitchAnimationLayer();
 
@@ -51,12 +66,31 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     baseChargeDuration = 5.0f;
                 }
             }
-            
 
+            SpawnChargeEffect(false);
             chargeDuration = baseChargeDuration;
 
-            
+            base.OnEnter();
 
+        }
+
+        // this charge effect does not use the EffectManager, gives control on when to destroy the object this way (unless there IS a way when using EffectManager that I don't know)"
+        private void SpawnChargeEffect(bool isMaxCharge)
+        {
+            Log.Info("Grabbing the component. ");
+            if(!isMaxCharge)
+            {
+                hasRegularEffectSpawned = true;
+                if (spiritGunChargeEffectPrefab != null) spiritGunChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPrefab, FindModelChild("fingerTipR"));
+            }
+            else
+            {
+                hasMaxChargeEffectSpawned = true;
+                if (spiritGunChargeEffectPotentPrefab != null) spiritGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPotentPrefab, FindModelChild("fingerTipR"));
+
+            }
+            
+            
         }
 
         // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
@@ -86,6 +120,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnExit();
             if(isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(2);
+            // if any chargeEffect objects still exist, remove them.
+            if (spiritGunChargeEffectObject) EntityState.Destroy(spiritGunChargeEffectObject);
+            if (spiritGunChargeEffectPotentObject) EntityState.Destroy(spiritGunChargeEffectPotentObject);
 
 
 
@@ -109,6 +146,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     Chat.AddMessage("Max charge.");
                     Log.Info($"Total charge (regular): " +totalCharge);
                     isMaxCharge = true;
+                    
                 }
             }
 
@@ -116,6 +154,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                DestroyCurrentEffect();
+                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
 
                 if (!hasIconSwitch)
                 {
@@ -173,6 +214,18 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
 
 
+        }
+
+        // deleting the first effect so the second effect can be created and shown
+        private void DestroyCurrentEffect()
+        {
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                Log.Info("Removing effect:");
+                EntityState.Destroy(spiritGunChargeEffectObject);
+            }
+            
         }
 
         public override void Update()

@@ -108,7 +108,9 @@ namespace YusukeMod.Modules
         }
 
         internal static GameObject LoadEffect(this AssetBundle assetBundle, string resourceName, bool parentToTransform) => LoadEffect(assetBundle, resourceName, "", parentToTransform);
-        internal static GameObject LoadEffect(this AssetBundle assetBundle, string resourceName, string soundName = "", bool parentToTransform = false)
+
+        internal static GameObject LoadEffect(this AssetBundle assetBundle, string resourceName, bool parentToTransform, bool shouldSkipEffectData) => LoadEffect(assetBundle, resourceName, "", parentToTransform, shouldSkipEffectData);
+        internal static GameObject LoadEffect(this AssetBundle assetBundle, string resourceName, string soundName = "", bool parentToTransform = false, bool shouldSkipEffectData = false)
         {
             GameObject newEffect = assetBundle.LoadAsset<GameObject>(resourceName);
 
@@ -118,7 +120,7 @@ namespace YusukeMod.Modules
                 return null;
             }
 
-            newEffect.AddComponent<DestroyOnTimer>().duration = 12;
+            //newEffect.AddComponent<DestroyOnTimer>().duration = 12;
             newEffect.AddComponent<NetworkIdentity>();
             newEffect.AddComponent<VFXAttributes>().vfxPriority = VFXAttributes.VFXPriority.Always;
             EffectComponent effect = newEffect.AddComponent<EffectComponent>();
@@ -127,11 +129,13 @@ namespace YusukeMod.Modules
             effect.parentToReferencedTransform = parentToTransform;
             effect.positionAtReferencedTransform = true;
             effect.soundName = soundName;
+            if(shouldSkipEffectData) effect.noEffectData = true;    // the logs complain about NRE when not using the EffectManager, unless this is a bad thing; I'll just keep it this way
 
             Modules.Content.CreateAndAddEffectDef(newEffect);
 
             return newEffect;
         }
+
 
         internal static GameObject CreateProjectileGhostPrefab(this AssetBundle assetBundle, string ghostName)
         {

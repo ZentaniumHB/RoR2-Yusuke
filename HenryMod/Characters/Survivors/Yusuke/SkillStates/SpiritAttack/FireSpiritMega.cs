@@ -43,9 +43,17 @@ namespace YusukeMod.SkillStates
         private AimAnimator aimAnim;
         private float originalGiveUpDuration = 0f;
 
+        public GameObject spiritGunMegaChargeEffectObject;
+        public GameObject spiritGunMegaChargeEffectPotentObject;
+
+        private readonly string fingerTipString = "fingerTipR";
+        private GameObject spiritGunMegaMuzzleFlashPrefab;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
 
             base.characterBody.SetAimTimer(1f);
             modelTransform = GetModelTransform();
@@ -78,6 +86,20 @@ namespace YusukeMod.SkillStates
                 RoR2.ShakeEmitter.CreateSimpleShakeEmitter(GetAimRay().origin, wave, 1.5f, 20f, true);
             }
 
+            SpawnMuzzleEffect();
+        }
+
+        private void SpawnMuzzleEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
+            spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+
+            if (component)
+            {
+                component.parentToReferencedTransform = true;
+
+            }
         }
 
         private void SwitchAnimationLayer()
@@ -117,9 +139,10 @@ namespace YusukeMod.SkillStates
                 this.hasFired = true;
                 PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
+                if (spiritGunMegaChargeEffectObject) EntityState.Destroy(spiritGunMegaChargeEffectObject);
+                if (spiritGunMegaChargeEffectPotentObject) EntityState.Destroy(spiritGunMegaChargeEffectPotentObject);
 
-                //base.characterBody.AddSpreadBloom(1.5f);
-                //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
+                EffectManager.SimpleMuzzleFlash(spiritGunMegaMuzzleFlashPrefab, gameObject, fingerTipString, false);
                 Util.PlaySound("HenryShootPistol", base.gameObject);
 
                 if (isGrounded)
