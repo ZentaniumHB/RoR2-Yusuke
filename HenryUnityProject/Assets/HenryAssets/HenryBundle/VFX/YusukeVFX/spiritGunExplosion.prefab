@@ -16066,32 +16066,32 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.30980393}
-        key1: {r: 0.75, g: 1, b: 0.98579454, a: 0.9983062}
-        key2: {r: 0, g: 1, b: 0.88495564, a: 0.9098039}
-        key3: {r: 0, g: 0.029350117, b: 0.26415092, a: 0.2901961}
+        key0: {r: 1, g: 1, b: 1, a: 0.078431375}
+        key1: {r: 0, g: 1, b: 0.88495564, a: 1}
+        key2: {r: 0, g: 0.20951352, b: 0.42352942, a: 0.9098039}
+        key3: {r: 0, g: 0.045425083, b: 0.4245283, a: 0}
         key4: {r: 0, g: 1, b: 0.88495564, a: 0.67058825}
         key5: {r: 0, g: 0.045425083, b: 0.4245283, a: 0}
         key6: {r: 0, g: 0, b: 0, a: 0}
         key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 7132
-        ctime1: 22359
-        ctime2: 33731
+        ctime0: 23130
+        ctime1: 30069
+        ctime2: 55898
         ctime3: 48766
         ctime4: 33731
         ctime5: 48766
         ctime6: 0
         ctime7: 0
         atime0: 0
-        atime1: 5012
-        atime2: 55127
+        atime1: 386
+        atime2: 36044
         atime3: 65535
         atime4: 65535
         atime5: 0
         atime6: 0
         atime7: 0
         m_Mode: 0
-        m_NumColorKeys: 4
+        m_NumColorKeys: 3
         m_NumAlphaKeys: 4
       minGradient:
         serializedVersion: 2
