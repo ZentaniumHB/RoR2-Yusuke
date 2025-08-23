@@ -231,7 +231,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if(ID != 0)
             {
                 if (!target.healthComponent.alive) outer.SetNextStateToMain();    // if the enemy is killed whilst the dash is happening, then simple exit the state.
-                PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
+                PlayAnimation("FullBody, Override", "DashAirLoop", "Roll.playbackRate", duration);
                 if (characterMotor && characterDirection)
                 {
 
