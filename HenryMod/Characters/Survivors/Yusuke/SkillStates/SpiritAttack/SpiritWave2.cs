@@ -120,6 +120,7 @@ namespace YusukeMod.SkillStates
         private YusukeMain mainState;
         private float recoupTime;
         private bool hasRecoup;
+        private PivotRotation pivotRotation;
 
         public override void OnEnter()
         {
@@ -169,6 +170,9 @@ namespace YusukeMod.SkillStates
             {
                 PlayAnimation("FullBody, Override", "DashWave", "Slide.playbackRate", duration);
             }
+
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.SetRotations(forwardDirection, true, true);
 
         }
 
@@ -604,7 +608,10 @@ namespace YusukeMod.SkillStates
                 });
             }
 
-            
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.SetRotations(Vector3.zero, false, false);
+
+
         }
 
         private void RevertGroundedChanges()

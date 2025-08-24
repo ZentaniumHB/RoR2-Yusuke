@@ -197,6 +197,8 @@ namespace YusukeMod.Survivors.Yusuke
             bodyPrefab.AddComponent<SingleTracking>().TurnOff();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
+
+            bodyPrefab.AddComponent<PivotRotation>();   // visual pivot rotation for the animations and vfx
             LoadAdditionalSprites();
             //anything else here
         }
