@@ -8,6 +8,7 @@ using EntityStates;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 using YusukeMod.Modules.BaseStates;
+using YusukeMod.Survivors.Yusuke;
 
 namespace YusukeMod.SkillStates
 {
@@ -18,9 +19,21 @@ namespace YusukeMod.SkillStates
         private bool isMaxCharge;
         private YusukeMain mainState;
 
+
+        private GameObject spiritWaveChargeEffectPrefab;
+        private GameObject spiritWaveChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject spiritWaveChargeEffectPotentPrefab;
+        private GameObject spiritWaveChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritWaveChargeEffectPrefab = YusukeAssets.spiritWaveChargeEffect;
+            spiritWaveChargeEffectPotentPrefab = YusukeAssets.spiritWaveChargePotentEffect;
 
             SwitchAnimationLayer();
 
@@ -31,6 +44,23 @@ namespace YusukeMod.SkillStates
 
             chargeDuration = baseChargeDuration;
 
+            SpawnChargeEffect(false);
+
+        }
+
+        private void SpawnChargeEffect(bool isMaxCharge)
+        {
+            if (!isMaxCharge)
+            {
+                hasRegularEffectSpawned = true;
+                if (spiritWaveChargeEffectPrefab != null) spiritWaveChargeEffectObject = YusukePlugin.CreateEffectObject(spiritWaveChargeEffectPrefab, FindModelChild("mainPosition"));
+            }
+            else
+            {
+                hasMaxChargeEffectSpawned = true;
+                if (spiritWaveChargeEffectPotentPrefab != null) spiritWaveChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritWaveChargeEffectPotentPrefab, FindModelChild("HandR"));
+
+            }
         }
 
         // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
@@ -87,6 +117,9 @@ namespace YusukeMod.SkillStates
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                DestroyCurrentEffect();
+                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
             }
 
             if (!IsKeyDown() && isAuthority)
@@ -98,6 +131,16 @@ namespace YusukeMod.SkillStates
             }
 
 
+        }
+
+        private void DestroyCurrentEffect()
+        {
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                Log.Info("Removing effect:");
+                EntityState.Destroy(spiritWaveChargeEffectObject);
+            }
         }
 
         public override void Update()
@@ -124,7 +167,9 @@ namespace YusukeMod.SkillStates
             return new SpiritWave2
             {
                 charge = totalCharge,
-                isMaxCharge = isMaxCharge
+                isMaxCharge = isMaxCharge,
+                spiritWaveChargeEffectObject = spiritWaveChargeEffectObject,
+                spiritWaveEffectPotentObject = spiritWaveChargeEffectPotentObject
             };
         }
 

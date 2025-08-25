@@ -24,8 +24,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public static float recoil = 3f;
         public static float range = 256f;
 
-        public static GameObject tracerEffectPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/Tracers/TracerLunarWispMinigun"); //"Prefabs/Effects/Tracers/TracerGoldGat"
-        public GameObject spiritImpactEffect = LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/FireworkExplosion"); //YusukeAssets.spiritGunExplosionEffect;
+        public static GameObject spiritTracerEffect = YusukeAssets.spiritShotGunTracerEffect;
+        public GameObject spiritShotGunExplosionHitEffect = YusukeAssets.spiritShotGunHitEffect;
 
         private float duration;
         private float fireTime;
@@ -37,9 +37,15 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private int damageDivision;
         private YusukeMain mainState;
 
+        private readonly string muzzleCenter = "muzzleCenter";
+        private GameObject spiritGunMuzzleFlashPrefab;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
+
 
             // get the stateMachine related to the customName Body
             EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
@@ -59,6 +65,31 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             muzzleString = "Muzzle";
 
             PlayAnimation("BothHands, Override", "ShootSpiritShotgun", "ShootGun.playbackRate", 1f);
+
+            SpawnMuzzleEffect();
+            SpawnTracerAndExplosionEffect();
+        }
+
+        private void SpawnTracerAndExplosionEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            //EffectComponent component = spiritShotGunExplosionHitEffect.GetComponent<EffectComponent>();
+            spiritShotGunExplosionHitEffect.AddComponent<DestroyOnTimer>().duration = 2;
+
+        }
+
+        private void SpawnMuzzleEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = spiritGunMuzzleFlashPrefab.GetComponent<EffectComponent>();
+            spiritGunMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+
+            if (component)
+            {
+                // toggling the parent
+                component.parentToReferencedTransform = true;
+
+            }
         }
 
         public override void OnExit()
@@ -117,7 +148,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 hasFired = true;
 
                 characterBody.AddSpreadBloom(1.5f);
-                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                EffectManager.SimpleMuzzleFlash(spiritGunMuzzleFlashPrefab, gameObject, muzzleCenter, false);
                 Util.PlaySound("HenryShootPistol", gameObject);
 
                 Ray aimRay = GetAimRay();
@@ -127,11 +158,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 foreach (HurtBox enemy in targets)
                 {
                     //do a check if its a max charge, it SlowOnHit. If not, then regular.
-                    EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
+                    /*EffectManager.SpawnEffect(spiritTracerEffect, new EffectData
                     {
                         origin = enemy.gameObject.transform.position,
                         scale = 8f
-                    }, transmit: true);
+                    }, transmit: true);*/
                     new BulletAttack
                     {
                         bulletCount = 1,
@@ -152,15 +183,15 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         smartCollision = true,
                         procChainMask = default,
                         procCoefficient = procCoefficient,
-                        radius = 0.75f,
+                        radius = 1f,
                         sniper = false,
                         stopperMask = LayerIndex.CommonMasks.bullet,
                         weapon = null,
-                        tracerEffectPrefab = tracerEffectPrefab,
+                        tracerEffectPrefab = spiritTracerEffect,
                         spreadPitchScale = 1f,
                         spreadYawScale = 1f,
                         queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
-                        hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
+                        hitEffectPrefab = spiritShotGunExplosionHitEffect,
 
                     }.Fire();
                 }

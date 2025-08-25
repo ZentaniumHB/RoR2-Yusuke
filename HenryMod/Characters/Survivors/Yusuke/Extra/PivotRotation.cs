@@ -24,7 +24,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
         private bool endUpdateOvertime;
 
-        private bool hasRotated;
+        private bool hasRotatedVFX;
 
         public bool shouldRotate = false;
 
@@ -53,27 +53,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
         // late update used for the rotation aspect
         private void LateUpdate()
         {
-
+            // the pivotRotation is using the local rotation as its parented to the model, the base doesn't need to do that since it's being overrided
             if(lookDirection != Vector3.zero && shouldRotate) 
             {
                 if (!hasCapturedOrigRotations)
                 {
                     // grab the previous rotations first
                     hasCapturedOrigRotations = true;
-                    originalBoneRotation = baseBoneTransform.rotation;
-                    originalPivotRotation = basePivotTransform.rotation;
+                    //originalBoneRotation = baseBoneTransform.rotation;
+                    originalPivotRotation = basePivotTransform.localRotation;
                 }
 
                 Rotate();
-                hasRotated = true;
+                hasRotatedVFX = true;
             }
 
-            if (!shouldRotate && hasRotated)
+            if (!shouldRotate && hasRotatedVFX)
             {
                 // resets the rotations back to normal
-                hasRotated = false;
-                baseBoneTransform.rotation = originalBoneRotation;
-                basePivotTransform.rotation = originalPivotRotation;
+                hasRotatedVFX = false;
+                hasCapturedOrigRotations = false;
+                //baseBoneTransform.rotation = originalBoneRotation;
+                basePivotTransform.localRotation = originalPivotRotation;
 
             }
         }
@@ -85,7 +86,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             {
                 //Rotating
                 baseBoneTransform.rotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
-                if (shouldRotatePivotVFX) basePivotTransform.rotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
+                if (!hasRotatedVFX) basePivotTransform.localRotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
             }
             // transforms have not been set properly otherwise
 

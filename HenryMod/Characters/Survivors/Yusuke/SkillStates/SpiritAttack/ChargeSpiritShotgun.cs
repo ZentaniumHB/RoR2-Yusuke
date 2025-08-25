@@ -23,9 +23,25 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private bool hasIconSwitch;
         private YusukeMain mainState;
 
+
+        private GameObject spiritShotGunChargeEffectPrefab;
+        private GameObject spiritShotGunChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject spiritShotGunChargeEffectPotentPrefab;
+        private GameObject spiritShotGunChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
+        private DestroyOnTimer destroyRegularChargeTimer;
+        private readonly string handString = "HandR";
+
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritShotGunChargeEffectPrefab = YusukeAssets.spiritShotGunChargeEffect;
+            spiritShotGunChargeEffectPotentPrefab = YusukeAssets.spiritShotGunChargePotentEffect;
 
             SwitchAnimationLayer();
 
@@ -49,6 +65,22 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 }
             }
 
+            SpawnChargeEffect(false);
+        }
+
+        private void SpawnChargeEffect(bool v)
+        {
+            if (!isMaxCharge)
+            {
+                hasRegularEffectSpawned = true;
+                if (spiritShotGunChargeEffectPrefab != null) spiritShotGunChargeEffectObject = YusukePlugin.CreateEffectObject(spiritShotGunChargeEffectPrefab, FindModelChild("HandR"));
+            }
+            else
+            {
+                hasMaxChargeEffectSpawned = true;
+                if (spiritShotGunChargeEffectPotentPrefab != null) spiritShotGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritShotGunChargeEffectPotentPrefab, FindModelChild("HandR"));
+
+            }
         }
 
         // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
@@ -78,6 +110,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnExit();
             if (isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(3);
+            if (spiritShotGunChargeEffectObject) EntityState.Destroy(spiritShotGunChargeEffectObject);
+            if (spiritShotGunChargeEffectPotentObject) EntityState.Destroy(spiritShotGunChargeEffectPotentObject);
 
 
         }
@@ -108,6 +142,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                DestroyCurrentEffect();
+                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
 
                 if (!hasIconSwitch)
                 {
@@ -162,6 +199,16 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
 
 
+        }
+
+        private void DestroyCurrentEffect()
+        {
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                Log.Info("Removing effect:");
+                EntityState.Destroy(spiritShotGunChargeEffectObject);
+            }
         }
 
         public override void Update()

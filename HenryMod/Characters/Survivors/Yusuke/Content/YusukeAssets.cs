@@ -24,7 +24,14 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritGunMegaChargePotentEffect;
         public static GameObject spiritGunMegaMuzzleFlashEffect;
 
+        public static GameObject spiritShotGunChargeEffect;
+        public static GameObject spiritShotGunChargePotentEffect;
+        public static GameObject spiritShotGunHitEffect;
+        public static GameObject spiritShotGunTracerEffect;
 
+        public static GameObject spiritWaveChargeEffect;
+        public static GameObject spiritWaveChargePotentEffect;
+        public static GameObject spiritWaveImpactEffect;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -68,9 +75,25 @@ namespace YusukeMod.Survivors.Yusuke
             CreateBombExplosionEffect();
             CreateSpiritExplosionEffects();
             CreateSpiritEnergyEffects();
+            CreateHitEffect();
+
+            spiritShotGunTracerEffect = _assetBundle.LoadEffect("spiritShotgunBulletTrace");
+            /*Tracer spiritTracer = spiritShotGunTracerEffect.AddComponent<Tracer>();
+            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(1);
+            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(2);
+            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(3);
+            spiritTracer.speed = 2f;
+            spiritTracer.length = 1f;*/
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
+        }
+
+        private static void CreateHitEffect()
+        {
+            Log.Info("loading shotgun tracer");
+            spiritShotGunHitEffect = _assetBundle.LoadEffect("spiritShotGunExplosion");
+
         }
 
         private static void CreateSpiritEnergyEffects()
@@ -81,8 +104,18 @@ namespace YusukeMod.Survivors.Yusuke
             spiritGunMegaChargeEffect = _assetBundle.LoadEffect("spiritMegaCharge", "spiritMegaCharge", true, true);
             spiritGunMegaChargePotentEffect = _assetBundle.LoadEffect("spiritMegaChargePotent", "spiritMegaChargePotent", true, true);
 
+            Log.Info("loading shotgun effect");
+            spiritShotGunChargeEffect = _assetBundle.LoadEffect("spiritShotGunCharge", "spiritShotGunCharge", true, true);
+            spiritShotGunChargePotentEffect = _assetBundle.LoadEffect("spiritShotGunChargePotent", "spiritShotGunChargePotent", true, true);
+
+            Log.Info("loading wave effect");
+            spiritWaveChargeEffect = _assetBundle.LoadEffect("spiritWaveCharge", "spiritWaveCharge", true, true);
+            spiritWaveChargePotentEffect = _assetBundle.LoadEffect("spiritWavePotent", "spiritWavePotent", true, true);
+
             spiritGunMuzzleFlashEffect = _assetBundle.LoadEffect("spiritGunMuzzleFlash", "spiritGunMuzzleFlash", true, false);
             spiritGunMegaMuzzleFlashEffect = _assetBundle.LoadEffect("spiritMegaMuzzle", "spiritMegaMuzzle", true, false);
+            spiritWaveImpactEffect = _assetBundle.LoadEffect("spiritWaveImpact", "spiritWaveImpact", true, false);
+
         }
 
         private static void CreateBombExplosionEffect()
@@ -320,7 +353,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             // explosion impact 
             ProjectileImpactExplosion spiritGunImpact = spiritGunMegaPrefab.GetComponent<ProjectileImpactExplosion>();
-            spiritGunImpact.blastRadius = 40f;
+            spiritGunImpact.blastRadius = 60f;
             GameObject explosion = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/VagrantCannonExplosion");
             spiritGunImpact.impactEffect = spiritGunMegaExplosionEffect;
 

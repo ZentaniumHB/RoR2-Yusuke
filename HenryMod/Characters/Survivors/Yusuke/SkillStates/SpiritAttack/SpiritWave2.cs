@@ -122,9 +122,20 @@ namespace YusukeMod.SkillStates
         private bool hasRecoup;
         private PivotRotation pivotRotation;
 
+        // effects 
+        public GameObject spiritWaveChargeEffectObject;
+        public GameObject spiritWaveEffectPotentObject;
+
+        private GameObject spiritWaveImpactEffect;
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string waveMuzzleYAxis = "muzzleCenter";
+
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritWaveImpactEffect = YusukeAssets.spiritWaveImpactEffect;
 
             SwitchAnimationLayer();
 
@@ -151,6 +162,9 @@ namespace YusukeMod.SkillStates
                 }
                 Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
                 previousPosition = transform.position - b;
+
+                pivotRotation = GetComponent<PivotRotation>();
+                pivotRotation.SetRotations(forwardDirection, true, true);
             }
 
             // prevent any movement if spirit wave is grouned
@@ -171,9 +185,24 @@ namespace YusukeMod.SkillStates
                 PlayAnimation("FullBody, Override", "DashWave", "Slide.playbackRate", duration);
             }
 
-            pivotRotation = GetComponent<PivotRotation>();
-            pivotRotation.SetRotations(forwardDirection, true, true);
+            
 
+            CreateMuzzleEffect();
+
+        }
+
+        private void CreateMuzzleEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = spiritWaveImpactEffect.GetComponent<EffectComponent>();
+            spiritWaveImpactEffect.AddComponent<DestroyOnTimer>().duration = 2;
+
+            if (component)
+            {
+                // toggling the parent
+                component.parentToReferencedTransform = true;
+
+            }
         }
 
         // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
@@ -246,6 +275,9 @@ namespace YusukeMod.SkillStates
 
             if (collision)
             {
+                // remove the effect when there is a collision
+                
+
                 actionStopwatch += Time.fixedDeltaTime;
                 if (isAuthority)
                 {
@@ -567,6 +599,17 @@ namespace YusukeMod.SkillStates
         {
             if (!hasPunched)
             {
+                if (isGrounded)
+                {
+                    EffectManager.SimpleMuzzleFlash(spiritWaveImpactEffect, gameObject, waveMuzzleYAxis, false);
+                }
+                else
+                {
+                    EffectManager.SimpleMuzzleFlash(spiritWaveImpactEffect, gameObject, muzzleCenter, false);
+                }
+
+                if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
+                if (spiritWaveEffectPotentObject) EntityState.Destroy(spiritWaveEffectPotentObject);
 
                 attack = new OverlapAttack
                 {
@@ -608,8 +651,15 @@ namespace YusukeMod.SkillStates
                 });
             }
 
-            pivotRotation = GetComponent<PivotRotation>();
-            pivotRotation.SetRotations(Vector3.zero, false, false);
+            if (!groundedVersion)
+            {
+                pivotRotation = GetComponent<PivotRotation>();
+                pivotRotation.SetRotations(Vector3.zero, false, false);
+            }
+            
+            // remove the effect if there is still an object created for them. 
+            if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
+            if (spiritWaveEffectPotentObject) EntityState.Destroy(spiritWaveEffectPotentObject);
 
 
         }
