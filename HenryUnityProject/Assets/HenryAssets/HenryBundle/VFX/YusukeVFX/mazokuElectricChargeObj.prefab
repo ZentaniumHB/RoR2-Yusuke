@@ -47,17 +47,17 @@ PrefabInstance:
     - target: {fileID: 6902843797709905274, guid: dc5e5467afb670b43b2a04a3a55693df,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 43.473858
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6902843797709905274, guid: dc5e5467afb670b43b2a04a3a55693df,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.344121
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6902843797709905274, guid: dc5e5467afb670b43b2a04a3a55693df,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -32.737415
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6902843797709905274, guid: dc5e5467afb670b43b2a04a3a55693df,
         type: 3}
@@ -99,6 +99,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: electricCharge
       objectReference: {fileID: 0}
+    - target: {fileID: 8763813669387446877, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: bf4ccac995b57ac4f9d336062465b16b, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc5e5467afb670b43b2a04a3a55693df, type: 3}
 --- !u!4 &8296798621579621503 stripped
