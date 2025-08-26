@@ -527,7 +527,7 @@ namespace YusukeMod.Survivors.Yusuke
                 activationState = new EntityStates.SerializableEntityStateType(typeof(ChargeSpiritGunMega)),
                 //setting this to the "weapon2" EntityStateMachine allows us to cast this skill at the same time primary, which is set to the "weapon" EntityStateMachine
                 activationStateMachineName = "Weapon",
-                interruptPriority = EntityStates.InterruptPriority.Frozen,
+                interruptPriority = EntityStates.InterruptPriority.Stun,
 
                 baseRechargeInterval = 15f,
                 baseMaxStock = 1,

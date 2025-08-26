@@ -243,7 +243,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Stun;
+            return InterruptPriority.Frozen;
         }
 
         protected virtual EntityState SpiritNextState()
