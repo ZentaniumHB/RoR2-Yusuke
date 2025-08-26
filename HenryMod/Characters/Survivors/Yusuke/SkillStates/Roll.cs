@@ -30,6 +30,12 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private List<Type> AvoidedStates;
 
+        private GameObject dashStartSmallEffectPrefab;
+        private GameObject dashGroundedEffectPrefab;
+        private GameObject dashAirEffectPrefab;
+
+        private readonly string mainPosition = "mainPosition";
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -42,6 +48,11 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
             else
             {
+
+                dashStartSmallEffectPrefab = YusukeAssets.dashStartSmallEffect;
+                dashGroundedEffectPrefab = YusukeAssets.dashGroundedEffect;
+                dashAirEffectPrefab = YusukeAssets.dashAirEffect;
+
                 animator = GetModelAnimator();
                 PlayAnimation("FullBody, Override", "BufferEmpty", "Slide.playbackRate", duration);
                 PlayAnimation("Gesture, Override", "BufferEmpty", "Slide.playbackRate", duration);
@@ -77,6 +88,12 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
                 }
 
+                AddEffect();
+
+                EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
+                if (isGrounded) EffectManager.SimpleMuzzleFlash(dashGroundedEffectPrefab, gameObject, mainPosition, false);
+                if (!isGrounded) EffectManager.SimpleMuzzleFlash(dashAirEffectPrefab, gameObject, mainPosition, false);
+                
                 Util.PlaySound(dodgeSoundString, gameObject);
 
                 if (NetworkServer.active)
@@ -85,7 +102,19 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.5f * duration);
                 }
 
+                
+
+
             }
+
+        }
+
+        private void AddEffect()
+        {
+            
+            dashStartSmallEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            dashGroundedEffectPrefab.AddComponent<DestroyOnTimer>().duration = 0.5f;
+            dashAirEffectPrefab.AddComponent<DestroyOnTimer>().duration = 0.5f;
 
         }
 

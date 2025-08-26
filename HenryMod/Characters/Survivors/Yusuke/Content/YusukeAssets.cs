@@ -33,6 +33,17 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritWaveChargePotentEffect;
         public static GameObject spiritWaveImpactEffect;
 
+        // other effects
+        public static GameObject dashStartSmallEffect;
+        public static GameObject dashStartMaxEffect;
+        public static GameObject dashGroundedEffect;
+        public static GameObject dashAirEffect;
+        public static GameObject dashBoomEffect;
+        public static GameObject dashBoomContinuousEffect;
+        public static GameObject chargeWindEffect;
+        public static GameObject megaWindEffect;
+
+
         //explosion effects
         public static GameObject bombExplosionEffect;
 
@@ -75,7 +86,8 @@ namespace YusukeMod.Survivors.Yusuke
             CreateBombExplosionEffect();
             CreateSpiritExplosionEffects();
             CreateSpiritEnergyEffects();
-            CreateHitEffect();
+            CreateHitAndOtherEffect();
+
 
             spiritShotGunTracerEffect = _assetBundle.LoadEffect("spiritShotgunBulletTrace");
             /*Tracer spiritTracer = spiritShotGunTracerEffect.AddComponent<Tracer>();
@@ -89,10 +101,18 @@ namespace YusukeMod.Survivors.Yusuke
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
         }
 
-        private static void CreateHitEffect()
+        private static void CreateHitAndOtherEffect()
         {
-            Log.Info("loading shotgun tracer");
+            Log.Info("Creating other effects. ");
             spiritShotGunHitEffect = _assetBundle.LoadEffect("spiritShotGunExplosion");
+            dashStartSmallEffect = _assetBundle.LoadEffect("dashStartSmall", "dashStartSmall", false, false);
+            dashStartMaxEffect = _assetBundle.LoadEffect("dashStartMax", "dashStartMax", false, false);
+            dashGroundedEffect = _assetBundle.LoadEffect("dashEffectGrounded", "dashEffectGrounded", true, false);
+            dashAirEffect = _assetBundle.LoadEffect("dashEffectAir", "dashEffectAir", true, false);
+            dashBoomEffect = _assetBundle.LoadEffect("dashBoom", "dashBoom", true, false);
+            dashBoomContinuousEffect = _assetBundle.LoadEffect("dashBoomContinuous", "dashBoomContinuous", true, false);
+            chargeWindEffect = _assetBundle.LoadEffect("chargeWind", "chargeWind", true, false);
+            megaWindEffect = _assetBundle.LoadEffect("megaWindEffect", "megaWindEffect", false, false);
 
         }
 

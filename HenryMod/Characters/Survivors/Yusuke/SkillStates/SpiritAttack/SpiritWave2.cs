@@ -126,16 +126,32 @@ namespace YusukeMod.SkillStates
         public GameObject spiritWaveChargeEffectObject;
         public GameObject spiritWaveEffectPotentObject;
 
+        public GameObject dashAirEffectObject;
+
+        private GameObject dashStartSmallEffectPrefab;
+        private GameObject dashStartMaxEffectPrefab;
+        private GameObject dashAirEffectPrefab;
+        private GameObject dashBoomPrefab;
+
         private GameObject spiritWaveImpactEffect;
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string waveMuzzleYAxis = "muzzleCenter";
+        private readonly string mainPosition = "mainPosition";
+        private readonly string dashCenter = "dashCenter";
 
 
         public override void OnEnter()
         {
             base.OnEnter();
 
+
             spiritWaveImpactEffect = YusukeAssets.spiritWaveImpactEffect;
+
+            // dash effect prefabs 
+            dashStartSmallEffectPrefab = YusukeAssets.dashStartSmallEffect;
+            dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
+            dashAirEffectPrefab = YusukeAssets.dashAirEffect;
+            dashBoomPrefab = YusukeAssets.dashBoomEffect;
 
             SwitchAnimationLayer();
 
@@ -165,6 +181,25 @@ namespace YusukeMod.SkillStates
 
                 pivotRotation = GetComponent<PivotRotation>();
                 pivotRotation.SetRotations(forwardDirection, true, true);
+                EditDashEffects();
+
+                // these dash effects are not 
+                if (!isGrounded) 
+                {
+                    EffectManager.SimpleMuzzleFlash(dashBoomPrefab, gameObject, dashCenter, false);
+                    if (isMaxCharge)
+                    {
+                        EffectManager.SimpleMuzzleFlash(dashStartMaxEffectPrefab, gameObject, mainPosition, false);
+                    }
+                    else
+                    {
+                        EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
+                    }
+                    
+                    
+                }
+
+                    
             }
 
             // prevent any movement if spirit wave is grouned
@@ -186,8 +221,16 @@ namespace YusukeMod.SkillStates
             }
 
             
-
             CreateMuzzleEffect();
+
+        }
+
+        private void EditDashEffects()
+        {
+            if (dashAirEffectPrefab != null) dashAirEffectObject = YusukePlugin.CreateEffectObject(dashAirEffectPrefab, FindModelChild("mainPosition"));
+            dashStartSmallEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
+            dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
 
         }
 
@@ -610,6 +653,7 @@ namespace YusukeMod.SkillStates
 
                 if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
                 if (spiritWaveEffectPotentObject) EntityState.Destroy(spiritWaveEffectPotentObject);
+                if (dashAirEffectObject) EntityState.Destroy(dashAirEffectObject);
 
                 attack = new OverlapAttack
                 {
@@ -660,6 +704,7 @@ namespace YusukeMod.SkillStates
             // remove the effect if there is still an object created for them. 
             if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
             if (spiritWaveEffectPotentObject) EntityState.Destroy(spiritWaveEffectPotentObject);
+            if (dashAirEffectObject) EntityState.Destroy(dashAirEffectObject);
 
 
         }
