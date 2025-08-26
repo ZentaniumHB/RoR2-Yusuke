@@ -39,12 +39,15 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private GameObject spiritGunMegaChargeEffectPotentObject;
         private bool hasMaxChargeEffectSpawned;
 
+        private GameObject chargeWindEffectPrefab;
+        private GameObject chargeWindObject;
 
         public override void OnEnter()
         {
             
             spiritGunMegaChargeEffectPrefab = YusukeAssets.spiritGunMegaChargeEffect;
             spiritGunMegaChargeEffectPotentPrefab = YusukeAssets.spiritGunMegaChargePotentEffect;
+            chargeWindEffectPrefab = YusukeAssets.chargeWindEffect;
 
             SwitchAnimationLayer();
 
@@ -71,6 +74,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             }
 
             PlayAnimation("BothHands, Override", "SpiritMegaHandPose", "ShootGun.playbackRate", 1f);
+
+            if (chargeWindEffectPrefab != null) chargeWindObject = YusukePlugin.CreateEffectObject(chargeWindEffectPrefab, FindModelChild("mainPosition"));
             SpawnChargeEffect(false);
 
             base.OnEnter();
@@ -78,10 +83,10 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private void SpawnChargeEffect(bool isMaxCharge) 
         {
+
             if (!isMaxCharge)
             {
                 hasRegularEffectSpawned = true;
-                if (spiritGunMegaChargeEffectPrefab == null) Log.Info("Mega effect does not exist........");
                 if (spiritGunMegaChargeEffectPrefab != null) spiritGunMegaChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunMegaChargeEffectPrefab, FindModelChild("fingerTipR"));
             }
             else
@@ -302,8 +307,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 tier1Wave = tier1Wave,
                 tier2Wave = tier2Wave,
                 spiritGunMegaChargeEffectObject = spiritGunMegaChargeEffectObject,
-                spiritGunMegaChargeEffectPotentObject = spiritGunMegaChargeEffectPotentObject
-                
+                spiritGunMegaChargeEffectPotentObject = spiritGunMegaChargeEffectPotentObject,
+                chargeWindObject = chargeWindObject
 
             };
         }

@@ -45,15 +45,19 @@ namespace YusukeMod.SkillStates
 
         public GameObject spiritGunMegaChargeEffectObject;
         public GameObject spiritGunMegaChargeEffectPotentObject;
+        public GameObject chargeWindObject;
 
         private readonly string fingerTipString = "fingerTipR";
+        private readonly string mainPosition = "mainPosition";
         private GameObject spiritGunMegaMuzzleFlashPrefab;
+        private GameObject megaWindEffectPrefab;
 
         public override void OnEnter()
         {
             base.OnEnter();
 
             spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
+            megaWindEffectPrefab = YusukeAssets.megaWindEffect;
 
             base.characterBody.SetAimTimer(1f);
             modelTransform = GetModelTransform();
@@ -94,6 +98,7 @@ namespace YusukeMod.SkillStates
             // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
             EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
             spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
 
             if (component)
             {
@@ -125,6 +130,7 @@ namespace YusukeMod.SkillStates
         public override void OnExit()
         {
             base.OnExit();
+            if (chargeWindObject) Log.Info("THE MEGA WIND STILL EXISTS!");
             //aimAnim.giveupDuration = originalGiveUpDuration;
             aimAnim.enabled = true;
             SwitchAnimationLayer();
@@ -141,8 +147,11 @@ namespace YusukeMod.SkillStates
 
                 if (spiritGunMegaChargeEffectObject) EntityState.Destroy(spiritGunMegaChargeEffectObject);
                 if (spiritGunMegaChargeEffectPotentObject) EntityState.Destroy(spiritGunMegaChargeEffectPotentObject);
+                if (chargeWindObject) EntityState.Destroy(chargeWindObject);
 
                 EffectManager.SimpleMuzzleFlash(spiritGunMegaMuzzleFlashPrefab, gameObject, fingerTipString, false);
+                EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
+
                 Util.PlaySound("HenryShootPistol", base.gameObject);
 
                 if (isGrounded)
