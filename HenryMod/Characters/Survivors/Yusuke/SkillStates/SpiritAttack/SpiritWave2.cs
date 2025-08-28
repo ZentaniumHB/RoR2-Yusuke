@@ -132,10 +132,11 @@ namespace YusukeMod.SkillStates
         private GameObject dashStartMaxEffectPrefab;
         private GameObject dashAirEffectPrefab;
         private GameObject dashBoomPrefab;
+        public GameObject heavyHitEffectPrefab;
 
         private GameObject spiritWaveImpactEffect;
         private readonly string muzzleCenter = "muzzleCenter";
-        private readonly string waveMuzzleYAxis = "muzzleCenter";
+        private readonly string waveMuzzleYAxis = "waveYImpact";
         private readonly string mainPosition = "mainPosition";
         private readonly string dashCenter = "dashCenter";
 
@@ -152,6 +153,7 @@ namespace YusukeMod.SkillStates
             dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
             dashAirEffectPrefab = YusukeAssets.dashAirEffect;
             dashBoomPrefab = YusukeAssets.dashBoomEffect;
+            heavyHitEffectPrefab = YusukeAssets.heavyHitRingEffect;
 
             SwitchAnimationLayer();
 
@@ -231,6 +233,8 @@ namespace YusukeMod.SkillStates
             dashStartSmallEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
             dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
             dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            heavyHitEffectPrefab.AddComponent <DestroyOnTimer>().duration = 1f;
+
 
         }
 
@@ -580,6 +584,7 @@ namespace YusukeMod.SkillStates
                 ID = chosenSkill,
                 target = target,
                 enemyCollider = enemyCollider,
+                dashBoomPrefab = dashBoomPrefab
             };
         }
 
@@ -604,10 +609,6 @@ namespace YusukeMod.SkillStates
 
             };
         }
-
-        
-
-
         
 
         private void OnHitEnemyAuthority()
@@ -645,10 +646,13 @@ namespace YusukeMod.SkillStates
                 if (isGrounded)
                 {
                     EffectManager.SimpleMuzzleFlash(spiritWaveImpactEffect, gameObject, waveMuzzleYAxis, false);
+                    EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, waveMuzzleYAxis, false);
+
                 }
                 else
                 {
                     EffectManager.SimpleMuzzleFlash(spiritWaveImpactEffect, gameObject, muzzleCenter, false);
+                    EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
                 }
 
                 if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);

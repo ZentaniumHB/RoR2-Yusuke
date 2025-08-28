@@ -43,6 +43,15 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject chargeWindEffect;
         public static GameObject megaWindEffect;
 
+        public static GameObject hitImpactEffect;
+        public static GameObject punchBarrageSlowEffect;
+        public static GameObject punchBarrageFastEffect;
+        public static GameObject heavyHitRingEffect;
+        public static GameObject heavyHitRingFollowingEffect;
+        public static GameObject finalHitEffect;
+        public static GameObject stompEffect;
+
+
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -114,6 +123,15 @@ namespace YusukeMod.Survivors.Yusuke
             chargeWindEffect = _assetBundle.LoadEffect("chargeWind", "chargeWind", true, false);
             megaWindEffect = _assetBundle.LoadEffect("megaWindEffect", "megaWindEffect", false, false);
 
+            hitImpactEffect = _assetBundle.LoadEffect("hitImpact", "hitImpact", true, false);
+            punchBarrageFastEffect = _assetBundle.LoadEffect("punchBarrageFast", "punchBarrageFast", true, false);
+            punchBarrageSlowEffect = _assetBundle.LoadEffect("punchBarrageSlow", "punchBarrageSlow", true, false);
+
+            heavyHitRingEffect = _assetBundle.LoadEffect("heavyHitRing", "heavyHitRing", false, false);
+            heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHitRing2", "heavyHitRing2", true, false);
+
+            finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", true, false);
+            stompEffect = _assetBundle.LoadEffect("stomp", "stomp", true, false);
         }
 
         private static void CreateSpiritEnergyEffects()
