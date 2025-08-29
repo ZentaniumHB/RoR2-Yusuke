@@ -94,6 +94,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.24313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.99607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: InitialModule.startColor.minColor.b
+      value: 0.24056602
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: InitialModule.startColor.minColor.r
+      value: 0.9944969
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: TrailModule.colorOverLifetime.maxColor.b
+      value: 0.759434
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635838213009648623, guid: dc5e5467afb670b43b2a04a3a55693df,
+        type: 3}
+      propertyPath: TrailModule.colorOverLifetime.maxColor.r
+      value: 0.99875355
+      objectReference: {fileID: 0}
     - target: {fileID: 8425514205303738829, guid: dc5e5467afb670b43b2a04a3a55693df,
         type: 3}
       propertyPath: m_Name
