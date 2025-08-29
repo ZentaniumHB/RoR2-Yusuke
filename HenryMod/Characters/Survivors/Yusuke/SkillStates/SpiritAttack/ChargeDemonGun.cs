@@ -16,6 +16,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
     public class ChargeDemonGun : BaseChargeSpirit
     {
 
+
         protected float totalCharge { get; private set; }
         public bool isMaxCharge;
 
@@ -26,9 +27,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private YusukeMain mainState;
 
+
+        private GameObject demonGunChargeEffectPrefab;
+        private GameObject demonGunChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject demonGunChargeEffectPotentPrefab;
+        private GameObject demonGunChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
+        private GameObject mazokuSparkElectricityPrefab;
+        private GameObject mazokuSparkElectricityObject;
+
+        private readonly string fingerTipString = "fingerTipR";
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            demonGunChargeEffectPrefab = YusukeAssets.demonGunChargeEffect;
+            demonGunChargeEffectPotentPrefab = YusukeAssets.demonGunChargePotentEffect;
+            mazokuSparkElectricityPrefab = YusukeAssets.mazokuElectricChargeEffect;
 
             SwitchAnimationLayer();
 
@@ -53,6 +72,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             chargeDuration = baseChargeDuration;
 
+            mazokuSparkElectricityObject = YusukePlugin.CreateEffectObject(mazokuSparkElectricityPrefab, FindModelChild(fingerTipString));
+            SpawnChargeEffect(false);
+
+        }
+
+        private void SpawnChargeEffect(bool isMaxCharge)
+        {
+            if (!isMaxCharge)
+            {
+                hasRegularEffectSpawned = true;
+                if (demonGunChargeEffectPrefab != null) demonGunChargeEffectObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPrefab, FindModelChild(fingerTipString));
+            }
+            else
+            {
+                hasMaxChargeEffectSpawned = true;
+                if (demonGunChargeEffectPotentPrefab != null) demonGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPotentPrefab, FindModelChild(fingerTipString));
+
+            }
         }
 
         // the animation switching is done once the YusukeMain state is taken
@@ -88,6 +125,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             base.OnExit();
             if (isMaxCharge || cuffComponent.hasReleased) RevertIconSwitch(2);
+            if (demonGunChargeEffectObject) EntityState.Destroy(demonGunChargeEffectObject);
+            if (demonGunChargeEffectPotentObject) EntityState.Destroy(demonGunChargeEffectPotentObject);
+            if (mazokuSparkElectricityObject) EntityState.Destroy(mazokuSparkElectricityObject);
 
 
         }
@@ -117,6 +157,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             {
                 characterBody.isSprinting = false;
                 base.characterBody.SetAimTimer(1f);
+
+                DestroyCurrentEffect();
+                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
 
                 if (!hasIconSwitch)
                 {
@@ -157,6 +200,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             }
 
 
+        }
+
+        private void DestroyCurrentEffect()
+        {
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                EntityState.Destroy(demonGunChargeEffectObject);
+            }
         }
 
         public override void Update()

@@ -14,7 +14,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
     public class FireDemonGunBarrage : BaseChargeSpirit
     {
 
-        public GameObject projectilePrefab = YusukeAssets.basicSpiritGunPrefab;
+        public static GameObject projectilePrefab = YusukeAssets.demonGunProjectilePrefab;
 
         public static float damageCoefficient = YusukeStaticValues.gunDamageCoefficient;
         public static float procCoefficient = 1f;
@@ -34,15 +34,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public bool isPrimary;
         public int totalBullets;
         public bool hasBarrageEnded;
-        private float barrageStopWatch;
+        private float barrageStopWatch = 0.2f;
         private int numberOfShots;
 
         private YusukeMain mainState;
 
 
+        private readonly string fingerTipString = "fingerTipR";
+        private GameObject demonGunMuzzleFlashPrefab;
+
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            demonGunMuzzleFlashPrefab = YusukeAssets.demonGunMuzzleFlashEffect;
 
             // get the stateMachine related to the customName Body
             EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
@@ -66,7 +72,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 projectilePrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
             }
 
-            
+            SpawnMuzzleEffect();
+
+        }
+
+        private void SpawnMuzzleEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = demonGunMuzzleFlashPrefab.GetComponent<EffectComponent>();
+            demonGunMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+
+            if (component)
+            {
+                // toggling the parent
+                component.parentToReferencedTransform = true;
+
+            }
         }
 
         private void SwitchAnimationLayer()
@@ -137,7 +158,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
 
             characterBody.AddSpreadBloom(1.5f);
-            EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+
+            EffectManager.SimpleMuzzleFlash(demonGunMuzzleFlashPrefab, gameObject, fingerTipString, false);
 
             PlayAnimation("BothHands, Override", "ShootSpiritGun", "ShootGun.playbackRate", 1.8f);
             Util.PlaySound("HenryShootPistol", gameObject);

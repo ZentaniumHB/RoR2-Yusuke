@@ -33,6 +33,11 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritWaveChargePotentEffect;
         public static GameObject spiritWaveImpactEffect;
 
+        public static GameObject demonGunChargeEffect;
+        public static GameObject demonGunChargePotentEffect;
+        public static GameObject demonGunMuzzleFlashEffect;
+        public static GameObject mazokuElectricChargeEffect;
+
         // other effects
         public static GameObject dashStartSmallEffect;
         public static GameObject dashStartMaxEffect;
@@ -60,6 +65,8 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject bombExplosionEffect;
 
         public static GameObject spiritGunExplosionEffect;
+        public static GameObject demonGunExplosionEffect;
+
         public static GameObject spiritGunMegaExplosionEffect;
 
         // networked hit sounds
@@ -71,6 +78,9 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject basicSpiritGunPrefab;
         public static GameObject spiritGunPiercePrefab;
         public static GameObject spiritGunMegaPrefab;
+
+
+        public static GameObject demonGunProjectilePrefab;
 
         //HUD
         public static GameObject SpiritCuffGauge;
@@ -161,6 +171,10 @@ namespace YusukeMod.Survivors.Yusuke
             spiritGunMegaMuzzleFlashEffect = _assetBundle.LoadEffect("spiritMegaMuzzle", "spiritMegaMuzzle", true, false);
             spiritWaveImpactEffect = _assetBundle.LoadEffect("spiritWaveImpact", "spiritWaveImpact", true, false);
 
+            demonGunChargeEffect = _assetBundle.LoadEffect("demonGunCharge", "demonGunCharge", false, true);
+            demonGunChargePotentEffect = _assetBundle.LoadEffect("demonGunChargePotent", "demonGunChargePotent", false, true);
+            mazokuElectricChargeEffect = _assetBundle.LoadEffect("mazokuElectricChargeObj", "mazokuElectricChargeObj", false, true);
+            demonGunMuzzleFlashEffect = _assetBundle.LoadEffect("demonGunMuzzleFlash", "demonGunMuzzleFlash", true, false);
         }
 
         private static void CreateBombExplosionEffect()
@@ -209,7 +223,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             spiritGunMegaExplosionEffect = _assetBundle.LoadEffect("spiritgunMegaExplosionBigger", "spiritgunMegaExplosionBigger");
 
-            if (!spiritGunExplosionEffect)
+            if (!spiritGunMegaExplosionEffect)
                 return;
 
             ShakeEmitter megaShakeEmitter = spiritGunMegaExplosionEffect.AddComponent<ShakeEmitter>();
@@ -224,6 +238,27 @@ namespace YusukeMod.Survivors.Yusuke
                 frequency = 40f,
                 cycleOffset = 0f
             };
+
+
+
+            demonGunExplosionEffect = _assetBundle.LoadEffect("demonGunExplosion", "demonGunExplosion");
+
+            if (!demonGunExplosionEffect)
+                return;
+
+            ShakeEmitter demonShakeEmitter = demonGunExplosionEffect.AddComponent<ShakeEmitter>();
+            demonShakeEmitter.amplitudeTimeDecay = true;
+            demonShakeEmitter.duration = 0.5f;
+            demonShakeEmitter.radius = 200f;
+            demonShakeEmitter.scaleShakeRadiusWithLocalScale = false;
+
+            demonShakeEmitter.wave = new Wave
+            {
+                amplitude = 0.5f,
+                frequency = 20f,
+                cycleOffset = 0f
+            };
+
         }
 
 
@@ -302,13 +337,46 @@ namespace YusukeMod.Survivors.Yusuke
             // speed and duration
             ProjectileSimple spiritGunSpeed = basicSpiritGunPrefab.GetComponent<ProjectileSimple>();
             spiritGunSpeed.desiredForwardSpeed = 120;
-            spiritGunSpeed.lifetime = 5;
+            spiritGunSpeed.lifetime = 15;
 
             // explosion impact 
             ProjectileImpactExplosion spiritGunImpact = basicSpiritGunPrefab.GetComponent<ProjectileImpactExplosion>();
             spiritGunImpact.blastRadius = 8f;
-            GameObject explosion = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/FireworkExplosion");
             spiritGunImpact.impactEffect = spiritGunExplosionEffect;
+
+
+            // [DEMON GUN] --------------------------------------
+
+            // cloning
+            GameObject demonGun = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Mage/MageFireboltBasic.prefab").WaitForCompletion();
+            demonGunProjectilePrefab = PrefabAPI.InstantiateClone(demonGun, "demonGunProjectile");
+
+            // add screen shake?
+
+
+            // settings for the appearance
+            ProjectileController demonGunAesthetics = demonGunProjectilePrefab.GetComponent<ProjectileController>();
+
+            // changing the prefab appearance for now
+            if (_assetBundle.LoadAsset<GameObject>("demonGunProjectile") != null)
+            {
+                demonGunAesthetics.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("demonGunProjectile");
+            }
+            else
+            {
+                demonGunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+            }
+
+
+            // speed and duration
+            ProjectileSimple demonGunSpeed = demonGunProjectilePrefab.GetComponent<ProjectileSimple>();
+            demonGunSpeed.desiredForwardSpeed = 160;
+            demonGunSpeed.lifetime = 5;
+
+            // explosion impact 
+            ProjectileImpactExplosion demonGunImpact = demonGunProjectilePrefab.GetComponent<ProjectileImpactExplosion>();
+            demonGunImpact.blastRadius = 8f;
+            demonGunImpact.impactEffect = demonGunExplosionEffect;
 
 
 
@@ -394,7 +462,7 @@ namespace YusukeMod.Survivors.Yusuke
             // speed and duration
             ProjectileSimple spiritGunSpeed = spiritGunMegaPrefab.GetComponent<ProjectileSimple>();
             spiritGunSpeed.desiredForwardSpeed = 80;
-            spiritGunSpeed.lifetime = 10;
+            spiritGunSpeed.lifetime = 30;
 
             // explosion impact 
             ProjectileImpactExplosion spiritGunImpact = spiritGunMegaPrefab.GetComponent<ProjectileImpactExplosion>();
