@@ -51,6 +51,9 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject finalHitEffect;
         public static GameObject stompEffect;
 
+        public static GameObject mazokuTransformationRaizenStartupEffect;
+        public static GameObject maokuTansformationExplosionEffect;
+
 
 
         //explosion effects
@@ -132,6 +135,10 @@ namespace YusukeMod.Survivors.Yusuke
 
             finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", true, false);
             stompEffect = _assetBundle.LoadEffect("stomp", "stomp", true, false);
+
+            mazokuTransformationRaizenStartupEffect = _assetBundle.LoadEffect("mazokuTransformStartUp", "mazokuTransformStartUp", true, false);
+            maokuTansformationExplosionEffect = _assetBundle.LoadEffect("mazokuTransoformExplosion", "mazokuTransoformExplosion", true, false);
+
         }
 
         private static void CreateSpiritEnergyEffects()

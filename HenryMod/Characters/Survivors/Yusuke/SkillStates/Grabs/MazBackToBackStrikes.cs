@@ -93,6 +93,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float shotGunEndLagDuration = 0.5f;
         // flag to tell if the enemy can be grabbed or not
         private bool skipGrab;
+        private float dashTimer;
+        private float dashMaxTimer = 1f;
 
         public override void OnEnter()
         {
@@ -334,6 +336,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void DashAndKick()
         {
+            dashTimer += GetDeltaTime();
+
             characterMotor.enabled = true;
             characterDirection.enabled = true;
             Log.Info("Now dashing. ");
@@ -341,6 +345,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 hasDashed = true;
                 PlayAnimation("FullBody, Override", "Dash", "ShootGun.playbackRate", 1f);
+            }
+
+            if(dashTimer > dashMaxTimer)
+            {
+                EndAnimationLoops();
+                outer.SetNextStateToMain();
             }
 
             Vector3 enemyPosition = enemyHurtBox.gameObject.transform.position;
