@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Networking.NetworkSystem;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
@@ -86,6 +87,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         // boolean flags for kick 
         private bool hasKickedEnemy;
         private bool hasDashed;
+        private bool hasTeleported;
 
         // boolean and floats for shotgun for ungrabbable enemies
         private bool hasFiredShotgun;
@@ -95,6 +97,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool skipGrab;
         private float dashTimer;
         private float dashMaxTimer = 1f;
+
+        // effects
+        private GameObject shadowDashEffectPrefab;
+        private GameObject shadowDashGrabEffectPrefab;
+
+        private GameObject gutPunchSlowPrefab;
+        private GameObject gutPunchFastPrefab;
+        private GameObject gutPunchSlowObject;
+        private GameObject gutPunchFastObject;
+
+        private GameObject hitImpactEffectPrefab;
+        private GameObject finalHitEffectPrefab;
+        private GameObject heavyHitEffectPrefab;
+        private GameObject dashStartMaxEffectPrefab;
+        private GameObject dashBoomPrefab;
+
+        private bool hasPlayedShadowDash;
+        private bool hasPlayedGutPunch;
+        private bool hasSpawnedFinalHitEffect;
+        private readonly string dashCenter = "dashCenter";
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string gutPunchCenter = "gutPunchCenter";
+        private readonly string mainPosition = "mainPosition";
 
         public override void OnEnter()
         {
@@ -106,14 +131,43 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             mazokuGrabController = new MazokuGrabController();
             knockbackController = new KnockbackController();
 
+
+            hitImpactEffectPrefab = YusukeAssets.hitImpactEffect;
+            heavyHitEffectPrefab = YusukeAssets.heavyHitRingEffect;
+            finalHitEffectPrefab = YusukeAssets.finalHitEffect;
+            dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
+            dashBoomPrefab = YusukeAssets.dashBoomEffect;
+
+
             isEnemyKilled = false;
             hasSelectionMade = false;
             characterMotor.Motor.ForceUnground();
+
+            EditAttackEffects();
+
+        }
+
+
+        private void EditAttackEffects()
+        {
+            hitImpactEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
+            heavyHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+            dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            finalHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
         }
 
         private void SwitchAnimationLayer()
         {
             EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+
+
+            // make an switch case for the effect that should be used
+            shadowDashEffectPrefab = YusukeAssets.shadowDashSK1;
+            shadowDashGrabEffectPrefab = YusukeAssets.shadowDashGrabSK1;
+
+            gutPunchSlowPrefab = YusukeAssets.gutPunchSlowEffect;
+            gutPunchFastPrefab = YusukeAssets.gutPunchFastEffect;
+
             if (stateMachine == null)
             {
                 Log.Error("No State machine found");
@@ -137,13 +191,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 }
 
             }
+
+            EffectManager.SimpleMuzzleFlash(shadowDashEffectPrefab, gameObject, dashCenter, true);
+
         }
 
         private void TeleportToTarget()
         {
-           
             characterMotor.rootMotion += enemyHurtBox.gameObject.transform.position - transform.position;
-            
+            if (!hasPlayedShadowDash)
+            {
+                hasPlayedShadowDash = true;
+                EffectManager.SimpleMuzzleFlash(shadowDashGrabEffectPrefab, gameObject, dashCenter, true);
+            }
+
+
         }
 
         public override void FixedUpdate()
@@ -185,6 +247,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     if (!hasSelectionMade) 
                     {
                         ConsecutiveAttack();
+                        
                         if (consecutiveDuration > totalConsecutiveTime)
                         {
                             LaunchEnemy();
@@ -209,6 +272,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     {
                         LaunchEnemy();
                         if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
+                        
                     }
                 }
                 else
@@ -232,6 +296,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 Log.Info("Stop attacking (mazoku)");
                 outer.SetNextStateToMain();
+            }
+        }
+
+        private void SpawnGutPunchEffect(bool isSpedUp)
+        {
+            if (!isSpedUp)
+            {
+                if (!gutPunchSlowObject) gutPunchSlowObject = YusukePlugin.CreateEffectObject(gutPunchSlowPrefab, FindModelChild(gutPunchCenter));
+            }
+            else
+            {
+                if(!gutPunchFastObject) gutPunchFastObject = YusukePlugin.CreateEffectObject(gutPunchFastPrefab, FindModelChild(gutPunchCenter));
             }
         }
 
@@ -262,6 +338,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (!hasLaunchedEnemy) 
             { 
                 hasLaunchedEnemy = true;
+
+                RemovePunchEffects();
+                
+
                 mazokuGrabController.Remove();
                 PauseVelocity();
                 AddKnockbackController();
@@ -282,6 +362,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             launchAnimationDuration += Time.fixedDeltaTime;
             Log.Info(launchAnimationDuration);
             
+        }
+
+        private void RemovePunchEffects()
+        {
+            if(gutPunchFastObject) EntityState.Destroy(gutPunchFastObject);
+            if(gutPunchSlowObject) EntityState.Destroy(gutPunchSlowObject);
         }
 
         // knockback properties
@@ -345,6 +431,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 hasDashed = true;
                 PlayAnimation("FullBody, Override", "Dash", "ShootGun.playbackRate", 1f);
+                EffectManager.SimpleMuzzleFlash(dashStartMaxEffectPrefab, gameObject, mainPosition, false);
+                EffectManager.SimpleMuzzleFlash(dashBoomPrefab, gameObject, dashCenter, false);
+
             }
 
             if(dashTimer > dashMaxTimer)
@@ -377,7 +466,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     if (capturedHurtbox == enemyHurtBox)
                     {
 
-                        if(!hasKickedEnemy) KickEnemy();
+                        if (!hasKickedEnemy) 
+                        { 
+                            KickEnemy();
+                            
+                            
+                        }
+                            
                         
                     }
 
@@ -388,16 +483,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void KickEnemy()
         {
+
             hasKickedEnemy = true;
             PlayAnimation("FullBody, Override", "BackToBackMeleeFinish", "ShootGun.playbackRate", 1f);
 
             // when doing the kick, grabbing the knockbackcontroller direction and applying a force vector which will be used for special knockback for the enemies
             Vector3 forceVector = GetAimRay().direction;    // for now the Aim Ray is based on the characters facing direction
             forceVector *= 20000f;
-            
+
+            EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, false);
+            EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
+
             knockbackController.ForceDestory(); // destroying the controller first, so it doesn't interrupt the force vector
             AttackForce(forceVector);
+
             hasAttackEnded = true;
+
         }
 
         // Applying force
@@ -475,15 +576,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             // if the character is in the list or not, do different (animation). 
 
+            if (!hasPlayedGutPunch)
+            {
+                hasPlayedGutPunch = true;
+                if (NetworkServer.active && !hasSelectionMade)
+                {
+                    if(!hasIncreaseAttackSpeed) PlayAnimation("BothHands, Override", "GutPunch", "ThrowBomb.playbackRate", 0.4f);
+                    if(hasIncreaseAttackSpeed) PlayAnimation("BothHands, Override", "GutPunchFast", "ThrowBomb.playbackRate", 0.4f);
+                }
+            }
+
             characterBody.SetAimTimer(0.5f); 
             attackStopWatch += GetDeltaTime();
             consecutiveDuration += GetDeltaTime();
             Log.Info("consecutive: " + consecutiveDuration);
 
+            SpawnGutPunchEffect(false);
             // the punches will increase its speed if 2 seconds passes. 
             if (!hasIncreaseAttackSpeed && consecutiveDuration > 2)
             {
                 hasIncreaseAttackSpeed = true;
+                hasPlayedGutPunch = false;
+                SpawnGutPunchEffect(true);
                 attackInterval /= 2;
                 
             }
@@ -496,10 +610,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (attackStopWatch > attackInterval)
                 {
 
-                    if (NetworkServer.active)
-                    {
-                        PlayAnimation("BothHands, Override", "GutPunch", "ThrowBomb.playbackRate", 0.4f);
-                    }
+                    
                     EffectManager.SpawnEffect(hitEffectPrefab, new EffectData
                     {
                         origin = enemyHurtBox.gameObject.transform.position,
@@ -638,6 +749,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 mainState.SwitchMovementAnimations((int)AnimationLayerIndex.Mazoku, true);
             }
+
+            RemovePunchEffects();
 
         }
 

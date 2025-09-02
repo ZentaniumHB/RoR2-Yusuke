@@ -68,7 +68,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         // Animation flags used to play animations when needed. 
         private bool hasStartUpPlayed;
         private bool isFinalPunchAnimationActive;
-        private float finalPunchStartup = 0.8f;
+        private float finalPunchStartup = 0.6f;
+        private float finalPunchEnd = 1.2f;
         private float finalPunchDelayStopwatch = 0f;
         private float groundedAnimationStartupDelayValue = 0.6f;
 
@@ -88,6 +89,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private bool hasAppliedDashEffect;
         private bool hasAppliedPunchEffect;
+        private bool hasAppliedFinalHitEffect;
         private readonly string dashCenter = "dashCenter";
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string divePunchCenter = "divePunchCenter";
@@ -220,13 +222,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
 
                     Log.Info("Attack compolete");
-                    if(target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
-                    if (knockbackController)
-                    {
-                        Log.Info("Now deleting knockback controller");
-                        knockbackController.ForceDestory();
-
-                    }
+                    
                     outer.SetNextState(new RevertSkills
                     {
                         moveID = ID
@@ -446,18 +442,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             
             if(!target.healthComponent.alive) hasBarrageFinished = true;
 
-            if(punchCount == maxPunches-1 && target.healthComponent.alive)
+            if(punchCount == maxPunches-1)
             {
                 groundedAnimationStopwatch = 0f; // stopping the punch stopwatch, not really needed but whatever
                 DeliverFinalPunch();    // final punch
 
                 if (ID != 0 && hasBarrageFinished)
                 {
-                    Log.Info("TOTAL PUNCHES: "+punchCount);
-                    Log.Info("BARAGE HAS BEEN COMPLETE, REMOVING DIVE COTROLLER");
-                    if(beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
-                    Log.Info("First deleting dive punch");
-                    if(target.healthComponent.alive) DivePunchController.Remove();
+                    
                 }
             }
 
@@ -562,16 +554,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (finalPunchDelayStopwatch > finalPunchStartup)
             {
                 ApplyForce();
-                if (!hasBarrageFinished)
+                Log.Info("Finalpunch delay: " + finalPunchDelayStopwatch);
+                if (!hasAppliedFinalHitEffect)
                 {
+                    hasAppliedFinalHitEffect = true;
                     EffectComponent component2 = heavyHitEffectPrefab.GetComponent<EffectComponent>();
                     if (component2) component2.parentToReferencedTransform = false;
 
                     EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, false);
                     EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
+
+                    if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+                    if (target.healthComponent.alive) DivePunchController.Remove();
+                    if (target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
+                    if (knockbackController)
+                    {
+                        knockbackController.ForceDestory();
+
+                    }
+
                 }
                 
-                hasBarrageFinished = true;
+                if(finalPunchDelayStopwatch > finalPunchEnd) hasBarrageFinished = true;
             }
         }
 

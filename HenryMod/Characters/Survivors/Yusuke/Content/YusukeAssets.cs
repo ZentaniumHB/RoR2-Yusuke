@@ -59,6 +59,10 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject mazokuTransformationRaizenStartupEffect;
         public static GameObject maokuTansformationExplosionEffect;
 
+        public static GameObject shadowDashSK1;
+        public static GameObject shadowDashGrabSK1;
+        public static GameObject gutPunchSlowEffect;
+        public static GameObject gutPunchFastEffect;
 
 
         //explosion effects
@@ -143,11 +147,17 @@ namespace YusukeMod.Survivors.Yusuke
             heavyHitRingEffect = _assetBundle.LoadEffect("heavyHitRing", "heavyHitRing", false, false);
             heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHitRing2", "heavyHitRing2", true, false);
 
-            finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", true, false);
+            finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", false, false);
             stompEffect = _assetBundle.LoadEffect("stomp", "stomp", true, false);
 
             mazokuTransformationRaizenStartupEffect = _assetBundle.LoadEffect("mazokuTransformStartUp", "mazokuTransformStartUp", true, false);
             maokuTansformationExplosionEffect = _assetBundle.LoadEffect("mazokuTransoformExplosion", "mazokuTransoformExplosion", true, false);
+
+            shadowDashSK1 = _assetBundle.LoadEffect("shadowDashSK1", "shadowDashSK1", false, false);
+            shadowDashGrabSK1 = _assetBundle.LoadEffect("shadowDashGrabSK1", "shadowDashGrabSK1", false, false);
+
+            gutPunchSlowEffect = _assetBundle.LoadEffect("gutPunchEffectSlow", "gutPunchEffectSlow", true, false);
+            gutPunchFastEffect = _assetBundle.LoadEffect("gutPunchEffectFast", "gutPunchEffectFast", true, false);
 
         }
 
