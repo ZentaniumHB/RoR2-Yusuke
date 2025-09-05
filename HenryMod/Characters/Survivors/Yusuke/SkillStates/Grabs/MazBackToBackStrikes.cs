@@ -52,7 +52,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private float shotgunFireStopwatch;
         private int numberOfShots;
         private float dashSpeed = 20f;
-        private float velocityDivider = 0.1f; 
+        private float velocityDivider = 0.01f; 
 
         public float maxTrackingDistance = 60f;
         public float maxTrackingAngle = 60f;

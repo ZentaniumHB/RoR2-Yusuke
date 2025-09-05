@@ -27,6 +27,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public static GameObject spiritTracerEffect = YusukeAssets.spiritShotGunTracerEffect;
         public GameObject spiritShotGunExplosionHitEffect = YusukeAssets.spiritShotGunHitEffect;
 
+
         private float duration;
         private float fireTime;
         private bool hasFired;
@@ -163,10 +164,14 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         origin = enemy.gameObject.transform.position,
                         scale = 8f
                     }, transmit: true);*/
+
+                    Vector3 aimVector = (enemy.gameObject.transform.position - transform.position).normalized;
+                    Log.Info("AIM ORIGIN: " + aimRay.origin);
+                    Log.Info("AIM VECTOR: " + aimVector);
                     new BulletAttack
                     {
                         bulletCount = 1,
-                        aimVector = enemy.gameObject.transform.position - transform.position,
+                        aimVector = aimVector,
                         origin = aimRay.origin,
                         damage = (damageCoefficient / damageDivision) * damageStat,
                         damageColorIndex = DamageColorIndex.Default,
@@ -179,7 +184,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         maxSpread = 0f,
                         isCrit = RollCrit(),
                         owner = gameObject,
-                        muzzleName = muzzleString,
+                        muzzleName = muzzleCenter,
                         smartCollision = true,
                         procChainMask = default,
                         procCoefficient = procCoefficient,

@@ -6,6 +6,7 @@ using RoR2.Projectile;
 using R2API;
 using UnityEngine.AddressableAssets;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using On;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -28,6 +29,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritShotGunChargePotentEffect;
         public static GameObject spiritShotGunHitEffect;
         public static GameObject spiritShotGunTracerEffect;
+        public static GameObject spiritShotGunTracer;
 
         public static GameObject spiritWaveChargeEffect;
         public static GameObject spiritWaveChargePotentEffect;
@@ -114,14 +116,30 @@ namespace YusukeMod.Survivors.Yusuke
             CreateSpiritEnergyEffects();
             CreateHitAndOtherEffect();
 
+            //spiritShotGunTracer = _assetBundle.LoadEffect("spiritShotgunBulletTrace");
+            //spiritShotGunTracer.AddComponent<Tracer>();
 
-            spiritShotGunTracerEffect = _assetBundle.LoadEffect("spiritShotgunBulletTrace");
-            /*Tracer spiritTracer = spiritShotGunTracerEffect.AddComponent<Tracer>();
-            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(1);
-            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(2);
-            spiritTracer.headTransform = spiritShotGunTracerEffect.transform.GetChild(3);
-            spiritTracer.speed = 2f;
-            spiritTracer.length = 1f;*/
+            spiritShotGunTracerEffect = Asset.CloneTracer("TracerGoldGat", "spiritShotGunTracer");
+
+            spiritShotGunTracerEffect.GetComponent<LineRenderer>().startColor = new Color32(152,255,255,255);   // light cyan
+            spiritShotGunTracerEffect.GetComponent<LineRenderer>().endColor = new Color32(0, 128, 255, 255);    // blue
+            spiritShotGunTracerEffect.GetComponent<LineRenderer>().widthMultiplier = 0.8f; // sizing
+
+            /*Tracer spiritTracer = spiritShotGunTracer.AddComponent<Tracer>();
+            spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(1);
+            spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(2);
+            spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(3);
+            spiritTracer.speed = 250f;
+            spiritTracer.length = 40f;
+
+            BeamPointsFromTransforms beamPoint = spiritShotGunTracer.AddComponent<BeamPointsFromTransforms>();
+            beamPoint.target = spiritShotGunTracer.GetComponent<LineRenderer>();
+            Transform[] transforms = new Transform[2];
+            transforms[0] = spiritShotGunTracer.transform.GetChild(1);
+            transforms[1] = spiritShotGunTracer.transform.GetChild(2);
+            beamPoint.pointTransforms = transforms;
+
+            Modules.Content.CreateAndAddEffectDef(spiritShotGunTracer);*/
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
