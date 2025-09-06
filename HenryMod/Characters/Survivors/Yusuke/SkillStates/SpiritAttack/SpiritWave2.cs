@@ -182,7 +182,7 @@ namespace YusukeMod.SkillStates
                 previousPosition = transform.position - b;
 
                 pivotRotation = GetComponent<PivotRotation>();
-                pivotRotation.SetRotations(forwardDirection, true, true);
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
                 EditDashEffects();
 
                 // these dash effects are not 
@@ -702,7 +702,7 @@ namespace YusukeMod.SkillStates
             if (!groundedVersion)
             {
                 pivotRotation = GetComponent<PivotRotation>();
-                pivotRotation.SetRotations(Vector3.zero, false, false);
+                pivotRotation.SetRotations(Vector3.zero, false, false, false);
             }
             
             // remove the effect if there is still an object created for them. 

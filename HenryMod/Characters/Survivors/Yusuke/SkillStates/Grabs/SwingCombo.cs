@@ -68,9 +68,32 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasSelectionBeenMade;
         public const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
+        private PivotRotation pivotRotation;
+
+        // effect prefab
+        private GameObject dashAirEffectObject;
+        private GameObject dashBoomObject;
+
+        private GameObject dashStartMaxEffectPrefab;
+        private GameObject dashAirEffectPrefab;
+        private GameObject dashBoomContinuousPrefab;
+        private bool hasResetPivotRotation;
+        private readonly string mainPosition = "mainPosition";
+        private readonly string dashCenter = "dashCenter";
+
+
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+
+            // dash effect prefabs 
+            dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
+            dashAirEffectPrefab = YusukeAssets.dashAirEffect;
+            dashBoomContinuousPrefab = YusukeAssets.dashBoomContinuousEffect;
+
+
 
             UpdateDashSpeed(maxInitialSpeed, finalSpeed);
             forwardDirection = GetAimRay().direction;
@@ -81,7 +104,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
             previousPosition = transform.position - b;
 
+            EditDashEffects();
+
             PlayAnimation("FullBody, Override", "MazokuSwingDashGrab", "Slide.playbackRate", duration);
+
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.SetRotations(forwardDirection, true, true, false);
+
+            EffectManager.SimpleMuzzleFlash(dashStartMaxEffectPrefab, gameObject, mainPosition, false);
+        }
+
+        private void EditDashEffects()
+        {
+            if (dashAirEffectPrefab != null) dashAirEffectObject = YusukePlugin.CreateEffectObject(dashAirEffectPrefab, FindModelChild("mainPosition"));
+            if (dashBoomContinuousPrefab != null) dashBoomObject = YusukePlugin.CreateEffectObject(dashBoomContinuousPrefab, FindModelChild("dashCenter"));
+            dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
 
         }
 
@@ -94,9 +131,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 Dash();
                 SearchForBody();
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
             }
 
-            if (targetFound) SwingThrow();
+            if (targetFound) 
+            {
+                SwingThrow();
+                if (dashBoomObject) EntityState.Destroy(dashBoomObject);
+                if (dashAirEffectObject) EntityState.Destroy(dashAirEffectObject);
+
+                if (!hasResetPivotRotation)
+                {
+                    hasResetPivotRotation = true;
+                    pivotRotation.SetRotations(Vector3.zero, false, false, true);
+                }
+                
+            }
+
+                
 
             if (dashTime > duration && !targetFound)
             {
@@ -475,6 +527,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         public override void OnExit()
         {
+            if (dashBoomObject) EntityState.Destroy(dashBoomObject);
+            if (dashAirEffectObject) EntityState.Destroy(dashAirEffectObject);
+
+            if (!hasResetPivotRotation)
+            {
+                hasResetPivotRotation = true;
+                pivotRotation = GetComponent<PivotRotation>();
+                pivotRotation.SetRotations(Vector3.zero, false, false, false);
+            }
+
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             base.OnExit();
             if (target)  // removes indicators if present

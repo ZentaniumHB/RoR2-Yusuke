@@ -100,11 +100,39 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         // Net
         private bool hasAppliedStun;
         private bool hasAppliedForce;
-        
+
+
+        //effects 
+        public GameObject hitImpactEffectPrefab;
+        public GameObject punchBarragePrefab;
+        public GameObject heavyHitEffectPrefab;
+        public GameObject heavyHitEffectFollowPrefab;
+        public GameObject finalHitEffectPrefab;
+        private GameObject stompEffectPrefab;
+
+        private GameObject shadowDashEffectPrefab;
+        private bool hasAppliedPunchEffect;
+
+        private readonly string dashCenter = "dashCenter";
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string divePunchCenter = "divePunchCenter";
+        private readonly string mainPosition = "mainPosition";
+
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            hitImpactEffectPrefab = YusukeAssets.hitImpactEffect;
+            punchBarragePrefab = YusukeAssets.punchBarrageFastEffect;
+            heavyHitEffectPrefab = YusukeAssets.heavyHitRingEffect;
+            heavyHitEffectFollowPrefab = YusukeAssets.heavyHitRingFollowingEffect;
+            finalHitEffectPrefab = YusukeAssets.finalHitEffect;
+            stompEffectPrefab = YusukeAssets.stompEffect;
+
+
+            shadowDashEffectPrefab = YusukeAssets.shadowDashSK1;
+
 
             characterMotor.enabled = true;
             characterDirection.enabled = true;
@@ -121,8 +149,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             knockbackController = new KnockbackController();
             attackFinisherID = (byte)Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
 
+            EditAttackEffects();
+            EffectManager.SimpleMuzzleFlash(shadowDashEffectPrefab, gameObject, dashCenter, true);
 
+        }
 
+        private void EditAttackEffects()
+        {
+            hitImpactEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
+
+            float duration = punchReset * (maxPunches - 1);
+            punchBarragePrefab.AddComponent<DestroyOnTimer>().duration = duration + 0.1f;
+
+            heavyHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+            heavyHitEffectFollowPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+            shadowDashEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+            stompEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+
+            EffectComponent component2 = heavyHitEffectPrefab.GetComponent<EffectComponent>();
+            if (component2) component2.parentToReferencedTransform = false;
+
+            finalHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
         }
 
         public override void OnExit()
@@ -158,6 +205,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 {
                     if (attackFinisherID == 1) PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
                     if (attackFinisherID == 2) PlayAnimation("FullBody, Override", "StompDive", "Roll.playbackRate", 0.5f);
+
+                    EffectManager.SimpleMuzzleFlash(hitImpactEffectPrefab, gameObject, divePunchCenter, false);
+                    EffectManager.SimpleMuzzleFlash(heavyHitEffectFollowPrefab, gameObject, divePunchCenter, false);
+                    EffectManager.SimpleMuzzleFlash(stompEffectPrefab, gameObject, divePunchCenter, false);
+
                     playAnim = true;
                 }
 
@@ -507,6 +559,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 scale = 8f
             }, transmit: true);
 
+            if (!hasAppliedPunchEffect)
+            {
+                hasAppliedPunchEffect = true;
+                EffectManager.SimpleMuzzleFlash(punchBarragePrefab, gameObject, divePunchCenter, false);
+
+
+            }
+
             attack = new OverlapAttack
             {
                 damageType = damageType,
@@ -534,6 +594,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 scale = 8f
             }, transmit: true);
 
+            EffectManager.SimpleMuzzleFlash(stompEffectPrefab, gameObject, mainPosition, false);
 
             stompAttack = new OverlapAttack
             {
@@ -614,6 +675,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (finalPunchDelayStopwatch > finalPunchStartup) 
             {
                 ApplyForce();
+                EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, false);
+                EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
                 hasBarrageFinished = true; 
             } 
             
@@ -648,6 +711,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             {
                 Log.Info("Attack kick has ended, so make barrage true");
                 ApplyForce();
+                EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, false);
+                EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
                 hasBarrageFinished = true;
             }
 

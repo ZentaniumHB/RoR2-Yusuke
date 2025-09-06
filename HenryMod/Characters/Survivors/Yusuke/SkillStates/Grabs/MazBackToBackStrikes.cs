@@ -138,6 +138,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
             dashBoomPrefab = YusukeAssets.dashBoomEffect;
 
+            shadowDashEffectPrefab = YusukeAssets.shadowDashSK1;
+            shadowDashGrabEffectPrefab = YusukeAssets.shadowDashGrabSK1;
+
+            gutPunchSlowPrefab = YusukeAssets.gutPunchSlowEffect;
+            gutPunchFastPrefab = YusukeAssets.gutPunchFastEffect;
+
 
             isEnemyKilled = false;
             hasSelectionMade = false;
@@ -154,6 +160,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             heavyHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
             dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
             finalHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+
+            shadowDashEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+            shadowDashGrabEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
+
+
         }
 
         private void SwitchAnimationLayer()
@@ -162,11 +173,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
 
             // make an switch case for the effect that should be used
-            shadowDashEffectPrefab = YusukeAssets.shadowDashSK1;
-            shadowDashGrabEffectPrefab = YusukeAssets.shadowDashGrabSK1;
-
-            gutPunchSlowPrefab = YusukeAssets.gutPunchSlowEffect;
-            gutPunchFastPrefab = YusukeAssets.gutPunchFastEffect;
+            
 
             if (stateMachine == null)
             {
@@ -192,7 +199,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             }
 
-            EffectManager.SimpleMuzzleFlash(shadowDashEffectPrefab, gameObject, dashCenter, true);
+            
 
         }
 
@@ -283,6 +290,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     // after the shotgun duration (so the animation can be seen and not interruped), kick em
                     if (shotGunEndLag > shotGunEndLagDuration)
                     {
+                        hasPlayedShadowDash = false;
                         TeleportToTarget();
                         KickEnemy();
                     }

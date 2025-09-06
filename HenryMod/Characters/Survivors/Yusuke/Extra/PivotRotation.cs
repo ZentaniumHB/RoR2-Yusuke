@@ -22,13 +22,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
         private bool hasCapturedOrigRotations;
 
-        private bool endUpdateOvertime;
+        private bool shouldUpdateVFXRotationsOvertime;
 
         private bool hasRotatedVFX;
 
         public bool shouldRotate = false;
 
         public bool shouldRotatePivotVFX = false;
+
 
         private void Start()
         {
@@ -65,7 +66,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 }
 
                 Rotate();
-                hasRotatedVFX = true;
+                if(!shouldUpdateVFXRotationsOvertime) hasRotatedVFX = true;
             }
 
             if (!shouldRotate && hasRotatedVFX)
@@ -73,6 +74,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 // resets the rotations back to normal
                 hasRotatedVFX = false;
                 hasCapturedOrigRotations = false;
+                shouldUpdateVFXRotationsOvertime = false;
                 //baseBoneTransform.rotation = originalBoneRotation;
                 basePivotTransform.localRotation = originalPivotRotation;
 
@@ -87,6 +89,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 //Rotating
                 baseBoneTransform.rotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
                 if (!hasRotatedVFX) basePivotTransform.localRotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
+                if (shouldUpdateVFXRotationsOvertime) basePivotTransform.localRotation = Quaternion.Inverse(baseBoneTransform.rotation);
             }
             // transforms have not been set properly otherwise
 
@@ -94,11 +97,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
 
         // setting the rotations of the character and visual effects if needed.
-        public void SetRotations(Vector3 forwardDirection, bool bodyRotation, bool vfxRotation)
+        public void SetRotations(Vector3 forwardDirection, bool bodyRotation, bool vfxRotation, bool rotateOvertime)
         {
             lookDirection = forwardDirection;
             shouldRotate = bodyRotation;
             shouldRotatePivotVFX = vfxRotation;
+            shouldUpdateVFXRotationsOvertime = rotateOvertime;
 
         }
     }

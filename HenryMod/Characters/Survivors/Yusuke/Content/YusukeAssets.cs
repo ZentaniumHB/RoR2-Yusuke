@@ -166,7 +166,7 @@ namespace YusukeMod.Survivors.Yusuke
             heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHitRing2", "heavyHitRing2", true, false);
 
             finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", false, false);
-            stompEffect = _assetBundle.LoadEffect("stomp", "stomp", true, false);
+            stompEffect = _assetBundle.LoadEffect("stomp", "stomp", false, false);
 
             mazokuTransformationRaizenStartupEffect = _assetBundle.LoadEffect("mazokuTransformStartUp", "mazokuTransformStartUp", true, false);
             maokuTansformationExplosionEffect = _assetBundle.LoadEffect("mazokuTransoformExplosion", "mazokuTransoformExplosion", true, false);
