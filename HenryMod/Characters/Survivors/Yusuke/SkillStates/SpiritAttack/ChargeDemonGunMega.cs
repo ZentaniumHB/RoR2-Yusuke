@@ -35,11 +35,33 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private YusukeMain mainState;
 
+
+        private GameObject spiritGunMegaChargeEffectPrefab;
+        private GameObject spiritGunMegaChargeEffectObject;
+        private bool hasRegularEffectSpawned;
+
+        private GameObject spiritGunMegaChargeEffectPotentPrefab;
+        private GameObject spiritGunMegaChargeEffectPotentObject;
+        private bool hasMaxChargeEffectSpawned;
+
+        private GameObject chargeWindEffectPrefab;
+        private GameObject chargeWindObject;
+
+        private GameObject mazokuSparkElectricityPrefab;
+        private GameObject mazokuSparkElectricityObject;
+        private bool hasShownElectricityEffect;
+        private readonly string fingerTipString = "fingerTipR";
+
         public override void OnEnter()
         {
             base.OnEnter();
 
             SwitchAnimationLayer();
+
+            spiritGunMegaChargeEffectPrefab = YusukeAssets.spiritGunMegaChargeEffect;
+            spiritGunMegaChargeEffectPotentPrefab = YusukeAssets.spiritGunMegaChargePotentEffect;
+            chargeWindEffectPrefab = YusukeAssets.chargeWindEffect;
+            mazokuSparkElectricityPrefab = YusukeAssets.mazokuElectricChargeEffect;
 
             // starting value, max value and how long to it takes to reach charge limit (in seconds)
             chargeValue = 0.0f;
@@ -62,6 +84,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             }
 
             PlayAnimation("BothHands, Override", "SpiritMegaHandPose", "ShootGun.playbackRate", 1f);
+
+            if (chargeWindEffectPrefab != null) chargeWindObject = YusukePlugin.CreateEffectObject(chargeWindEffectPrefab, FindModelChild("mainPosition"));
+            SpawnChargeEffect();
+
+
+        }
+
+        private void SpawnChargeEffect()
+        {
+            if (spiritGunMegaChargeEffectPrefab != null) spiritGunMegaChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunMegaChargeEffectPrefab, FindModelChild("fingerTipR"));
+            if (spiritGunMegaChargeEffectPotentPrefab != null) spiritGunMegaChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritGunMegaChargeEffectPotentPrefab, FindModelChild("fingerTipR"));
+            if (mazokuSparkElectricityPrefab != null) mazokuSparkElectricityObject = YusukePlugin.CreateEffectObject(mazokuSparkElectricityPrefab, FindModelChild(fingerTipString));
+
+            spiritGunMegaChargeEffectPotentObject.SetActive(false);
+            mazokuSparkElectricityObject.SetActive(false);
+            hasRegularEffectSpawned = true;
         }
 
         // the animation switching is done once the YusukeMain state is taken
@@ -149,7 +187,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             {
                 tier1Wave = false;
                 tier2Wave = true;
+                
+                DestroyCurrentEffect();
+            }
 
+            if(totalCharge >= 200)
+            {
+                if (!hasShownElectricityEffect)
+                {
+                    hasShownElectricityEffect = true;
+                    mazokuSparkElectricityObject.SetActive(true);
+                }
             }
 
             ChangeWave();
@@ -164,6 +212,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             }
 
 
+        }
+
+        private void DestroyCurrentEffect()
+        {
+            if (hasRegularEffectSpawned)
+            {
+                hasRegularEffectSpawned = false;
+                EntityState.Destroy(spiritGunMegaChargeEffectObject);
+                spiritGunMegaChargeEffectPotentObject.SetActive(true);
+            }
         }
 
         private void CheckTransformState()
@@ -274,7 +332,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 charge = totalCharge,
                 tier1Wave = tier1Wave,
                 tier2Wave = tier2Wave,
-                penaltyTime = penaltyTimer
+                penaltyTime = penaltyTimer,
+                spiritGunMegaChargeEffectObject = spiritGunMegaChargeEffectObject,
+                spiritGunMegaChargeEffectPotentObject = spiritGunMegaChargeEffectPotentObject,
+                chargeWindObject = chargeWindObject,
+                mazokuSparkElectricityObject = mazokuSparkElectricityObject
 
             };
         }

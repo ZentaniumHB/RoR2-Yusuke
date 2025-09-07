@@ -44,9 +44,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private Transform modelTransform;
         private AimAnimator aimAnim;
 
+        public GameObject spiritGunMegaChargeEffectObject;
+        public GameObject spiritGunMegaChargeEffectPotentObject;
+        public GameObject chargeWindObject;
+        public GameObject mazokuSparkElectricityObject;
+
+        private readonly string fingerTipString = "fingerTipR";
+        private readonly string mainPosition = "mainPosition";
+        private GameObject spiritGunMegaMuzzleFlashPrefab;
+        private GameObject megaWindEffectPrefab;
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
+            megaWindEffectPrefab = YusukeAssets.megaWindEffect;
 
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
 
@@ -82,6 +95,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 ShakeEmitter.CreateSimpleShakeEmitter(GetAimRay().origin, wave, 1.5f, 20f, true);
             }
 
+            SpawnMuzzleEffect();
+
+        }
+
+        private void SpawnMuzzleEffect()
+        {
+            // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
+            EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
+            spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+
+            if (component)
+            {
+                component.parentToReferencedTransform = true;
+
+            }
         }
 
         public override void OnExit()
@@ -130,6 +159,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 hasFired = true;
                 PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
+                if (spiritGunMegaChargeEffectObject) EntityState.Destroy(spiritGunMegaChargeEffectObject);
+                if (spiritGunMegaChargeEffectPotentObject) EntityState.Destroy(spiritGunMegaChargeEffectPotentObject);
+                if (chargeWindObject) EntityState.Destroy(chargeWindObject);
+                if (mazokuSparkElectricityObject) EntityState.Destroy(mazokuSparkElectricityObject);
+
+                EffectManager.SimpleMuzzleFlash(spiritGunMegaMuzzleFlashPrefab, gameObject, fingerTipString, false);
+                EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
 
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
