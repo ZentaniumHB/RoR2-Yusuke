@@ -66,6 +66,9 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject gutPunchSlowEffect;
         public static GameObject gutPunchFastEffect;
 
+        public static GameObject spiritCuffReleaseEffect;
+        public static GameObject spiritCuffEffect;
+
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -170,6 +173,9 @@ namespace YusukeMod.Survivors.Yusuke
 
             mazokuTransformationRaizenStartupEffect = _assetBundle.LoadEffect("mazokuTransformStartUp", "mazokuTransformStartUp", true, false);
             maokuTansformationExplosionEffect = _assetBundle.LoadEffect("mazokuTransoformExplosion", "mazokuTransoformExplosion", true, false);
+
+            spiritCuffReleaseEffect = _assetBundle.LoadEffect("spiritCuffReleaseState", "spiritCuffReleaseState", true, false);
+            spiritCuffEffect = _assetBundle.LoadEffect("spiritCuffReleaseParticles", "spiritCuffReleaseParticles", true, true);
 
             shadowDashSK1 = _assetBundle.LoadEffect("shadowDashSK1", "shadowDashSK1", false, false);
             shadowDashGrabSK1 = _assetBundle.LoadEffect("shadowDashGrabSK1", "shadowDashGrabSK1", false, false);
