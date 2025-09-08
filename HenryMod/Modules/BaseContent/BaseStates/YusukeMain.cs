@@ -29,6 +29,7 @@ namespace YusukeMod.Modules.BaseStates
             Mazoku
         }
 
+        private GameObject spiritCuffEffect = null;
 
         Vector3 currentPosition;
         Vector3 latestGroundPosition;
@@ -79,6 +80,10 @@ namespace YusukeMod.Modules.BaseStates
         private bool isRestAnimationActive = false;
         private MazokuComponent mazokuComponent;
 
+        private SpiritCuffComponent spiritCuffComponent;
+        private GameObject spiritCuffObject;
+        private GameObject spiritCuffEffectPrefab;
+
         private string playbackRateParam = "animInterrupt.playbackRate";
 
         public void Start()
@@ -103,6 +108,12 @@ namespace YusukeMod.Modules.BaseStates
             isPrimaryReady = true;
             isSecondaryReady = true;
             mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+            spiritCuffComponent = characterBody.gameObject.GetComponent<SpiritCuffComponent>();
+
+            // used to control the spirit cuff effect
+            spiritCuffEffectPrefab = YusukeAssets.spiritCuffEffect;
+            if (!spiritCuffObject) spiritCuffObject = YusukePlugin.CreateEffectObject(spiritCuffEffectPrefab, FindModelChild("mainPosition"));
+            spiritCuffObject.SetActive(false);
 
         }
 
@@ -237,6 +248,19 @@ namespace YusukeMod.Modules.BaseStates
 
                 }
 
+            }
+
+            // cheap way of doing it, but I spent too long trying to figure out another way of doing it. If it works, it works.
+            if(spiritCuffComponent != null)
+            {
+                if (spiritCuffComponent.hasReleased)
+                {
+                    spiritCuffObject.SetActive(true);
+                }
+                else
+                {
+                    spiritCuffObject.SetActive(false);
+                }
             }
         }
 
