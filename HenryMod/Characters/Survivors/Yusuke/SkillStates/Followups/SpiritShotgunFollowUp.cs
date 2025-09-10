@@ -50,12 +50,34 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public static float damageCoefficient = YusukeStaticValues.gunDamageCoefficient;
         private bool hasAppliedForce;
 
+        private GameObject spiritShotGunChargeEffectPotentPrefab;
+        private GameObject spiritShotGunChargeEffectPotentObject;
+
+        private Transform modelTransform;
+        private AimAnimator aimAnim;
+
+        public static GameObject spiritTracerEffect = YusukeAssets.spiritShotGunTracerEffect;
+        private GameObject spiritShotGunExplosionHitEffect = YusukeAssets.spiritShotGunHitEffect;
+        private GameObject spiritGunMuzzleFlashPrefab;
+
+        private bool hasPlayedStartUpAnimation;
+        private bool hasPlayedFinishAnimation;
+
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string divePunchCenter = "divePunchCenter";
+
         public override void OnEnter()
         {
             base.OnEnter();
 
             if (ID != 0)
             {
+                spiritShotGunChargeEffectPotentPrefab = YusukeAssets.spiritShotGunChargePotentEffect;
+                spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
+
+                modelTransform = GetModelTransform();
+                aimAnim = modelTransform.GetComponent<AimAnimator>();
+
                 controller = new ShotgunController();
                 characterMotor.enabled = true;
                 characterDirection.enabled = true;
@@ -63,8 +85,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 muzzleString = "Muzzle";
 
             }
+            aimAnim.enabled = false;
+            SpawnAndEditEffect();
+
+        }
+
+        private void SpawnAndEditEffect()
+        {
+            if (spiritShotGunChargeEffectPotentPrefab != null) spiritShotGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritShotGunChargeEffectPotentPrefab, FindModelChild("HandR"));
+            
+        }
 
 
+        public override void OnExit()
+        {
+            base.OnExit();
+            aimAnim.enabled = true;
         }
 
         public override void FixedUpdate()
@@ -78,6 +114,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 if (foundTarget)
                 {
                     AddController();
+
+                    if (!hasPlayedStartUpAnimation)
+                    {
+                        hasPlayedStartUpAnimation = true;
+                        PlayAnimation("FullBody, Override", "ShotgunFollowUpStartUp", "ShootGun.playbackRate", 1f);
+                        spiritShotGunChargeEffectPotentObject.SetActive(true);
+
+                    }
+
                     if(slowDownStopWatch > slowDownDuration)
                     {
                         SearchForTargets(out var targets);
@@ -184,6 +229,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private void SlowDown()
         {
+
             // slows down the velocity Yusuke is traveling
             slowDownStopWatch += GetDeltaTime();
             float decelerateValue = 0.95f;
@@ -201,11 +247,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (!hasFiredShotgun)
             {
                 hasFiredShotgun = true;
+
+                if (spiritShotGunChargeEffectPotentObject) EntityState.Destroy(spiritShotGunChargeEffectPotentObject);
+
+                if (!hasPlayedFinishAnimation)
+                {
+                    hasPlayedFinishAnimation = true;
+                    PlayAnimation("FullBody, Override", "ShotgunFollowUpFinish", "ShootGun.playbackRate", 1f);
+                }
+
                 SendDiagonally();
 
                 Log.Info("Firing shotgun");
                 characterBody.AddSpreadBloom(1.5f);
-                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                EffectManager.SimpleMuzzleFlash(spiritGunMuzzleFlashPrefab, gameObject, divePunchCenter, false);
                 Util.PlaySound("HenryShootPistol", gameObject);
 
                 Ray aimRay = GetAimRay();
@@ -244,12 +299,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         radius = 0.75f,
                         sniper = false,
                         stopperMask = LayerIndex.CommonMasks.bullet,
-                        weapon = null,
-                        tracerEffectPrefab = tracerEffectPrefab,
+                        tracerEffectPrefab = spiritTracerEffect,
                         spreadPitchScale = 1f,
                         spreadYawScale = 1f,
                         queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
-                        hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
+                        hitEffectPrefab = spiritShotGunExplosionHitEffect,
 
                     }.Fire();
                 }
@@ -312,8 +366,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private void DashTowardsEnemy()
         {
-            //Log.Info("Capturing target");
-
+            
+            spiritShotGunChargeEffectPotentObject.SetActive(false);
             if (!target.healthComponent.alive) 
             {   // if the enemy is killed whilst the dash is happening, then simple exit the state.
                 outer.SetNextState(new RevertSkills
