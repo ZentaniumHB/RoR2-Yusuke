@@ -79,14 +79,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 Vector3 b = characterMotor ? characterMotor.velocity : Vector3.zero;
                 previousPosition = transform.position - b;
 
-                if (isGrounded)
-                {
-                    PlayAnimation("FullBody, Override", "Slide", "Slide.playbackRate", duration);
-                }
-                else
-                {
-                    PlayAnimation("FullBody, Override", "Dash", "Roll.playbackRate", duration);
-                }
+                PlayCorrespondingSlideAnimation();
 
                 AddEffect();
 
@@ -107,6 +100,42 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             }
 
+        }
+
+        private void PlayCorrespondingSlideAnimation()
+        {
+            EntityState state = EntityStateMachine.FindByCustomName(gameObject, "Weapon").state;
+            Log.Info("current State in slide: "+ state.GetType().ToString());
+            if (isGrounded)
+            {
+                if (state.GetType() == typeof(ChargeSpiritGun) || state.GetType() == typeof(ChargeSpiritGunPrimary))
+                {
+                    PlayAnimation("FullBody, Override", "SlideGun", "Slide.playbackRate", duration);
+
+                } else if (state.GetType() == typeof(ChargeSpiritShotgun)) 
+                {
+                    PlayAnimation("FullBody, Override", "SlideShotgun", "Slide.playbackRate", duration);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "Slide", "Slide.playbackRate", duration);
+                }
+            }
+            else
+            {
+                if (state.GetType() == typeof(ChargeSpiritGun) || state.GetType() == typeof(ChargeSpiritGunPrimary))
+                {
+                    PlayAnimation("FullBody, Override", "DashGun", "Slide.playbackRate", duration);
+                }
+                else if (state.GetType() == typeof(ChargeSpiritShotgun))
+                {
+                    PlayAnimation("FullBody, Override", "DashShotgun", "Slide.playbackRate", duration);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "Dash", "Slide.playbackRate", duration);
+                }
+            }
         }
 
         private void AddEffect()
