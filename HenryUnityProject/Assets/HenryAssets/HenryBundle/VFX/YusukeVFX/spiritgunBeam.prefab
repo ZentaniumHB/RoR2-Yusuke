@@ -14638,7 +14638,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5098778947797635927}
   m_Layer: 0
-  m_Name: spiritBeam
+  m_Name: spiritgunBeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
