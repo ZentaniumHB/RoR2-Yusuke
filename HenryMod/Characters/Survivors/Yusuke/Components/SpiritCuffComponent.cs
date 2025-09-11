@@ -17,6 +17,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public bool hasReleased;
         private float decreaseValue = 3f;
 
+        private bool hasDisplayedEffect;
+        public GameObject spiritCuffObj;
 
         private void Start()
         {
@@ -36,6 +38,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 currentSpiritValue = 0;
                 previousValue = currentSpiritValue;
                 hasReleased = false;
+                hasDisplayedEffect = false;
             }
         }
 
@@ -74,6 +77,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             previousValue = currentSpiritValue;
             Log.Info("Previous value: "+previousValue);
             return true;
+        }
+
+        public void ChangeEffectState(bool isActive)
+        {
+            if (isActive)
+            {
+                hasDisplayedEffect = true;
+            }
+            else
+            {
+                hasDisplayedEffect = false;
+            }
+        }
+
+        public bool GetCurrentEffectState()
+        {
+            return hasDisplayedEffect;
         }
 
     }

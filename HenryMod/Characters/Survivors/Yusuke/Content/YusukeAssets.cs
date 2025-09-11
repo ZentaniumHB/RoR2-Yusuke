@@ -40,6 +40,8 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject demonGunMuzzleFlashEffect;
         public static GameObject mazokuElectricChargeEffect;
 
+        public static GameObject spiritgunBeamEffect;
+
         // other effects
         public static GameObject dashStartSmallEffect;
         public static GameObject dashStartMaxEffect;
@@ -192,6 +194,8 @@ namespace YusukeMod.Survivors.Yusuke
             spiritGunChargePotentEffect = _assetBundle.LoadEffect("spiritGunChargePotent", "spiritGunChargePotent", false, true);
             spiritGunMegaChargeEffect = _assetBundle.LoadEffect("spiritMegaCharge", "spiritMegaCharge", true, true);
             spiritGunMegaChargePotentEffect = _assetBundle.LoadEffect("spiritMegaChargePotent", "spiritMegaChargePotent", true, true);
+
+            spiritgunBeamEffect = _assetBundle.LoadEffect("spiritgunBeam", "spiritgunBeam", true, false);
 
             Log.Info("loading shotgun effect");
             spiritShotGunChargeEffect = _assetBundle.LoadEffect("spiritShotGunCharge", "spiritShotGunCharge", true, true);

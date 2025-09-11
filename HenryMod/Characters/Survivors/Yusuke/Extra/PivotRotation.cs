@@ -30,6 +30,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
         public bool shouldRotatePivotVFX = false;
 
+        public bool shouldOnlyRotateVFX = false;
+
 
         private void Start()
         {
@@ -87,7 +89,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             if(baseBoneTransform && basePivotTransform)
             {
                 //Rotating
-                baseBoneTransform.rotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
+                if(!shouldOnlyRotateVFX) baseBoneTransform.rotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
                 if (!hasRotatedVFX) basePivotTransform.localRotation *= Quaternion.AngleAxis((lookDirection.y * -90f), Vector3.right);
                 if (shouldUpdateVFXRotationsOvertime) basePivotTransform.localRotation = Quaternion.Inverse(baseBoneTransform.rotation);
             }
@@ -103,7 +105,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             shouldRotate = bodyRotation;
             shouldRotatePivotVFX = vfxRotation;
             shouldUpdateVFXRotationsOvertime = rotateOvertime;
+            
+        }
 
+        public void SetOnlyVFXRotation()
+        {
+            shouldOnlyRotateVFX = true;
+        }
+
+        public void ResetOnlyVFXRotation()
+        {
+            shouldOnlyRotateVFX = false;
         }
     }
 }

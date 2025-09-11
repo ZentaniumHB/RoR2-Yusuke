@@ -49,9 +49,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private PivotRotation pivotRotation;
         private Vector3 forwardDirection;
 
+        private GameObject spiritGunMuzzleFlashPrefab;
+        private GameObject spiritGunBeamPrefab;
+        private GameObject dashBoomPrefab;
+
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string dashCenter = "muzzleCenter";
+
         public override void OnEnter()
         {
             base.OnEnter();
+
+            spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
+            spiritGunBeamPrefab = YusukeAssets.spiritgunBeamEffect;
+            dashBoomPrefab = YusukeAssets.dashBoomEffect;
 
             // get the stateMachine related to the customName Body
             EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
@@ -72,26 +83,37 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             damageTypeDecider = Random.Range(1, 3);     // makes it pick either 1 or 2
             Log.Info("type move: " + damageTypeDecider);
 
+            pivotRotation = GetComponent<PivotRotation>();
+            forwardDirection = GetAimRay().direction;
+
             if (isGrounded)
             {
                 PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
+                pivotRotation.SetOnlyVFXRotation();
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
             }
             else
             {
                 PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
-
-                pivotRotation = GetComponent<PivotRotation>();
-                forwardDirection = GetAimRay().direction;
                 pivotRotation.SetRotations(forwardDirection, true, true, false);
             }
             //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+            SpawnChargeEffect();
 
+        }
 
+        private void SpawnChargeEffect()
+        {
+            spiritGunBeamPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            spiritGunMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 2;
         }
 
         public override void OnExit()
         {
             base.OnExit();
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.ResetOnlyVFXRotation();
             pivotRotation.SetRotations(Vector3.zero, false, false, false);
             SwitchAnimationLayer();
 
@@ -101,6 +123,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+            characterDirection.forward = aimRay.direction;
+            characterDirection.moveVector = aimRay.direction;
 
             if (fixedAge >= fireTime)
             {
@@ -140,7 +165,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 hasFired = true;
 
                 characterBody.AddSpreadBloom(1.5f);
-                EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+                
+                EffectManager.SimpleMuzzleFlash(spiritGunMuzzleFlashPrefab, gameObject, muzzleCenter, false);
+                EffectManager.SimpleMuzzleFlash(spiritGunBeamPrefab, gameObject, muzzleCenter, false);
+                EffectManager.SimpleMuzzleFlash(dashBoomPrefab, gameObject, dashCenter, false);
+
                 Util.PlaySound("HenryShootPistol", gameObject);
 
                 if (isAuthority)

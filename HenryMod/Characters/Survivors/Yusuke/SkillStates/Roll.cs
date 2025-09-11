@@ -35,6 +35,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private GameObject dashAirEffectPrefab;
 
         private readonly string mainPosition = "mainPosition";
+        private EntityState bodyState;
 
         public override void OnEnter()
         {
@@ -96,7 +97,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 }
 
                 
-
+                bodyState = EntityStateMachine.FindByCustomName(gameObject, "Body").state;
 
             }
 
@@ -226,6 +227,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 outer.SetNextStateToMain();
                 return;
             }
+
+            
         }
 
         public override void OnExit()
