@@ -46,6 +46,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private float knockBackTime;
         private float knockBackDuration = 1f;
 
+        private PivotRotation pivotRotation;
+        private Vector3 forwardDirection;
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -76,14 +79,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             else
             {
                 PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
+
+                pivotRotation = GetComponent<PivotRotation>();
+                forwardDirection = GetAimRay().direction;
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
             }
             //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+
 
         }
 
         public override void OnExit()
         {
             base.OnExit();
+            pivotRotation.SetRotations(Vector3.zero, false, false, false);
             SwitchAnimationLayer();
 
         }

@@ -166,7 +166,7 @@ namespace YusukeMod.Survivors.Yusuke
             punchBarrageSlowEffect = _assetBundle.LoadEffect("punchBarrageSlow", "punchBarrageSlow", true, false);
 
             heavyHitRingEffect = _assetBundle.LoadEffect("heavyHitRing", "heavyHitRing", false, false);
-            heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHitRing2", "heavyHitRing2", true, false);
+            heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHItRingFollow", "heavyHItRingFollow", true, false);
 
             finalHitEffect = _assetBundle.LoadEffect("finalHit", "finalHit", false, false);
             stompEffect = _assetBundle.LoadEffect("stomp", "stomp", false, false);
@@ -420,18 +420,27 @@ namespace YusukeMod.Survivors.Yusuke
         {
             // cloning
             GameObject baseSpiritGun = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Mage/MageFireboltBasic.prefab").WaitForCompletion();
-            basicSpiritGunPrefabPrimary = PrefabAPI.InstantiateClone(baseSpiritGun, "basicSpiritGunProjectilePrimary");
+            basicSpiritGunPrefabPrimary = PrefabAPI.InstantiateClone(baseSpiritGun, "basicSpiritGunProjectile");
 
             // add screen shake?
 
             // settings for the appearance
             ProjectileController spiritgunAesthetics = basicSpiritGunPrefabPrimary.GetComponent<ProjectileController>();
-            spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+
+            // changing the prefab appearance for now
+            if (_assetBundle.LoadAsset<GameObject>("spiritGunProjectile") != null)
+            {
+                spiritgunAesthetics.ghostPrefab = _assetBundle.CreateProjectileGhostPrefab("spiritGunProjectile");
+            }
+            else
+            {
+                spiritgunAesthetics.ghostPrefab = RoR2.LegacyResourcesAPI.Load<GameObject>("Prefabs/ProjectileGhosts/CaptainTazerGhost");
+            }
 
             // speed and duration
             ProjectileSimple spiritGunSpeed = basicSpiritGunPrefabPrimary.GetComponent<ProjectileSimple>();
             spiritGunSpeed.desiredForwardSpeed = 120;
-            spiritGunSpeed.lifetime = 5;
+            spiritGunSpeed.lifetime = 15;
 
             // explosion impact 
             ProjectileImpactExplosion spiritGunImpact = basicSpiritGunPrefabPrimary.GetComponent<ProjectileImpactExplosion>();
