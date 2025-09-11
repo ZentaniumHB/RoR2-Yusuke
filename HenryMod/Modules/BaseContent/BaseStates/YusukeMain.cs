@@ -112,8 +112,13 @@ namespace YusukeMod.Modules.BaseStates
 
             // used to control the spirit cuff effect
             spiritCuffEffectPrefab = YusukeAssets.spiritCuffEffect;
-            if (!spiritCuffObject) spiritCuffObject = YusukePlugin.CreateEffectObject(spiritCuffEffectPrefab, FindModelChild("mainPosition"));
-            spiritCuffObject.SetActive(false);
+            if (spiritCuffComponent.hasReleased && !spiritCuffComponent.GetCurrentEffectState()) 
+            {
+                Log.Info("Creating the spirit effect object");
+                spiritCuffComponent.ChangeEffectState(true);
+                spiritCuffObject = YusukePlugin.CreateEffectObject(spiritCuffEffectPrefab, FindModelChild("mainPosition"));
+                spiritCuffComponent.spiritCuffObj = spiritCuffObject;
+            }
 
         }
 
@@ -121,6 +126,8 @@ namespace YusukeMod.Modules.BaseStates
         {
             base.FixedUpdate();
             currentPosition = transform.position;
+            if (spiritCuffComponent.spiritCuffObj) Log.Info("Spirit cuff object exists in cuff component");
+
             if (isGrounded) latestGroundPosition = transform.position;
 
             //checking for any movement, including skill activations 
@@ -253,13 +260,24 @@ namespace YusukeMod.Modules.BaseStates
             // cheap way of doing it, but I spent too long trying to figure out another way of doing it. If it works, it works.
             if(spiritCuffComponent != null)
             {
-                if (spiritCuffComponent.hasReleased)
+                /*if (spiritCuffComponent.hasReleased)
                 {
                     spiritCuffObject.SetActive(true);
                 }
                 else
                 {
                     spiritCuffObject.SetActive(false);
+                }*/
+
+                if(!spiritCuffComponent.hasReleased)
+                {
+                    spiritCuffComponent.ChangeEffectState(false);
+                    if (spiritCuffComponent.spiritCuffObj) 
+                    {
+                        Log.Info("Deleting the spirit effect object");
+                        EntityState.Destroy(spiritCuffComponent.spiritCuffObj);
+                    }
+                        
                 }
             }
         }
