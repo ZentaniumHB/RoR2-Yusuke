@@ -11,12 +11,21 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private SpiritCuffComponent cuffComponent;
 
+        private GameObject meleeSwingEffect1Prefab = YusukeAssets.meleeSwingEffect1;
+        private GameObject meleeSwingEffect2Prefab = YusukeAssets.meleeSwingEffect2;
+        private GameObject meleeSwingEffect3Prefab = YusukeAssets.meleeSwingEffect3;
+        private GameObject meleeSwingEffect4Prefab = YusukeAssets.meleeSwingEffect4;
+
+        private GameObject hitImpactEffectPrefab = YusukeAssets.hitImpactEffect;
+
+        private readonly string dashCenter = "dashCenter";
+
         public override void OnEnter()
         {
             cuffComponent = gameObject.GetComponent<SpiritCuffComponent>();
 
 
-            hitboxGroupName = "SwordGroup";
+            hitboxGroupName = "MeleeGroup";
 
             damageType = DamageType.Generic;
             damageCoefficient = YusukeStaticValues.swordDamageCoefficient;
@@ -39,14 +48,32 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             swingSoundString = "HenrySwordSwing";
             hitSoundString = "";
-            muzzleString = swingIndex % 2 == 0 ? "SwingLeft" : "SwingRight";
+            muzzleString = "mainPosition";
             playbackRateParam = "Slash.playbackRate";
+
+
             swingEffectPrefab = YusukeAssets.swordSwingEffect;
+
+            meleeSwingEffect1Prefab = YusukeAssets.meleeSwingEffect1;
+            meleeSwingEffect2Prefab = YusukeAssets.meleeSwingEffect2;
+            meleeSwingEffect3Prefab = YusukeAssets.meleeSwingEffect3;
+            meleeSwingEffect4Prefab = YusukeAssets.meleeSwingEffect4;
+
             hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
 
             impactSound = YusukeAssets.swordHitSoundEvent.index;
 
+            EditEffects();
+
             base.OnEnter();
+        }
+
+        private void EditEffects()
+        {
+            meleeSwingEffect1Prefab.AddComponent<DestroyOnTimer>().duration = 1;
+            meleeSwingEffect2Prefab.AddComponent<DestroyOnTimer>().duration = 1;
+            meleeSwingEffect3Prefab.AddComponent<DestroyOnTimer>().duration = 1;
+            meleeSwingEffect4Prefab.AddComponent<DestroyOnTimer>().duration = 1;
         }
 
         protected override void PlayAttackAnimation()
@@ -126,12 +153,42 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         protected override void PlaySwingEffect()
         {
-            base.PlaySwingEffect();
+            //EffectManager.SimpleMuzzleFlash(swingEffectPrefab, gameObject, muzzleString, false);
+            switch (swingIndex)
+            {
+                case 1:
+                    EffectManager.SimpleMuzzleFlash(meleeSwingEffect1Prefab, gameObject, muzzleString, false);
+                    break;
+                case 2:
+                    EffectManager.SimpleMuzzleFlash(meleeSwingEffect2Prefab, gameObject, muzzleString, false);
+                    break;
+                case 3:
+                    if(characterBody.isSprinting && isGrounded)
+                    {
+                        EffectManager.SimpleMuzzleFlash(meleeSwingEffect1Prefab, gameObject, muzzleString, false);
+                    }
+                    else
+                    {
+                        EffectManager.SimpleMuzzleFlash(meleeSwingEffect3Prefab, gameObject, muzzleString, false);
+                    }
+                    break;
+                case 4:
+                    if (characterBody.isSprinting && isGrounded)
+                    {
+                        EffectManager.SimpleMuzzleFlash(meleeSwingEffect2Prefab, gameObject, muzzleString, false);
+                    }
+                    else
+                    {
+                        EffectManager.SimpleMuzzleFlash(meleeSwingEffect4Prefab, gameObject, muzzleString, false);
+                    }
+                    break;
+            }
         }
 
         protected override void OnHitEnemyAuthority()
         {
             base.OnHitEnemyAuthority();
+            EffectManager.SimpleMuzzleFlash(hitImpactEffectPrefab, gameObject, dashCenter, false);
             if (cuffComponent)
             {
                 cuffComponent.IncreaseCuff(1);

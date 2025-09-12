@@ -206,7 +206,9 @@ namespace YusukeMod.Survivors.Yusuke
         public void AddHitboxes()
         {
             //example of how to create a HitBoxGroup. see summary for more details
-            Prefabs.SetupHitBoxGroup(characterModelObject, "SwordGroup", "SwordHitbox");
+            //Prefabs.SetupHitBoxGroup(characterModelObject, "SwordGroup", "SwordHitbox");
+
+            Prefabs.SetupHitBoxGroup(characterModelObject, "MeleeGroup", "meleeHitBox");
         }
 
         public override void InitializeEntityStateMachines()

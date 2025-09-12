@@ -71,6 +71,10 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritCuffReleaseEffect;
         public static GameObject spiritCuffEffect;
 
+        public static GameObject meleeSwingEffect1;
+        public static GameObject meleeSwingEffect2;
+        public static GameObject meleeSwingEffect3;
+        public static GameObject meleeSwingEffect4;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -148,6 +152,12 @@ namespace YusukeMod.Survivors.Yusuke
 
             swordSwingEffect = _assetBundle.LoadEffect("HenrySwordSwingEffect", true);
             swordHitImpactEffect = _assetBundle.LoadEffect("ImpactHenrySlash");
+
+
+            meleeSwingEffect1 = _assetBundle.LoadEffect("meleeSwing1Effect", true);
+            meleeSwingEffect2 = _assetBundle.LoadEffect("meleeSwing2Effect", true);
+            meleeSwingEffect3 = _assetBundle.LoadEffect("meleeSwing3Effect", true);
+            meleeSwingEffect4 = _assetBundle.LoadEffect("meleeSwing4Effect", true);
         }
 
         private static void CreateHitAndOtherEffect()
