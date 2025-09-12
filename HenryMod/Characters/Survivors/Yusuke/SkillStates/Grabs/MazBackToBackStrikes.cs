@@ -17,6 +17,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 using static Rewired.ComponentControls.Effects.RotateAroundAxis;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 
@@ -116,10 +117,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasPlayedShadowDash;
         private bool hasPlayedGutPunch;
         private bool hasSpawnedFinalHitEffect;
+        
         private readonly string dashCenter = "dashCenter";
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string gutPunchCenter = "gutPunchCenter";
         private readonly string mainPosition = "mainPosition";
+
+        private YusukeWeaponComponent yusukeWeaponComponent;
 
         public override void OnEnter()
         {
@@ -148,6 +152,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             isEnemyKilled = false;
             hasSelectionMade = false;
             characterMotor.Motor.ForceUnground();
+
+
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetFollowUpBoolean(true);
 
             EditAttackEffects();
 
@@ -759,6 +767,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
 
             RemovePunchEffects();
+
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetFollowUpBoolean(false);
 
         }
 

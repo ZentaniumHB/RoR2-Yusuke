@@ -11,6 +11,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Modules.BaseStates
@@ -84,6 +85,8 @@ namespace YusukeMod.Modules.BaseStates
         private GameObject spiritCuffObject;
         private GameObject spiritCuffEffectPrefab;
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         private string playbackRateParam = "animInterrupt.playbackRate";
 
         public void Start()
@@ -109,6 +112,8 @@ namespace YusukeMod.Modules.BaseStates
             isSecondaryReady = true;
             mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             spiritCuffComponent = characterBody.gameObject.GetComponent<SpiritCuffComponent>();
+            
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
 
             // used to control the spirit cuff effect
             spiritCuffEffectPrefab = YusukeAssets.spiritCuffEffect;
@@ -304,7 +309,7 @@ namespace YusukeMod.Modules.BaseStates
 
         private bool CheckForInputs()
         {
-            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.jump.down || inputBank.sprint.down)
+            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.jump.down || inputBank.sprint.down || yusukeWeaponComponent.GetFollowUpBoolean())
                 return true;
             else
                 return false;

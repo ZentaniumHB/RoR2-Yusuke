@@ -17,6 +17,7 @@ using UnityEngine.Networking;
 using RoR2.Audio;
 using Random = UnityEngine.Random;
 using UnityEngine.Networking.NetworkSystem;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 {
@@ -33,7 +34,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private bool SkipDive;
         private bool playAnim;
         private byte attackFinisherID;
-
+        
         private bool resetY;
         private float velocityDivider = 0.1f;
 
@@ -119,6 +120,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private readonly string mainPosition = "mainPosition";
 
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -148,6 +151,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             knockbackController = new KnockbackController();
             attackFinisherID = (byte)Random.Range(1, 3); // pick between 1 or 2, it determines the type of animation/attack is done. 
+
+
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetFollowUpBoolean(true);
 
             EditAttackEffects();
             EffectManager.SimpleMuzzleFlash(shadowDashEffectPrefab, gameObject, dashCenter, true);
@@ -186,6 +193,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             Vector3 velocityPercentage = currentVelocity * velocityDivider;
             characterMotor.velocity = velocityPercentage;
 
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetFollowUpBoolean(false);
 
         }
 

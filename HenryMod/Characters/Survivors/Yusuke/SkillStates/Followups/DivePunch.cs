@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Collections;
 using UnityEngine.Networking;
 using RoR2.Audio;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 {
@@ -94,6 +95,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string divePunchCenter = "divePunchCenter";
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         public override void OnEnter()
         {
             base.OnEnter();     
@@ -121,6 +124,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 characterMotor.Motor.ForceUnground();
 
                 knockbackController = new KnockbackController();
+
+                yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+                yusukeWeaponComponent.SetFollowUpBoolean(true);
 
                 EditAttackEffects();
             }
@@ -160,9 +166,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             Vector3 velocityPercentage = currentVelocity * velocityDivider;
             characterMotor.velocity = velocityPercentage;
 
-            
-
-
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetFollowUpBoolean(false);
 
         }
 
