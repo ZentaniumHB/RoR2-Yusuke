@@ -64,6 +64,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             spiritGunBeamPrefab = YusukeAssets.spiritgunBeamEffect;
             dashBoomPrefab = YusukeAssets.dashBoomEffect;
 
+
+            SwitchAnimationLayer();
             // get the stateMachine related to the customName Body
             EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
             if (entityStateMachine.state is Roll)
@@ -91,6 +93,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
                 pivotRotation.SetOnlyVFXRotation();
                 pivotRotation.SetRotations(forwardDirection, true, true, false);
+                characterMotor.enabled = false;
+                characterDirection.enabled = false;
             }
             else
             {
@@ -115,7 +119,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             pivotRotation = GetComponent<PivotRotation>();
             pivotRotation.ResetOnlyVFXRotation();
             pivotRotation.SetRotations(Vector3.zero, false, false, false);
-            SwitchAnimationLayer();
+            //SwitchAnimationLayer();
+
+            characterMotor.enabled = true;
+            characterDirection.enabled = true;
 
         }
 

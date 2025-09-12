@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
@@ -40,14 +41,59 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float knockBackTime;
         private float knockBackDuration = 1f;
 
+
+
+        private GameObject demonGunMuzzleFlashPrefab;
+        private GameObject dashBoomPrefab;
+
+        public static GameObject spiritTracerEffect = YusukeAssets.spiritShotGunTracerEffect;
+        public GameObject demonGunExplosionHitEffect = YusukeAssets.demonGunExplosionEffect;
+
+        private PivotRotation pivotRotation;
+        private Vector3 forwardDirection;
+
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string dashCenter = "muzzleCenter";
+
+
         public override void OnEnter()
         {
             base.OnEnter();
             // pausing velocity so the character doesn't fall 
             characterMotor.velocity.y = 0f;
             characterMotor.enabled = true;
-            
 
+            demonGunMuzzleFlashPrefab = YusukeAssets.demonGunMuzzleFlashEffect;
+            dashBoomPrefab = YusukeAssets.dashBoomEffect;
+
+            pivotRotation = GetComponent<PivotRotation>();
+            forwardDirection = GetAimRay().direction;
+
+            if (isGrounded)
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", 1);
+                pivotRotation.SetOnlyVFXRotation();
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
+                characterMotor.enabled = false;
+                characterDirection.enabled = false;
+            }
+            else
+            {
+                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1);
+                pivotRotation.SetRotations(forwardDirection, true, true, false);
+            }
+
+
+            EditEffects();
+
+        }
+
+        private void EditEffects()
+        {
+            demonGunMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+            dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 2;
+
+            demonGunExplosionHitEffect.AddComponent<DestroyOnTimer>().duration = 2;
         }
 
         public override void OnExit()
@@ -55,8 +101,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             base.OnExit();
             // resume velocity
             characterMotor.velocity.y = 0f;
+
+            pivotRotation.ResetOnlyVFXRotation();
+            pivotRotation.SetRotations(Vector3.zero, false, false, false);
             characterMotor.enabled = true;
             characterDirection.enabled = true;
+
+            
+
         }
 
         public override void FixedUpdate()
@@ -79,14 +131,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 if (barrageStopWatch > bulletTime && numberOfShots != totalBullets)
                 {
                     // fires a bullet then increments
-                    if (isGrounded) // make sure the last bullet is normal speed, othewise it will look weird
+                    /*if (isGrounded) // make sure the last bullet is normal speed, othewise it will look weird
                     {
                         PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", 1);
                     }
                     else
                     {
                         PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", 1);
-                    }
+                    }*/
 
                     Fire();
 
@@ -125,7 +177,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (!isGrounded)
             {
                 // reverse the direction, so it seems it has a knockback effect.
-                Vector3 awayFromDirection = (-aimRay.direction).normalized;
+                Vector3 awayFromDirection = -(target.gameObject.transform.position - transform.position).normalized;
                 Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
                 // Apply the velocity to the character's motor
                 characterMotor.velocity = backWardSpeed;
@@ -136,7 +188,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
    
             characterBody.AddSpreadBloom(1.5f);
-            EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
+
+            EffectManager.SimpleMuzzleFlash(demonGunMuzzleFlashPrefab, gameObject, muzzleCenter, false);
+            EffectManager.SimpleMuzzleFlash(dashBoomPrefab, gameObject, dashCenter, false);
+
+            //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, gameObject, muzzleString, false);
             Util.PlaySound("HenryShootPistol", gameObject);
 
             aimRay = GetAimRay();
@@ -174,7 +230,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 spreadPitchScale = 1f,
                 spreadYawScale = 1f,
                 queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
-                hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
+                hitEffectPrefab = demonGunExplosionHitEffect,
 
             }.Fire();  
         }

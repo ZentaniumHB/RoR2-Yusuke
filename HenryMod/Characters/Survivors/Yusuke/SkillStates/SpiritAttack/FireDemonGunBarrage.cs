@@ -69,7 +69,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             if (isPrimary == true)
             {
-                projectilePrefab = YusukeAssets.basicSpiritGunPrefabPrimary;
+                
             }
 
             SpawnMuzzleEffect();
