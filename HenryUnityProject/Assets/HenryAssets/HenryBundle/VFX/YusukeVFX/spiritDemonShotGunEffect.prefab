@@ -4880,7 +4880,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1587894063055678018}
   m_Layer: 0
-  m_Name: spiritDemonShotGunEff
+  m_Name: spiritDemonShotGunEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
