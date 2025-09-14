@@ -56,14 +56,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float radius = 6f;
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string hitboxGroupName = "SwordGroup";
+        protected string hitboxGroupName = "MeleeGroup";
 
 
         private bool hasBarrageFinished;
         private float punchStopwatch;
         private float punchReset = 0.1f;
         private float punchCount = 0;
-        private int maxPunches = 6;
+        private int maxPunches = 12;
 
 
         // Animation flags used to play animations when needed. 
@@ -78,6 +78,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         // Net
         private bool hasAppliedStun;
+        private float additionalStunTime = 0.5f;
         private bool hasAppliedForce;
 
         // effects
@@ -96,6 +97,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private readonly string divePunchCenter = "divePunchCenter";
 
         private YusukeWeaponComponent yusukeWeaponComponent;
+        private bool hasPlayedRapidPunchAnimation;
 
         public override void OnEnter()
         {
@@ -250,7 +252,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 if (NetworkServer.active)
                 {
                     // the sum is based on the amount of time the enemy is pinned by Yusuke (once landed on the ground). Including all the startup and punch animation intervals 
-                    float stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup);
+                    float stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup + additionalStunTime);
                     target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(stunDuration);
 
                     // for bosses, the state needs to be set manually as they lack the SetStateOnHurt component
@@ -276,7 +278,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if(ID != 0)
             {
                 dashTimer += GetDeltaTime();
-                Log.Info("dashTimer: " + dashTimer);
                 if (!hasAppliedDashEffect)
                 {
                     hasAppliedDashEffect = true;
@@ -418,13 +419,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     PlayAnimation("FullBody, Override", "DiveMachinePunchStartup", "Roll.playbackRate", duration);
                 }
 
-                if (punchStopwatch > 0.2f && !isFinalPunchAnimationActive) // the boolean checks if the final animation is being played, that way it won't be interropted by the animations below. 
+                if (punchStopwatch > punchReset && !isFinalPunchAnimationActive) // the boolean checks if the final animation is being played, that way it won't be interropted by the animations below. 
                 {
                     if(!SkipDive && groundedAnimationStopwatch > groundedAnimationStartupDelayValue)    // once the animation reaches that value, it will then play the next animations
                     {
                         if (NetworkServer.active)
                         {
-                            PlayAnimation("FullBody, Override", "DiveMachinePunchGrounded", "Roll.playbackRate", 0.6f);
+                            if (!hasPlayedRapidPunchAnimation)
+                            {
+                                hasPlayedRapidPunchAnimation = true;
+                                PlayAnimation("FullBody, Override", "DiveMachinePunchGrounded", "Roll.playbackRate", 0.6f);
+                            }
 
                         }
                         ThrowPunch();

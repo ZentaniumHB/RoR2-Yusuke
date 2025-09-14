@@ -76,6 +76,9 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject meleeSwingEffect3;
         public static GameObject meleeSwingEffect4;
 
+        public static GameObject throwSwingSingleEffect;
+        public static GameObject throwSwingSpinningEffect;
+
         //explosion effects
         public static GameObject bombExplosionEffect;
 
@@ -194,6 +197,8 @@ namespace YusukeMod.Survivors.Yusuke
 
             gutPunchSlowEffect = _assetBundle.LoadEffect("gutPunchEffectSlow", "gutPunchEffectSlow", true, false);
             gutPunchFastEffect = _assetBundle.LoadEffect("gutPunchEffectFast", "gutPunchEffectFast", true, false);
+
+            throwSwingSingleEffect = _assetBundle.LoadEffect("ThrowSingleWind", "ThrowSingleWind", false, false);
 
         }
 

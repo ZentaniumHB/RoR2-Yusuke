@@ -80,7 +80,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         protected float radius = 6f;
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string hitboxGroupName = "SwordGroup";
+        protected string hitboxGroupName = "MeleeGroup";
         private bool hasAttackEnded;
         private bool hasLaunchedEnemy;
         private YusukeMain mainState;

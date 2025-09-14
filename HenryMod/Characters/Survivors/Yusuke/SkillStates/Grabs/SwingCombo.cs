@@ -77,6 +77,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private GameObject dashStartMaxEffectPrefab;
         private GameObject dashAirEffectPrefab;
         private GameObject dashBoomContinuousPrefab;
+        private GameObject throwSwingEffectPrefab;
+
         private bool hasResetPivotRotation;
         private readonly string mainPosition = "mainPosition";
         private readonly string dashCenter = "dashCenter";
@@ -92,7 +94,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             dashStartMaxEffectPrefab = YusukeAssets.dashStartMaxEffect;
             dashAirEffectPrefab = YusukeAssets.dashAirEffect;
             dashBoomContinuousPrefab = YusukeAssets.dashBoomContinuousEffect;
-
+            throwSwingEffectPrefab = YusukeAssets.throwSwingSingleEffect;
 
 
             UpdateDashSpeed(maxInitialSpeed, finalSpeed);
@@ -119,6 +121,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (dashAirEffectPrefab != null) dashAirEffectObject = YusukePlugin.CreateEffectObject(dashAirEffectPrefab, FindModelChild("mainPosition"));
             if (dashBoomContinuousPrefab != null) dashBoomObject = YusukePlugin.CreateEffectObject(dashBoomContinuousPrefab, FindModelChild("dashCenter"));
             dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            throwSwingEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
 
         }
 
@@ -294,6 +297,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 {
                     // Create another animation for this, more like a swing throw
                     PlayAnimation("FullBody, Override", "MazokuSingleSwingToss", "Roll.playbackRate", 2f);
+
+                    EffectManager.SimpleMuzzleFlash(throwSwingEffectPrefab, gameObject, mainPosition, false);
+
                     Vector3 forceVector = GetAimRay().direction;    // for now the Aim Ray is based on the characters facing direction
                     forceVector *= 20000f;
                     AttackForce(forceVector);

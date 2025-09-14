@@ -54,7 +54,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float radius = 6f;
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string hitboxGroupName = "SwordGroup";
+        protected string hitboxGroupName = "MeleeGroup";
 
 
         private OverlapAttack stompAttack;
@@ -65,7 +65,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float stompRadius = 60f;
         public GameObject stompHitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex stompImpactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string stompHitboxGroupName = "SwordGroup";
+        protected string stompHitboxGroupName = "MeleeGroup";
 
 
         private bool hasBarrageFinished;
@@ -96,6 +96,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         private float finalKickDelayStopwatch = 0f;
 
         private float animationEndLag;
+        private float additionalStunTime = 0.5f;
 
 
         // Net
@@ -294,8 +295,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                      *  In this case the stun will vary for each attack with a different ID.
                      */
                     float stunDuration = 0;
-                    if(attackFinisherID == 1) stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup);
-                    if(attackFinisherID == 2) stunDuration = (maxStomps * stompReset) + (stompStopwatch);
+                    if(attackFinisherID == 1) stunDuration = (maxPunches * punchReset) + (punchReset + finalPunchStartup + additionalStunTime);
+                    if(attackFinisherID == 2) stunDuration = (maxStomps * stompReset) + (stompStopwatch + additionalStunTime);
 
                     target.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(stunDuration);
 
