@@ -54,7 +54,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float radius = 6f;
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string hitboxGroupName = "MeleeGroup";
+        protected string hitboxGroupName = "divePunchGroup";
 
 
         private OverlapAttack stompAttack;
@@ -65,7 +65,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float stompRadius = 60f;
         public GameObject stompHitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex stompImpactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string stompHitboxGroupName = "MeleeGroup";
+        protected string stompHitboxGroupName = "divePunchGroup";
 
 
         private bool hasBarrageFinished;

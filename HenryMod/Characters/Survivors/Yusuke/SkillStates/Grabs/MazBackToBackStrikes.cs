@@ -103,6 +103,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private GameObject shadowDashEffectPrefab;
         private GameObject shadowDashGrabEffectPrefab;
 
+        private GameObject demonShotgunEffect;
+        private GameObject demonShotgunObject;
+
+        private GameObject demonShotgunExplosion;
+        private GameObject demonGunTracerEffect;
+
         private GameObject gutPunchSlowPrefab;
         private GameObject gutPunchFastPrefab;
         private GameObject gutPunchSlowObject;
@@ -148,6 +154,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             gutPunchSlowPrefab = YusukeAssets.gutPunchSlowEffect;
             gutPunchFastPrefab = YusukeAssets.gutPunchFastEffect;
 
+            demonShotgunEffect = YusukeAssets.demonShotgunChargeEffect;
+            demonShotgunExplosion = YusukeAssets.demonShotgunHitEffect;
+            demonGunTracerEffect = YusukeAssets.demonShotgunTracerEffect;
 
             isEnemyKilled = false;
             hasSelectionMade = false;
@@ -172,6 +181,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             shadowDashEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
             shadowDashGrabEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
 
+            demonShotgunExplosion.AddComponent<DestroyOnTimer>().duration = 1;
+
+            if (demonShotgunEffect != null) demonShotgunObject = YusukePlugin.CreateEffectObject(demonShotgunEffect, FindModelChild("HandR"));
+            demonShotgunObject.SetActive(false);
 
         }
 
@@ -265,6 +278,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                         
                         if (consecutiveDuration > totalConsecutiveTime)
                         {
+                            if (demonShotgunObject) EntityState.Destroy(demonShotgunObject);
                             LaunchEnemy();
                             if (launchAnimationDuration > launchAnimationSpeed)
                             {
@@ -281,10 +295,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     {
                         hasSelectionMade = true;
                         mazokuGrabController.Remove();
+                        
                     }
 
                     if (hasSelectionMade)   // once a selection is made (skill 1 selected), then it will continue
                     {
+                        if (demonShotgunObject) EntityState.Destroy(demonShotgunObject);
                         LaunchEnemy();
                         if (launchAnimationDuration > launchAnimationSpeed) DashAndKick();
                         
@@ -549,7 +565,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             foreach (HurtBox enemy in enemyTargets)
             {
                 //do a check if its a max charge, it SlowOnHit. If not, then regular.
-                EffectManager.SpawnEffect(spiritImpactEffect, new EffectData
+                EffectManager.SpawnEffect(demonShotgunExplosion, new EffectData
                 {
                     origin = enemy.gameObject.transform.position,
                     scale = 8f
@@ -574,15 +590,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                     smartCollision = true,
                     procChainMask = default,
                     procCoefficient = procCoefficient,
-                    radius = 2f,
+                    radius = 4f,
                     sniper = false,
                     stopperMask = LayerIndex.world.mask,
                     weapon = null,
-                    tracerEffectPrefab = tracerEffectPrefab,
+                    tracerEffectPrefab = demonGunTracerEffect,
                     spreadPitchScale = 1f,
                     spreadYawScale = 1f,
                     queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
-                    hitEffectPrefab = EntityStates.Commando.CommandoWeapon.FirePistol2.hitEffectPrefab,
+                    hitEffectPrefab = demonShotgunExplosion,
 
                 }.Fire();
             }
@@ -614,6 +630,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 hasIncreaseAttackSpeed = true;
                 hasPlayedGutPunch = false;
                 SpawnGutPunchEffect(true);
+                demonShotgunObject.SetActive(true);
                 attackInterval /= 2;
                 
             }

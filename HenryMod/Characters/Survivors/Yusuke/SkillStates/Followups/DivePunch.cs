@@ -56,7 +56,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         protected float radius = 6f;
         public GameObject hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
         protected NetworkSoundEventIndex impactSound = YusukeAssets.swordHitSoundEvent.index;
-        protected string hitboxGroupName = "MeleeGroup";
+        protected string hitboxGroupName = "divePunchGroup";
 
 
         private bool hasBarrageFinished;
@@ -449,8 +449,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 }
 
             }
-            
-            if(!target.healthComponent.alive) hasBarrageFinished = true;
+
+            if (!target.healthComponent.alive) 
+            {
+                hasBarrageFinished = true;
+                RevertAndRemoveEnemyComponents();
+            }
+                
 
             if(punchCount == maxPunches-1)
             {
@@ -574,18 +579,23 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, false);
                     EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
 
-                    if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
-                    if (target.healthComponent.alive) DivePunchController.Remove();
-                    if (target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
-                    if (knockbackController)
-                    {
-                        knockbackController.ForceDestory();
-
-                    }
+                    RevertAndRemoveEnemyComponents();
 
                 }
                 
                 if(finalPunchDelayStopwatch > finalPunchEnd) hasBarrageFinished = true;
+            }
+        }
+
+        private void RevertAndRemoveEnemyComponents()
+        {
+            if (beginDive) DivePunchController.EnemyRotation(DivePunchController.modelTransform, false);
+            if (target.healthComponent.alive) DivePunchController.Remove();
+            if (target.healthComponent.alive) knockbackController = target.healthComponent.body.gameObject.GetComponent<KnockbackController>();
+            if (knockbackController)
+            {
+                knockbackController.ForceDestory();
+
             }
         }
 

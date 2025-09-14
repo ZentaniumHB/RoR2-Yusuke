@@ -50,7 +50,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             motor = GetComponent<CharacterMotor>();
             direction = GetComponent<CharacterDirection>();
             rigidMotor = gameObject.GetComponent<RigidbodyMotor>();
-            modelLocator = GetComponent<ModelLocator>();
+            modelLocator = GetComponent<ModelLocator>();    
             collider = gameObject.GetComponent<Collider>();
             sphCollider = gameObject.GetComponent<SphereCollider>();
             capCollider = gameObject.GetComponent<CapsuleCollider>();
@@ -181,7 +181,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (!pinned)
                 {
                     hasRevertedRotation = true;
-
                 }
 
             }

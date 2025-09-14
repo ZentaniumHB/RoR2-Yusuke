@@ -84,9 +84,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 characterMotor.Motor.ForceUnground();
                 muzzleString = "Muzzle";
 
+
+                aimAnim.enabled = false;
+                SpawnAndEditEffect();
             }
-            aimAnim.enabled = false;
-            SpawnAndEditEffect();
+            
 
         }
 
@@ -100,7 +102,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public override void OnExit()
         {
             base.OnExit();
-            aimAnim.enabled = true;
+            if (ID != 0)
+            {
+                aimAnim.enabled = true;
+            }
+            
         }
 
         public override void FixedUpdate()

@@ -204,6 +204,7 @@ namespace YusukeMod.SkillStates
                     
             }
 
+            PlayAnimation("Gesture, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);
             // prevent any movement if spirit wave is grouned
             if (isGrounded)
             {

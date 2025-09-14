@@ -78,6 +78,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private GameObject dashAirEffectPrefab;
         private GameObject dashBoomContinuousPrefab;
         private GameObject throwSwingEffectPrefab;
+        private GameObject throwWindPrefab;
 
         private bool hasResetPivotRotation;
         private readonly string mainPosition = "mainPosition";
@@ -95,6 +96,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             dashAirEffectPrefab = YusukeAssets.dashAirEffect;
             dashBoomContinuousPrefab = YusukeAssets.dashBoomContinuousEffect;
             throwSwingEffectPrefab = YusukeAssets.throwSwingSingleEffect;
+            throwWindPrefab = YusukeAssets.throwWindEffect;
 
 
             UpdateDashSpeed(maxInitialSpeed, finalSpeed);
@@ -122,6 +124,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             if (dashBoomContinuousPrefab != null) dashBoomObject = YusukePlugin.CreateEffectObject(dashBoomContinuousPrefab, FindModelChild("dashCenter"));
             dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
             throwSwingEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            throwWindPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
 
         }
 
@@ -292,6 +295,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
                 if (!skipSwing) 
                 { 
                     swingController.Remove();
+                    EffectManager.SimpleMuzzleFlash(throwWindPrefab, gameObject, mainPosition, false);
                 }
                 else
                 {

@@ -39,6 +39,9 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject demonGunChargePotentEffect;
         public static GameObject demonGunMuzzleFlashEffect;
         public static GameObject mazokuElectricChargeEffect;
+        public static GameObject demonShotgunTracerEffect;
+        public static GameObject demonShotgunChargeEffect;
+        public static GameObject demonShotgunHitEffect;
 
         public static GameObject spiritgunBeamEffect;
 
@@ -77,7 +80,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject meleeSwingEffect4;
 
         public static GameObject throwSwingSingleEffect;
-        public static GameObject throwSwingSpinningEffect;
+        public static GameObject throwWindEffect;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -137,6 +140,13 @@ namespace YusukeMod.Survivors.Yusuke
             spiritShotGunTracerEffect.GetComponent<LineRenderer>().endColor = new Color32(0, 128, 255, 255);    // blue
             spiritShotGunTracerEffect.GetComponent<LineRenderer>().widthMultiplier = 0.8f; // sizing
 
+
+            demonShotgunTracerEffect = Asset.CloneTracer("TracerGoldGat", "demonShotGunTracer");
+
+            demonShotgunTracerEffect.GetComponent<LineRenderer>().startColor = new Color32(255, 0, 0, 255);   // red
+            demonShotgunTracerEffect.GetComponent<LineRenderer>().endColor = new Color32(255, 0, 0, 178);    // light red
+            demonShotgunTracerEffect.GetComponent<LineRenderer>().widthMultiplier = 0.8f; // sizing
+
             /*Tracer spiritTracer = spiritShotGunTracer.AddComponent<Tracer>();
             spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(1);
             spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(2);
@@ -166,7 +176,10 @@ namespace YusukeMod.Survivors.Yusuke
         private static void CreateHitAndOtherEffect()
         {
             Log.Info("Creating other effects. ");
+
             spiritShotGunHitEffect = _assetBundle.LoadEffect("spiritShotGunExplosion");
+            demonShotgunHitEffect = _assetBundle.LoadEffect("demonShotGunExplosion");
+
             dashStartSmallEffect = _assetBundle.LoadEffect("dashStartSmall", "dashStartSmall", false, false);
             dashStartMaxEffect = _assetBundle.LoadEffect("dashStartMax", "dashStartMax", false, false);
             dashGroundedEffect = _assetBundle.LoadEffect("dashEffectGrounded", "dashEffectGrounded", true, false);
@@ -199,6 +212,7 @@ namespace YusukeMod.Survivors.Yusuke
             gutPunchFastEffect = _assetBundle.LoadEffect("gutPunchEffectFast", "gutPunchEffectFast", true, false);
 
             throwSwingSingleEffect = _assetBundle.LoadEffect("ThrowSingleWind", "ThrowSingleWind", false, false);
+            throwWindEffect = _assetBundle.LoadEffect("ThrowWind", "ThrowWind", false, false);
 
         }
 
@@ -228,6 +242,8 @@ namespace YusukeMod.Survivors.Yusuke
             demonGunChargePotentEffect = _assetBundle.LoadEffect("demonGunChargePotent", "demonGunChargePotent", false, true);
             mazokuElectricChargeEffect = _assetBundle.LoadEffect("mazokuElectricChargeObj", "mazokuElectricChargeObj", false, true);
             demonGunMuzzleFlashEffect = _assetBundle.LoadEffect("demonGunMuzzleFlash", "demonGunMuzzleFlash", true, false);
+
+            demonShotgunChargeEffect = _assetBundle.LoadEffect("spiritDemonShotGunEffect", "spiritDemonShotGunEffect", true, true);
         }
 
         private static void CreateBombExplosionEffect()
@@ -274,6 +290,9 @@ namespace YusukeMod.Survivors.Yusuke
                 cycleOffset = 0f
             };
 
+            spiritGunExplosionEffect.AddComponent<DestroyOnTimer>().duration = 3f;
+
+
             spiritGunMegaExplosionEffect = _assetBundle.LoadEffect("spiritgunMegaExplosionBigger", "spiritgunMegaExplosionBigger");
 
             if (!spiritGunMegaExplosionEffect)
@@ -292,7 +311,7 @@ namespace YusukeMod.Survivors.Yusuke
                 cycleOffset = 0f
             };
 
-
+            spiritGunMegaExplosionEffect.AddComponent<DestroyOnTimer>().duration = 5f;
 
             demonGunExplosionEffect = _assetBundle.LoadEffect("demonGunExplosion", "demonGunExplosion");
 
@@ -311,6 +330,8 @@ namespace YusukeMod.Survivors.Yusuke
                 frequency = 20f,
                 cycleOffset = 0f
             };
+
+            demonGunExplosionEffect.AddComponent<DestroyOnTimer>().duration = 3f;
 
         }
 

@@ -209,6 +209,7 @@ namespace YusukeMod.Survivors.Yusuke
             //Prefabs.SetupHitBoxGroup(characterModelObject, "SwordGroup", "SwordHitbox");
 
             Prefabs.SetupHitBoxGroup(characterModelObject, "MeleeGroup", "meleeHitBox");
+            Prefabs.SetupHitBoxGroup(characterModelObject, "divePunchGroup", "divePunchHitBox");
         }
 
         public override void InitializeEntityStateMachines()
