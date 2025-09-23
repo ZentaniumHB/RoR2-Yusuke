@@ -245,6 +245,8 @@ Transform:
   - {fileID: 6879416572021796205}
   - {fileID: 5671084367344361772}
   - {fileID: 681376858697909290}
+  - {fileID: 1430549430101668165}
+  - {fileID: 1317073021189793595}
   m_Father: {fileID: 7586734840729833169}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 95, y: 0, z: 0}
@@ -517,6 +519,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6929868422838026996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1317073021189793595}
+  m_Layer: 0
+  m_Name: ThighShadowCastR
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1317073021189793595
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6929868422838026996}
+  m_LocalRotation: {x: -0.7372774, y: 0, z: 0, w: 0.67559016}
+  m_LocalPosition: {x: 0.1, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1753320924735157511}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: -95, y: 0, z: 0}
 --- !u!1 &7335819981082812924
 GameObject:
   m_ObjectHideFlags: 0
@@ -656,6 +689,37 @@ Transform:
   m_Father: {fileID: 7333706963608801121}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8628941637596704073
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1430549430101668165}
+  m_Layer: 0
+  m_Name: ThighShadowCastL
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1430549430101668165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8628941637596704073}
+  m_LocalRotation: {x: -0.7372774, y: 0, z: 0, w: 0.67559016}
+  m_LocalPosition: {x: -0.1, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1753320924735157511}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: -95, y: 0, z: 0}
 --- !u!1001 &7981441051467802938
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -836,7 +900,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.0887609
+      value: 2.7945814
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -846,7 +910,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.874805
+      value: -0.50432146
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -3926,6 +3990,12 @@ MonoBehaviour:
     transform: {fileID: 6879416572021796205}
   - name: gutPunchCenter
     transform: {fileID: 5671084367344361772}
+  - name: thighShadowCastL
+    transform: {fileID: 1430549430101668165}
+  - name: thighShadowCastR
+    transform: {fileID: 1317073021189793595}
+  - name: handShadowCastL
+    transform: {fileID: 0}
 --- !u!4 &7268898622169888725 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8492778920247664913, guid: d89b752d6d6490046aa21637b8ba4cb5,
