@@ -3,8 +3,10 @@ using EntityStates.Treebot.Weapon;
 using RoR2;
 using RoR2.Projectile;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
@@ -49,8 +51,28 @@ namespace YusukeMod.SkillStates
 
         private readonly string fingerTipString = "fingerTipR";
         private readonly string mainPosition = "mainPosition";
+
+        private readonly string thighL = "thighShadowCastL";
+        private readonly string thighR = "thighShadowCastR";
+        private readonly string handL = "HandL";
+        private readonly string handR = "HandR";
+        private readonly string footL = "FootL";
+        private readonly string footR = "FootR";
+        private readonly string upperArmL = "UpperArmL";
+        private readonly string upperArmR = "UpperArmR";
+        private readonly string lowerArmL = "LowerArmL";
+        private readonly string lowerArmR = "LowerArmR";
+        private readonly string calfL = "CalfL";
+        private readonly string calfR = "CalfL";
+
+        private List<string> bodyParts = new List<string>();
+
         private GameObject spiritGunMegaMuzzleFlashPrefab;
         private GameObject megaWindEffectPrefab;
+        private GameObject blackCastShadowFadedPrefab;
+        private IgnoreParentRotation rotationIgnore;
+
+        private PivotRotation pivotRotation;
 
         public override void OnEnter()
         {
@@ -58,6 +80,7 @@ namespace YusukeMod.SkillStates
 
             spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
             megaWindEffectPrefab = YusukeAssets.megaWindEffect;
+            blackCastShadowFadedPrefab = YusukeAssets.blackCastShadowEffect;
 
             base.characterBody.SetAimTimer(1f);
             modelTransform = GetModelTransform();
@@ -91,6 +114,23 @@ namespace YusukeMod.SkillStates
             }
 
             SpawnMuzzleEffect();
+
+            pivotRotation = GetComponent<PivotRotation>();
+
+
+            bodyParts.Add(thighL);
+            bodyParts.Add(thighR);
+            bodyParts.Add(handL);
+            bodyParts.Add(handR);
+            bodyParts.Add(footL);
+            bodyParts.Add(footR);
+            bodyParts.Add(upperArmL);
+            bodyParts.Add(upperArmR);
+            bodyParts.Add(lowerArmL);
+            bodyParts.Add(lowerArmR);
+            bodyParts.Add(calfL);
+            bodyParts.Add(calfR);
+
         }
 
         private void SpawnMuzzleEffect()
@@ -99,6 +139,10 @@ namespace YusukeMod.SkillStates
             EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
             spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
             megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            blackCastShadowFadedPrefab.AddComponent<DestroyOnTimer>().duration = 1.2f;
+            rotationIgnore = blackCastShadowFadedPrefab.AddComponent<IgnoreParentRotation>();
+            rotationIgnore.SetLookRotation(GetAimRay().direction);
+            rotationIgnore.referenceTransform = FindModelChild("thighShadowCastR"); // needs at least one of the thights to rotate the rest since it's an empty object, doesn't matter which.
 
             if (component)
             {
@@ -133,6 +177,13 @@ namespace YusukeMod.SkillStates
             if (chargeWindObject) Log.Info("THE MEGA WIND STILL EXISTS!");
             //aimAnim.giveupDuration = originalGiveUpDuration;
             aimAnim.enabled = true;
+
+            characterMotor.enabled = true;
+            characterDirection.enabled = true;
+
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.ResetOnlyVFXRotation();
+            pivotRotation.SetRotations(Vector3.zero, false, false, false);
             SwitchAnimationLayer();
 
 
@@ -143,6 +194,11 @@ namespace YusukeMod.SkillStates
             if (!this.hasFired)
             {
                 this.hasFired = true;
+
+                
+
+
+
                 PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
                 if (spiritGunMegaChargeEffectObject) EntityState.Destroy(spiritGunMegaChargeEffectObject);
@@ -150,13 +206,19 @@ namespace YusukeMod.SkillStates
                 if (chargeWindObject) EntityState.Destroy(chargeWindObject);
 
                 EffectManager.SimpleMuzzleFlash(spiritGunMegaMuzzleFlashPrefab, gameObject, fingerTipString, false);
-                EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
+                
+
+                SpawnEffectOnBodyParts();
+                /*EffectManager.SimpleMuzzleFlash(blackCastShadowFadedPrefab, gameObject, thighL, false);
+                EffectManager.SimpleMuzzleFlash(blackCastShadowFadedPrefab, gameObject, thighR, false);
+                EffectManager.SimpleMuzzleFlash(blackCastShadowFadedPrefab, gameObject, handR, false);*/
 
                 Util.PlaySound("HenryShootPistol", base.gameObject);
 
                 if (isGrounded)
                 {
                     PlayAnimation("FullBody, Override", "ShootSpiritMegaGrounded", "ShootGun.playbackRate", 1f);
+                    EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
                 }
                 else
                 {
@@ -173,6 +235,20 @@ namespace YusukeMod.SkillStates
                         characterDirection.moveVector = fixedAimRay.direction;
 
                     }
+
+
+                    if (isGrounded)
+                    {
+                        pivotRotation.SetOnlyVFXRotation();
+                        pivotRotation.SetRotations(fixedAimRay.direction, true, true, false);
+                        characterMotor.enabled = false;
+                        characterDirection.enabled = false;
+                    }
+                    else
+                    {
+                        pivotRotation.SetRotations(fixedAimRay.direction, true, true, false);
+                    }
+
 
                     base.AddRecoil(-1f * FireSpiritShotgun.recoil, -2f * FireSpiritShotgun.recoil, -0.5f * FireSpiritShotgun.recoil, 0.5f * FireSpiritShotgun.recoil);
                     
@@ -205,7 +281,15 @@ namespace YusukeMod.SkillStates
 
             }
         }
-        
+
+        private void SpawnEffectOnBodyParts()
+        {
+            foreach(string bodyPart in bodyParts)
+            {
+                EffectManager.SimpleMuzzleFlash(blackCastShadowFadedPrefab, gameObject, bodyPart, false);
+            }
+            
+        }
 
         public override void FixedUpdate()
         {

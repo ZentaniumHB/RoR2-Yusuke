@@ -132,7 +132,9 @@ namespace YusukeMod.SkillStates
         private GameObject dashStartMaxEffectPrefab;
         private GameObject dashAirEffectPrefab;
         private GameObject dashBoomPrefab;
-        public GameObject heavyHitEffectPrefab;
+        private GameObject heavyHitEffectPrefab;
+        private GameObject spiritWaveProjectilePrefab;
+        private GameObject spiritWaveProjectileObject;
 
         private GameObject spiritWaveImpactEffect;
         private readonly string muzzleCenter = "muzzleCenter";
@@ -154,6 +156,7 @@ namespace YusukeMod.SkillStates
             dashAirEffectPrefab = YusukeAssets.dashAirEffect;
             dashBoomPrefab = YusukeAssets.dashBoomEffect;
             heavyHitEffectPrefab = YusukeAssets.heavyHitRingEffect;
+            spiritWaveProjectilePrefab = YusukeAssets.spiritWaveProjectileEffect;
 
             SwitchAnimationLayer();
 
@@ -235,6 +238,10 @@ namespace YusukeMod.SkillStates
             dashStartMaxEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
             dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
             heavyHitEffectPrefab.AddComponent <DestroyOnTimer>().duration = 1f;
+            spiritWaveProjectilePrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+
+            if (spiritWaveProjectilePrefab != null) spiritWaveProjectileObject = YusukePlugin.CreateEffectObject(spiritWaveProjectilePrefab, gameObject.transform);
+            spiritWaveProjectileObject.SetActive(false);
 
 
         }
@@ -655,6 +662,7 @@ namespace YusukeMod.SkillStates
                     EffectManager.SimpleMuzzleFlash(spiritWaveImpactEffect, gameObject, muzzleCenter, false);
                     EffectManager.SimpleMuzzleFlash(heavyHitEffectPrefab, gameObject, muzzleCenter, false);
                 }
+
 
                 if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
                 if (spiritWaveEffectPotentObject) EntityState.Destroy(spiritWaveEffectPotentObject);

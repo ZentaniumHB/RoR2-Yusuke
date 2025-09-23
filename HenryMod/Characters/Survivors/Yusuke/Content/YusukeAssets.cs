@@ -34,6 +34,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject spiritWaveChargeEffect;
         public static GameObject spiritWaveChargePotentEffect;
         public static GameObject spiritWaveImpactEffect;
+        public static GameObject spiritWaveProjectileEffect;
 
         public static GameObject demonGunChargeEffect;
         public static GameObject demonGunChargePotentEffect;
@@ -81,6 +82,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         public static GameObject throwSwingSingleEffect;
         public static GameObject throwWindEffect;
+        public static GameObject blackCastShadowEffect;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -214,6 +216,8 @@ namespace YusukeMod.Survivors.Yusuke
             throwSwingSingleEffect = _assetBundle.LoadEffect("ThrowSingleWind", "ThrowSingleWind", false, false);
             throwWindEffect = _assetBundle.LoadEffect("ThrowWind", "ThrowWind", false, false);
 
+            blackCastShadowEffect = _assetBundle.LoadEffect("blackCastShadowFaded", "blackCastShadowFaded", true, false);
+            
         }
 
         private static void CreateSpiritEnergyEffects()
@@ -233,6 +237,7 @@ namespace YusukeMod.Survivors.Yusuke
             Log.Info("loading wave effect");
             spiritWaveChargeEffect = _assetBundle.LoadEffect("spiritWaveCharge", "spiritWaveCharge", true, true);
             spiritWaveChargePotentEffect = _assetBundle.LoadEffect("spiritWavePotent", "spiritWavePotent", true, true);
+            spiritWaveProjectileEffect = _assetBundle.LoadEffect("spiritWaveProjectile", "spiritWaveProjectile", true, true);
 
             spiritGunMuzzleFlashEffect = _assetBundle.LoadEffect("spiritGunMuzzleFlash", "spiritGunMuzzleFlash", true, false);
             spiritGunMegaMuzzleFlashEffect = _assetBundle.LoadEffect("spiritMegaMuzzle", "spiritMegaMuzzle", true, false);
@@ -244,6 +249,7 @@ namespace YusukeMod.Survivors.Yusuke
             demonGunMuzzleFlashEffect = _assetBundle.LoadEffect("demonGunMuzzleFlash", "demonGunMuzzleFlash", true, false);
 
             demonShotgunChargeEffect = _assetBundle.LoadEffect("spiritDemonShotGunEffect", "spiritDemonShotGunEffect", true, true);
+
         }
 
         private static void CreateBombExplosionEffect()
