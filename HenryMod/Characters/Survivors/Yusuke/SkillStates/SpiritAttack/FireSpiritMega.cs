@@ -65,7 +65,7 @@ namespace YusukeMod.SkillStates
         private readonly string calfL = "CalfL";
         private readonly string calfR = "CalfL";
 
-        private List<string> bodyParts = new List<string>();
+        private List<string> bodyParts = new List<string>(); 
 
         private GameObject spiritGunMegaMuzzleFlashPrefab;
         private GameObject megaWindEffectPrefab;

@@ -10,6 +10,7 @@ using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Modules.BaseStates;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 {
@@ -51,8 +52,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private readonly string fingerTipString = "fingerTipR";
         private readonly string mainPosition = "mainPosition";
+
+        private readonly string thighL = "thighShadowCastL";
+        private readonly string thighR = "thighShadowCastR";
+        private readonly string handL = "HandL";
+        private readonly string handR = "HandR";
+        private readonly string footL = "FootL";
+        private readonly string footR = "FootR";
+        private readonly string upperArmL = "UpperArmL";
+        private readonly string upperArmR = "UpperArmR";
+        private readonly string lowerArmL = "LowerArmL";
+        private readonly string lowerArmR = "LowerArmR";
+        private readonly string calfL = "CalfL";
+        private readonly string calfR = "CalfL";
+
+        private List<string> bodyParts = new List<string>();
+
         private GameObject spiritGunMegaMuzzleFlashPrefab;
         private GameObject megaWindEffectPrefab;
+        private GameObject blackCastShadowFadedPrefab;
+        private IgnoreParentRotation rotationIgnore;
+
+        private PivotRotation pivotRotation;
 
         public override void OnEnter()
         {
@@ -60,6 +81,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
             megaWindEffectPrefab = YusukeAssets.megaWindEffect;
+            blackCastShadowFadedPrefab = YusukeAssets.blackCastShadowEffect;
 
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
 
@@ -97,6 +119,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             SpawnMuzzleEffect();
 
+            pivotRotation = GetComponent<PivotRotation>();
+
+            bodyParts.Add(thighL);
+            bodyParts.Add(thighR);
+            bodyParts.Add(handL);
+            bodyParts.Add(handR);
+            bodyParts.Add(footL);
+            bodyParts.Add(footR);
+            bodyParts.Add(upperArmL);
+            bodyParts.Add(upperArmR);
+            bodyParts.Add(lowerArmL);
+            bodyParts.Add(lowerArmR);
+            bodyParts.Add(calfL);
+            bodyParts.Add(calfR);
+
         }
 
         private void SpawnMuzzleEffect()
@@ -105,6 +142,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
             spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
             megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            blackCastShadowFadedPrefab.AddComponent<DestroyOnTimer>().duration = 1.2f;
+            rotationIgnore = blackCastShadowFadedPrefab.AddComponent<IgnoreParentRotation>();
+            rotationIgnore.SetLookRotation(GetAimRay().direction);
+            rotationIgnore.referenceTransform = FindModelChild("thighShadowCastR");
 
             if (component)
             {
@@ -118,6 +159,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             base.OnExit();
             SwitchAnimationLayer();
             aimAnim.enabled = true;
+
+            characterMotor.enabled = true;
+            characterDirection.enabled = true;
+
+            pivotRotation = GetComponent<PivotRotation>();
+            pivotRotation.ResetOnlyVFXRotation();
+            pivotRotation.SetRotations(Vector3.zero, false, false, false);
+
             PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 
         }
@@ -165,7 +214,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 if (mazokuSparkElectricityObject) EntityState.Destroy(mazokuSparkElectricityObject);
 
                 EffectManager.SimpleMuzzleFlash(spiritGunMegaMuzzleFlashPrefab, gameObject, fingerTipString, false);
-                EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
+                
+
+                SpawnEffectOnBodyParts();
 
                 //base.characterBody.AddSpreadBloom(1.5f);
                 //EffectManager.SimpleMuzzleFlash(EntityStates.Commando.CommandoWeapon.FirePistol2.muzzleEffectPrefab, base.gameObject, this.muzzleString, false);
@@ -174,6 +225,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 if (isGrounded)
                 {
                     PlayAnimation("FullBody, Override", "ShootSpiritMegaGrounded", "ShootGun.playbackRate", 1f);
+                    EffectManager.SimpleMuzzleFlash(megaWindEffectPrefab, gameObject, mainPosition, false);
                 }
                 else
                 {
@@ -190,6 +242,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                         characterDirection.forward = fixedAimRay.direction;
                         characterDirection.moveVector = fixedAimRay.direction;
 
+                    }
+
+                    if (isGrounded)
+                    {
+                        pivotRotation.SetOnlyVFXRotation();
+                        pivotRotation.SetRotations(fixedAimRay.direction, true, true, false);
+                        characterMotor.enabled = false;
+                        characterDirection.enabled = false;
+                    }
+                    else
+                    {
+                        pivotRotation.SetRotations(fixedAimRay.direction, true, true, false);
                     }
 
                     AddRecoil(-1f * recoil, -2f * FireSpiritShotgun.recoil, -0.5f * FireSpiritShotgun.recoil, 0.5f * FireSpiritShotgun.recoil);
@@ -224,6 +288,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             }
         }
 
+        private void SpawnEffectOnBodyParts()
+        {
+            foreach (string bodyPart in bodyParts)
+            {
+                EffectManager.SimpleMuzzleFlash(blackCastShadowFadedPrefab, gameObject, bodyPart, false);
+            }
+
+        }
 
         public override void FixedUpdate()
         {
