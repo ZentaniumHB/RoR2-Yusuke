@@ -83,6 +83,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject throwSwingSingleEffect;
         public static GameObject throwWindEffect;
         public static GameObject blackCastShadowEffect;
+        public static GameObject blackCastShadowEffectAir;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -217,7 +218,8 @@ namespace YusukeMod.Survivors.Yusuke
             throwWindEffect = _assetBundle.LoadEffect("ThrowWind", "ThrowWind", false, false);
 
             blackCastShadowEffect = _assetBundle.LoadEffect("blackCastShadowFaded", "blackCastShadowFaded", true, false);
-            
+            blackCastShadowEffectAir = _assetBundle.LoadEffect("blackCastShadowFadedAir", "blackCastShadowFadedAir", true, false);
+
         }
 
         private static void CreateSpiritEnergyEffects()

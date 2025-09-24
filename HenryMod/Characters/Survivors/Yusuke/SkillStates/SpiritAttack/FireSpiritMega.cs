@@ -80,7 +80,9 @@ namespace YusukeMod.SkillStates
 
             spiritGunMegaMuzzleFlashPrefab = YusukeAssets.spiritGunMegaMuzzleFlashEffect;
             megaWindEffectPrefab = YusukeAssets.megaWindEffect;
-            blackCastShadowFadedPrefab = YusukeAssets.blackCastShadowEffect;
+
+            if(isGrounded) blackCastShadowFadedPrefab = YusukeAssets.blackCastShadowEffect;
+            if (!isGrounded) blackCastShadowFadedPrefab = YusukeAssets.blackCastShadowEffectAir;
 
             base.characterBody.SetAimTimer(1f);
             modelTransform = GetModelTransform();
@@ -138,7 +140,7 @@ namespace YusukeMod.SkillStates
             // destroy timer will destroy the object effect after the duration of 2 seconds, the creation of effects had this by default when adding to the effects list, but this allows flexibility 
             EffectComponent component = spiritGunMegaMuzzleFlashPrefab.GetComponent<EffectComponent>();
             spiritGunMegaMuzzleFlashPrefab.AddComponent<DestroyOnTimer>().duration = 2;
-            megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            megaWindEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1.2f;
             blackCastShadowFadedPrefab.AddComponent<DestroyOnTimer>().duration = 1.2f;
             rotationIgnore = blackCastShadowFadedPrefab.AddComponent<IgnoreParentRotation>();
             rotationIgnore.SetLookRotation(GetAimRay().direction);
