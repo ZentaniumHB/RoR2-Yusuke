@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Components
 {
@@ -17,6 +18,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public float increaseValue = 0; // used for the hook reasoning
         public bool startReverse;
 
+        private bool isMazokuBarPaused;
+
         public void Start()
         {
 
@@ -27,7 +30,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if (hasTransformed)
             {
                 //Log.Info("currentMazokuValue " + currentMazokuValue);
-                currentMazokuValue = Mathf.Clamp(currentMazokuValue - (decreaseValue * Time.deltaTime), 0f, maxMazokuValue);
+                if(!isMazokuBarPaused) currentMazokuValue = Mathf.Clamp(currentMazokuValue - (decreaseValue * Time.deltaTime), 0f, maxMazokuValue);
                 previousValue = currentMazokuValue;
             }
             if (previousValue <= 0)
@@ -81,6 +84,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             Log.Info("Previous mazoku value: " + previousValue);
             increaseValue = 0f;
             return true;
+        }
+
+
+        public void HaltMazokuBar(bool shouldHalt)
+        {
+            isMazokuBarPaused = shouldHalt;
+        }
+
+        public void MaxReplenishMazokuBar()
+        {
+            increaseValue = 100;
         }
 
     }

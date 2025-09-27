@@ -7,6 +7,10 @@ namespace YusukeMod.Survivors.Yusuke.Components
         // used to prevent clashing idle animations
         private bool isFollowUpAttackActive;
 
+        //used for referencing the gameobjects necessary
+        private GameObject chargeObject;
+
+
         private void Awake()
         {
             //any funny custom behavior you want here
@@ -21,6 +25,20 @@ namespace YusukeMod.Survivors.Yusuke.Components
         public bool GetFollowUpBoolean()
         {
             return isFollowUpAttackActive;
+        }
+
+        public void SetReferenceChargeObject(GameObject obj)
+        {
+            Log.Info("Setting charge object from weaponConponent;");
+            chargeObject = obj;
+        }
+
+        public void ShowChargeObject(bool isVisible)
+        {
+            if(chargeObject != null)
+            {
+                chargeObject.SetActive(isVisible);
+            }
         }
     }
 }

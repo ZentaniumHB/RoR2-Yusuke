@@ -21,10 +21,29 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private GameObject spiritCuffReleasePrefab;
         private GameObject spiritCuffEffectPrefab;
 
+        private MazokuComponent mazokuComponent;
+
         public override void OnEnter()
         {
             base.OnEnter();
-            PlayAnimation("FullBody, Override", "SpiritCuffRelease", "ThrowBomb.playbackRate", duration);
+
+            mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+
+            if( mazokuComponent != null)
+            {
+                if (mazokuComponent.hasTransformed)
+                {
+                    mazokuComponent.HaltMazokuBar(true);
+                    baseDuration = 3.65f;
+                    PlayAnimation("FullBody, Override", "LuckRanOut", "ThrowBomb.playbackRate", duration);
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "SpiritCuffRelease", "ThrowBomb.playbackRate", duration);
+                }
+
+            }
+            
 
             spiritCuffReleasePrefab = YusukeAssets.spiritCuffReleaseEffect;
             spiritCuffEffectPrefab = YusukeAssets.spiritCuffEffect;
@@ -35,7 +54,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
         private void CreateAndEditEffect()
         {
-            if(spiritCuffEffectPrefab) spiritCuffReleasePrefab.AddComponent<DestroyOnTimer>().duration = 3f;
+            if(!mazokuComponent.hasTransformed && spiritCuffEffectPrefab) spiritCuffReleasePrefab.AddComponent<DestroyOnTimer>().duration = 3f;
             
         }
 
@@ -59,7 +78,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private void PlayEffect()
         {
             
-            if (!hasSpawnedCuffEffect)
+            if (!hasSpawnedCuffEffect && !mazokuComponent.hasTransformed)
             {
                 Log.Info("Spawning effect");
                 hasSpawnedCuffEffect = true;
@@ -80,6 +99,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             {
                 cuffComponent.hasReleased = true;
 
+            }
+
+            mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
+            if(mazokuComponent != null)
+            {
+                if (mazokuComponent.hasTransformed)
+                {
+                    mazokuComponent.HaltMazokuBar(false);
+                    mazokuComponent.MaxReplenishMazokuBar();
+                }
             }
 
         }

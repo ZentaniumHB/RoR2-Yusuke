@@ -11,6 +11,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
+using YusukeMod.Survivors.Yusuke.Components;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
@@ -42,10 +43,13 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private DestroyOnTimer destroyRegularChargeTimer;
         private readonly string fingerTipString = "fingerTipR";
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         public override void OnEnter()
         {
             spiritGunChargeEffectPrefab = YusukeAssets.spiritGunChargeEffect;
             spiritGunChargeEffectPotentPrefab = YusukeAssets.spiritGunChargePotentEffect;
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
 
             SwitchAnimationLayer();
 
@@ -67,7 +71,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 }
             }
 
-            SpawnChargeEffect(false);
+            SpawnChargeEffect();
             chargeDuration = baseChargeDuration;
 
             base.OnEnter();
@@ -75,22 +79,19 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         }
 
         // this charge effect does not use the EffectManager, gives control on when to destroy the object this way (unless there IS a way when using EffectManager that I don't know)"
-        private void SpawnChargeEffect(bool isMaxCharge)
+        private void SpawnChargeEffect()
         {
             Log.Info("Grabbing the component. ");
-            if(!isMaxCharge)
-            {
-                hasRegularEffectSpawned = true;
-                if (spiritGunChargeEffectPrefab != null) spiritGunChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPrefab, FindModelChild("fingerTipR"));
-            }
-            else
-            {
-                hasMaxChargeEffectSpawned = true;
-                if (spiritGunChargeEffectPotentPrefab != null) spiritGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPotentPrefab, FindModelChild("fingerTipR"));
 
-            }
-            
-            
+            if (spiritGunChargeEffectPrefab != null) spiritGunChargeEffectObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPrefab, FindModelChild("fingerTipR"));
+            if (spiritGunChargeEffectPotentPrefab != null) spiritGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(spiritGunChargeEffectPotentPrefab, FindModelChild("fingerTipR"));
+
+            if(yusukeWeaponComponent) yusukeWeaponComponent.SetReferenceChargeObject(spiritGunChargeEffectObject);
+
+            spiritGunChargeEffectObject.SetActive(true);
+            spiritGunChargeEffectPotentObject.SetActive(false);
+            hasRegularEffectSpawned = true;
+
         }
 
         // switching the animation layer within unity. This will perform the spirit gun animations that is synced to the body animations instead. 
@@ -156,7 +157,12 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 base.characterBody.SetAimTimer(1f);
 
                 DestroyCurrentEffect();
-                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
+                if (!hasMaxChargeEffectSpawned)
+                {
+                    hasMaxChargeEffectSpawned = true;
+                    spiritGunChargeEffectPotentObject.SetActive(true);
+                    if (yusukeWeaponComponent) yusukeWeaponComponent.SetReferenceChargeObject(spiritGunChargeEffectPotentObject);
+                }
 
                 if (!hasIconSwitch)
                 {

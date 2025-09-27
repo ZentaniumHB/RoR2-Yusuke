@@ -1,4 +1,5 @@
 ﻿
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
@@ -43,6 +44,7 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(DivePunch));
 
             Modules.Content.AddEntityState(typeof(Roll));
+            Modules.Content.AddEntityState(typeof(BlinkDash));
 
             Modules.Content.AddEntityState(typeof(ThrowBomb));
         }

@@ -21,6 +21,7 @@ using RoR2.Projectile;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using Rewired.Utils;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke
 {

@@ -9,6 +9,8 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using System;
 using YusukeMod.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -27,7 +29,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private Vector3 previousPosition;
 
         private bool shouldSkip;
-
+        
         private List<Type> AvoidedStates;
 
         private GameObject dashStartSmallEffectPrefab;
@@ -36,15 +38,21 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private readonly string mainPosition = "mainPosition";
         private EntityState bodyState;
+        private SpiritCuffComponent cuffComponent;
 
         public override void OnEnter()
         {
             base.OnEnter();
             shouldSkip = ListAndCheckAllAvoidedStates();
+            cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
             if (shouldSkip)
             {
                 skillLocator.utility.AddOneStock();
                 outer.SetNextStateToMain();
+                return;
+            }else if (cuffComponent.hasReleased)
+            {
+                outer.SetNextState(BlinkDashState());
                 return;
             }
             else
@@ -249,6 +257,13 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             base.OnDeserialize(reader);
             forwardDirection = reader.ReadVector3();
+        }
+
+
+        protected virtual EntityState BlinkDashState()
+        {
+            return new BlinkDash { };
+
         }
     }
 }

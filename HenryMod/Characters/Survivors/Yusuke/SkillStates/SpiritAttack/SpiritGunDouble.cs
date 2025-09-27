@@ -50,7 +50,7 @@ namespace YusukeMod.SkillStates
 
             spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
 
-            SwitchAnimationLayer();
+            
 
             // get the stateMachine related to the customName Body
             EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
@@ -123,8 +123,9 @@ namespace YusukeMod.SkillStates
         {
             base.OnExit();
             ResumeVelocity();
+            SwitchAnimationLayer();
             // make the ReleaseAnimation index false here
-            
+
             numberOfShots = 0;
         }
 
