@@ -25,6 +25,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
         private float dashStopWatch;
 
+        private float armourBuffDuration = 3f;
+
+        private float hiddenInvincibilityDuration = 0.5f;
+
         private CharacterModel characterModel;
 
         private HurtBoxGroup hurtboxGroup;
@@ -81,12 +85,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 characterDirection.forward = GetAimRay().direction;
                 characterMotor.Motor.ForceUnground();
                 EditEffects();
+
                 PlayAnimation("FullBody, Override", "DashAirLoop", "Slide.playbackRate", duration);
+                EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
 
                 if (NetworkServer.active)
                 {
-                    characterBody.AddTimedBuff(YusukeBuffs.armorBuff, 3f * duration);
-                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 0.5f * duration);
+                    characterBody.AddTimedBuff(YusukeBuffs.armorBuff, armourBuffDuration * duration);
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, hiddenInvincibilityDuration * duration);
                 }
 
                 yusukeWeaponComponent.ShowChargeObject(false);
@@ -120,6 +126,30 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 }
 
             }
+
+            AvoidedStates = new List<Type>
+            {
+                typeof(MazBackToBackStrikes),
+                typeof(FireDemonGunBarrage),
+                typeof(FireDemonGunMega),
+
+            };
+
+            state = EntityStateMachine.FindByCustomName(gameObject, "MazokuWeapon").state;
+            foreach (Type s in AvoidedStates)
+            {
+                if (state.GetType() == s)
+                {
+                    characterDirection.forward = GetAimRay().direction;
+                    characterDirection.moveVector = GetAimRay().direction;
+
+                    Log.Info("cannot activate... ");
+                    // means you cannot activate the roll when the skill is active
+                    return true;
+                }
+
+            }
+
             return false;
         }
 
@@ -183,15 +213,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 if (!hasSpawnedEffects)
                 {
                     hasSpawnedEffects = true;
-                    EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
                     EffectManager.SimpleMuzzleFlash(vanishLinesWhitePrefab, gameObject, chestLocation, false);
 
                 }
 
                 if (characterMotor && characterDirection)
                 {
-                    characterMotor.velocity = aimVector * (moveSpeedStat * dashSpeedMultiplier);
-                    //base.characterMotor.rootMotion += blinkVector * (moveSpeedStat * speedCoefficient * GetDeltaTime());
+                    //characterMotor.velocity = aimVector * (moveSpeedStat * dashSpeedMultiplier);
+                    characterMotor.velocity = Vector3.zero;
+                    characterMotor.rootMotion += aimVector * (moveSpeedStat * dashSpeedMultiplier * GetDeltaTime());
                 }
 
                 if (dashStopWatch >= duration && isAuthority)
@@ -223,6 +253,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
             }
 
+        }
+
+        public override InterruptPriority GetMinimumInterruptPriority()
+        {
+            return InterruptPriority.Frozen;
         }
 
 

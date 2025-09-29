@@ -7,7 +7,7 @@ namespace YusukeMod.Survivors.Yusuke.Components
         // used to prevent clashing idle animations
         private bool isFollowUpAttackActive;
 
-        //used for referencing the gameobjects necessary
+        //used for referencing the gameobject that is necessary
         private GameObject chargeObject;
 
 
