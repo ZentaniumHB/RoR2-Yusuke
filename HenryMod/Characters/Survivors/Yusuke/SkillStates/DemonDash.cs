@@ -16,10 +16,10 @@ using YusukeMod.Survivors.Yusuke.SkillStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 {
-    public class BlinkDash : BaseSkillState
+    public class DemonDash : BaseSkillState
     {
 
-        protected float dashSpeedMultiplier = 6f;
+        protected float dashSpeedMultiplier = 5f;
 
         protected float duration = 0.4f;
 
@@ -41,11 +41,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
         private YusukeWeaponComponent yusukeWeaponComponent;
         private YusukeMain mainState;
+
         
         private GameObject dashStartSmallEffectPrefab;
         private GameObject vanishLinesPrefab;
         private bool hasSpawnedEffects;
-        private readonly string mainPosition = "mainPosition";
+        private readonly string mainPosition = "dashCenter";
         private readonly string vanishLineLocation = "Chest";
 
         private bool shouldSkip;
@@ -64,8 +65,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
             }
             else
             {
-                dashStartSmallEffectPrefab = YusukeAssets.dashStartSmallEffect;
-                vanishLinesPrefab = YusukeAssets.vanishLinesWhite;
+                // change to whichever skin is being used. 
+                dashStartSmallEffectPrefab = YusukeAssets.shadowDashSK1;
+                vanishLinesPrefab = YusukeAssets.vanishLinesBlack;
                 yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
 
                 modelTransform = GetModelTransform();
@@ -97,7 +99,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
                 yusukeWeaponComponent.ShowChargeObject(false);
             }
-            
+
         }
 
         public virtual bool ListAndCheckAllAvoidedStates()
@@ -113,7 +115,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
             };
 
             EntityState state = EntityStateMachine.FindByCustomName(gameObject, "Weapon").state;
-            foreach (Type s in AvoidedStates) 
+            foreach (Type s in AvoidedStates)
             {
                 if (state.GetType() == s)
                 {
@@ -155,7 +157,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
         private void EditEffects()
         {
-            dashStartSmallEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+            dashStartSmallEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
             vanishLinesPrefab.AddComponent<DestroyOnTimer>().duration = 1;
             EffectComponent component = vanishLinesPrefab.GetComponent<EffectComponent>();
             if (component)
@@ -199,7 +201,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 yusukeWeaponComponent.ShowChargeObject(true);
                 SwitchAnimationLayer();
             }
-            
+
         }
 
 
@@ -219,8 +221,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
                 if (characterMotor && characterDirection)
                 {
-                    //characterMotor.velocity = aimVector * (moveSpeedStat * dashSpeedMultiplier);
-                    characterMotor.velocity = Vector3.zero;
+                    characterMotor.velocity = aimVector * (moveSpeedStat * dashSpeedMultiplier);
                     characterMotor.rootMotion += aimVector * (moveSpeedStat * dashSpeedMultiplier * GetDeltaTime());
                 }
 
@@ -255,10 +256,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
         }
 
-        public override InterruptPriority GetMinimumInterruptPriority()
-        {
-            return InterruptPriority.Frozen;
-        }
 
 
     }

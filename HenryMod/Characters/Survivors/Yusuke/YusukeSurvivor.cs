@@ -81,7 +81,7 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef mazokuDemonGun;
         internal static SkillDef mazokuDemonGunPrimary;
         internal static SkillDef backToBackStrikes;
-        internal static SkillDef blinkDash;
+        internal static SkillDef demonDash;
         internal static SkillDef swingCombo;
         internal static SkillDef demonGunMega;
 
@@ -447,9 +447,9 @@ namespace YusukeMod.Survivors.Yusuke
             //here's a skilldef of a typical movement skill.
             SkillDef utilitySkillDef1 = Skills.CreateSkillDef(new SkillDefInfo
             {
-                skillName = "HenryRoll",
-                skillNameToken = YUSUKE_PREFIX + "UTILITY_ROLL_NAME",
-                skillDescriptionToken = YUSUKE_PREFIX + "UTILITY_ROLL_DESCRIPTION",
+                skillName = "YusukeSlideDash",
+                skillNameToken = YUSUKE_PREFIX + "UTILITY_SLIDEDASH_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "UTILITY_SLIDEDASH_DESCRIPTION",
                 skillIcon = assetBundle.LoadAsset<Sprite>("texUtilityIcon"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(Roll)),
@@ -812,6 +812,39 @@ namespace YusukeMod.Survivors.Yusuke
                 forceSprintDuringState = false,
 
             });
+
+
+            YusukeSurvivor.demonDash = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeDemonDash",
+                skillNameToken = YUSUKE_PREFIX + "UTILITY_MAZDEMONDASH_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "MAZOKU_DEMONDASH_DESCRIPTION",
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(DemonDash)),
+                activationStateMachineName = "Body",
+                interruptPriority = EntityStates.InterruptPriority.Frozen,
+
+                baseRechargeInterval = 5f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = false,
+
+                isCombatSkill = false,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = true,
+            });
+
+
 
             YusukeSurvivor.swingCombo = Skills.CreateSkillDef(new SkillDefInfo
             {

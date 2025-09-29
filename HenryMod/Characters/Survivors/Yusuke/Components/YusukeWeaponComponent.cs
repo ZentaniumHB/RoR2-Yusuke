@@ -10,6 +10,7 @@ namespace YusukeMod.Survivors.Yusuke.Components
         //used for referencing the gameobject that is necessary
         private GameObject chargeObject;
 
+        private GameObject electricSparksObject;
 
         private void Awake()
         {
@@ -29,8 +30,12 @@ namespace YusukeMod.Survivors.Yusuke.Components
 
         public void SetReferenceChargeObject(GameObject obj)
         {
-            Log.Info("Setting charge object from weaponConponent;");
             chargeObject = obj;
+        }
+
+        public void SetElectricChargeObject(GameObject obj)
+        {
+            electricSparksObject = obj;
         }
 
         public void ShowChargeObject(bool isVisible)
@@ -38,6 +43,11 @@ namespace YusukeMod.Survivors.Yusuke.Components
             if(chargeObject != null)
             {
                 chargeObject.SetActive(isVisible);
+            }
+
+            if(electricSparksObject != null)
+            {
+                electricSparksObject.SetActive(isVisible);
             }
         }
     }

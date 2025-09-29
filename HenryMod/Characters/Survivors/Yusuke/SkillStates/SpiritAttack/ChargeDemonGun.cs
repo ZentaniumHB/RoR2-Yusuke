@@ -8,6 +8,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 
@@ -38,8 +39,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private GameObject mazokuSparkElectricityPrefab;
         private GameObject mazokuSparkElectricityObject;
-
+        
         private readonly string fingerTipString = "fingerTipR";
+
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
 
         public override void OnEnter()
         {
@@ -48,6 +52,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
             demonGunChargeEffectPrefab = YusukeAssets.demonGunChargeEffect;
             demonGunChargeEffectPotentPrefab = YusukeAssets.demonGunChargePotentEffect;
             mazokuSparkElectricityPrefab = YusukeAssets.mazokuElectricChargeEffect;
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+
 
             SwitchAnimationLayer();
 
@@ -72,24 +78,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
             chargeDuration = baseChargeDuration;
 
-            mazokuSparkElectricityObject = YusukePlugin.CreateEffectObject(mazokuSparkElectricityPrefab, FindModelChild(fingerTipString));
-            SpawnChargeEffect(false);
+            
+            SpawnChargeEffect();
 
         }
 
-        private void SpawnChargeEffect(bool isMaxCharge)
+        private void SpawnChargeEffect()
         {
-            if (!isMaxCharge)
-            {
-                hasRegularEffectSpawned = true;
-                if (demonGunChargeEffectPrefab != null) demonGunChargeEffectObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPrefab, FindModelChild(fingerTipString));
-            }
-            else
-            {
-                hasMaxChargeEffectSpawned = true;
-                if (demonGunChargeEffectPotentPrefab != null) demonGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPotentPrefab, FindModelChild(fingerTipString));
 
-            }
+            if (demonGunChargeEffectPrefab != null) demonGunChargeEffectObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPrefab, FindModelChild(fingerTipString));
+            if (demonGunChargeEffectPotentPrefab != null) demonGunChargeEffectPotentObject = YusukePlugin.CreateEffectObject(demonGunChargeEffectPotentPrefab, FindModelChild(fingerTipString));
+            mazokuSparkElectricityObject = YusukePlugin.CreateEffectObject(mazokuSparkElectricityPrefab, FindModelChild(fingerTipString));
+
+            if (yusukeWeaponComponent) yusukeWeaponComponent.SetReferenceChargeObject(demonGunChargeEffectObject);
+            if (yusukeWeaponComponent) yusukeWeaponComponent.SetElectricChargeObject(mazokuSparkElectricityObject);
+
+            demonGunChargeEffectObject.SetActive(true);
+            demonGunChargeEffectPotentObject.SetActive(false);
+            hasRegularEffectSpawned = true;
         }
 
         // the animation switching is done once the YusukeMain state is taken
@@ -159,7 +165,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                 base.characterBody.SetAimTimer(1f);
 
                 DestroyCurrentEffect();
-                if (!hasMaxChargeEffectSpawned) SpawnChargeEffect(true);
+                if (!hasMaxChargeEffectSpawned)
+                {
+                    hasMaxChargeEffectSpawned = true;
+                    demonGunChargeEffectPotentObject.SetActive(true);
+                    if (yusukeWeaponComponent) 
+                    {
+                        yusukeWeaponComponent.SetReferenceChargeObject(demonGunChargeEffectPotentObject);
+                        yusukeWeaponComponent.SetElectricChargeObject(mazokuSparkElectricityObject);
+                    }
+                        
+                }
 
                 if (!hasIconSwitch)
                 {

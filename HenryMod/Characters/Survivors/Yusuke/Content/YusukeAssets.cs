@@ -86,7 +86,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject blackCastShadowEffectAir;
 
         public static GameObject vanishLinesWhite;
-        public static GameObject valishLinesBlack;
+        public static GameObject vanishLinesBlack;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -224,7 +224,7 @@ namespace YusukeMod.Survivors.Yusuke
             blackCastShadowEffectAir = _assetBundle.LoadEffect("blackCastShadowFadedAir", "blackCastShadowFadedAir", true, false);
 
             vanishLinesWhite = _assetBundle.LoadEffect("vanishLinesWhite", "vanishLinesWhite", true, false);
-            valishLinesBlack = _assetBundle.LoadEffect("valishLinesBlack", "valishLinesBlack", true, false);
+            vanishLinesBlack = _assetBundle.LoadEffect("vanishLinesBlack", "vanishLinesBlack", true, false);
 
         }
 
