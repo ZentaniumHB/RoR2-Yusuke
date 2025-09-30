@@ -52,10 +52,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             // starting value, max value and how fast to increment
             chargeValue = 0.0f;
             chargeLimit = 100.0f;
-            baseChargeDuration = 5.0f;
-
-            chargeDuration = baseChargeDuration;
-
+            
 
             if (cuffComponent)
             {
@@ -68,8 +65,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     baseChargeDuration = 5.0f;
                 }
             }
-
+            
             SpawnChargeEffect();
+            chargeDuration = baseChargeDuration;
         }
 
         private void SpawnChargeEffect()

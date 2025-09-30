@@ -8,6 +8,7 @@ using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Modules.BaseStates;
+using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static Rewired.ComponentControls.Effects.RotateAroundAxis;
@@ -48,7 +49,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
 
         private PivotRotation pivotRotation;
         private Vector3 forwardDirection;
-
+        
         private GameObject spiritGunMuzzleFlashPrefab;
         private GameObject spiritGunBeamPrefab;
         private GameObject dashBoomPrefab;
@@ -56,54 +57,89 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string dashCenter = "muzzleCenter";
 
+        private bool shouldSkip;
+        private List<Type> AvoidedStates;
+
         public override void OnEnter()
         {
             base.OnEnter();
 
-            spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
-            spiritGunBeamPrefab = YusukeAssets.spiritgunBeamEffect;
-            dashBoomPrefab = YusukeAssets.dashBoomEffect;
-
-
-            SwitchAnimationLayer();
-            // get the stateMachine related to the customName Body
-            EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
-            if (entityStateMachine.state is Roll)
+            shouldSkip = ListAndCheckAllAvoidedStates();
+            if (shouldSkip)
             {
-                // means the roll state is currently active on that activation state, change the animations playing accordingly
-                if (!isGrounded)
-                {
-                    PlayAnimation("FullBody, Override", "BufferEmpty", "anim.interruptPlaybackRate", 1f);
-                }
-
-            }
-
-            duration = baseDuration / attackSpeedStat;
-            fireTime = firePercentTime * duration;
-            muzzleString = "Muzzle";
-
-            damageTypeDecider = Random.Range(1, 3);     // makes it pick either 1 or 2
-            Log.Info("type move: " + damageTypeDecider);
-
-            pivotRotation = GetComponent<PivotRotation>();
-            forwardDirection = GetAimRay().direction;
-
-            if (isGrounded)
-            {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
-                pivotRotation.SetOnlyVFXRotation();
-                pivotRotation.SetRotations(forwardDirection, true, true, false);
-                characterMotor.enabled = false;
-                characterDirection.enabled = false;
+                skillLocator.utility.AddOneStock();
+                SwitchAnimationLayer();
+                outer.SetNextStateToMain();
+                return;
             }
             else
             {
-                PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
-                pivotRotation.SetRotations(forwardDirection, true, true, false);
-            }
-            //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
-            SpawnChargeEffect();
+                spiritGunMuzzleFlashPrefab = YusukeAssets.spiritGunMuzzleFlashEffect;
+                spiritGunBeamPrefab = YusukeAssets.spiritgunBeamEffect;
+                dashBoomPrefab = YusukeAssets.dashBoomEffect;
 
+
+                SwitchAnimationLayer();
+                // get the stateMachine related to the customName Body
+                EntityStateMachine entityStateMachine = EntityStateMachine.FindByCustomName(gameObject, "Body");
+                if (entityStateMachine.state is Roll)
+                {
+                    // means the roll state is currently active on that activation state, change the animations playing accordingly
+                    if (!isGrounded)
+                    {
+                        PlayAnimation("FullBody, Override", "BufferEmpty", "anim.interruptPlaybackRate", 1f);
+                    }
+
+                }
+
+                duration = baseDuration / attackSpeedStat;
+                fireTime = firePercentTime * duration;
+                muzzleString = "Muzzle";
+
+                damageTypeDecider = Random.Range(1, 3);     // makes it pick either 1 or 2
+                Log.Info("type move: " + damageTypeDecider);
+
+                pivotRotation = GetComponent<PivotRotation>();
+                forwardDirection = GetAimRay().direction;
+
+                if (isGrounded)
+                {
+                    PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpGrounded", "ShootGun.playbackRate", duration);
+                    pivotRotation.SetOnlyVFXRotation();
+                    pivotRotation.SetRotations(forwardDirection, true, true, false);
+                    characterMotor.enabled = false;
+                    characterDirection.enabled = false;
+                }
+                else
+                {
+                    PlayAnimation("FullBody, Override", "ShootSpiritGunFollowUpAir", "ShootGun.playbackRate", duration);
+                    pivotRotation.SetRotations(forwardDirection, true, true, false);
+                }
+                //PlayAnimation("LeftArm, Override", "ShootGun", "ShootGun.playbackRate", 1.8f);
+                SpawnChargeEffect();
+            }
+
+            
+        }
+
+        private bool ListAndCheckAllAvoidedStates()
+        {
+            AvoidedStates = new List<Type>
+            {
+                typeof(BlinkDash)
+                
+            };
+
+            EntityState state = EntityStateMachine.FindByCustomName(gameObject, "Body").state;
+            foreach (Type s in AvoidedStates)
+            {
+                if (state.GetType() == s)
+                {
+                    return true;
+                }
+
+            }
+            return false;
         }
 
         private void SpawnChargeEffect()
@@ -116,13 +152,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         public override void OnExit()
         {
             base.OnExit();
-            pivotRotation = GetComponent<PivotRotation>();
-            pivotRotation.ResetOnlyVFXRotation();
-            pivotRotation.SetRotations(Vector3.zero, false, false, false);
-            //SwitchAnimationLayer();
 
-            characterMotor.enabled = true;
-            characterDirection.enabled = true;
+            if (!shouldSkip)
+            {
+                pivotRotation = GetComponent<PivotRotation>();
+                pivotRotation.ResetOnlyVFXRotation();
+                pivotRotation.SetRotations(Vector3.zero, false, false, false);
+                SwitchAnimationLayer();
+
+                characterMotor.enabled = true;
+                characterDirection.enabled = true;
+            }
+            
 
         }
 
@@ -131,38 +172,42 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
         {
             base.FixedUpdate();
 
-            characterDirection.forward = aimRay.direction;
-            characterDirection.moveVector = aimRay.direction;
-
-            if (fixedAge >= fireTime)
+            if (!shouldSkip)
             {
-                Fire();
-            }
+                characterDirection.forward = aimRay.direction;
+                characterDirection.moveVector = aimRay.direction;
 
-            if (hasFired)
-            {
-                characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
-                knockBackTime += GetDeltaTime();
-                if (!isGrounded)
+                if (fixedAge >= fireTime)
                 {
-                    // reverse the direction, so it seems it has a knockback effect.
-                    Vector3 awayFromDirection = (-aimRay.direction).normalized;
-                    Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
-                    // Apply the velocity to the character's motor
-                    characterMotor.velocity = backWardSpeed;
+                    Fire();
                 }
-                
-            }
 
-            if (fixedAge >= duration && isAuthority)
-            {
-                if (knockBackTime > knockBackDuration) 
+                if (hasFired)
                 {
-                    outer.SetNextStateToMain();
-                    return;
+                    characterDirection.moveVector = Vector3.zero;   // prevents character input movement 
+                    knockBackTime += GetDeltaTime();
+                    if (!isGrounded)
+                    {
+                        // reverse the direction, so it seems it has a knockback effect.
+                        Vector3 awayFromDirection = (-aimRay.direction).normalized;
+                        Vector3 backWardSpeed = awayFromDirection * moveSpeedStat;
+                        // Apply the velocity to the character's motor
+                        characterMotor.velocity = backWardSpeed;
+                    }
+
                 }
-                
+
+                if (fixedAge >= duration && isAuthority)
+                {
+                    if (knockBackTime > knockBackDuration)
+                    {
+                        outer.SetNextStateToMain();
+                        return;
+                    }
+
+                }
             }
+            
         }
 
         private void Fire()

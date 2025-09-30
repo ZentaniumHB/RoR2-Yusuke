@@ -166,8 +166,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                     }, transmit: true);*/
 
                     Vector3 aimVector = (enemy.gameObject.transform.position - transform.position).normalized;
-                    Log.Info("AIM ORIGIN: " + aimRay.origin);
-                    Log.Info("AIM VECTOR: " + aimVector);
+
                     new BulletAttack
                     {
                         bulletCount = 1,

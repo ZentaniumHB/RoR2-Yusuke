@@ -83,11 +83,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 }
                 aimVector = inputBank.aimDirection;
                 characterDirection.forward = GetAimRay().direction;
-                characterMotor.Motor.ForceUnground();
                 EditEffects();
 
                 PlayAnimation("FullBody, Override", "DashAirLoop", "Slide.playbackRate", duration);
                 EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
+                characterMotor.Motor.ForceUnground();
 
                 if (NetworkServer.active)
                 {
@@ -210,18 +210,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
             if (!shouldSkip)
             {
-                if (!hasSpawnedEffects)
-                {
-                    hasSpawnedEffects = true;
-                    EffectManager.SimpleMuzzleFlash(vanishLinesPrefab, gameObject, vanishLineLocation, false);
-
-                }
+                
 
                 if (characterMotor && characterDirection)
                 {
                     //characterMotor.velocity = aimVector * (moveSpeedStat * dashSpeedMultiplier);
                     characterMotor.velocity = Vector3.zero;
                     characterMotor.rootMotion += aimVector * (moveSpeedStat * dashSpeedMultiplier * GetDeltaTime());
+                }
+
+                if (!hasSpawnedEffects)
+                {
+                    hasSpawnedEffects = true;
+                    EffectManager.SimpleMuzzleFlash(vanishLinesPrefab, gameObject, vanishLineLocation, false);
+                    EffectManager.SimpleMuzzleFlash(dashStartSmallEffectPrefab, gameObject, mainPosition, false);
+
                 }
 
                 if (dashStopWatch >= duration && isAuthority)
