@@ -8,6 +8,7 @@ using static RoR2.CharacterAI.AISkillDriver;
 using RoR2.Skills;
 using System;
 using System.Linq;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Modules
 {
@@ -36,6 +37,9 @@ namespace YusukeMod.Modules
             characterModel.baseRendererInfos = prefab.GetComponentInChildren<CharacterModel>().baseRendererInfos;
 
             Modules.Asset.ConvertAllRenderersToHopooShader(display);
+
+            // adding the Character Select Survivor component to the display prefab, although a hook can also work
+            display.AddComponent<YusukeCSS>();
 
             return display;
         }
@@ -149,6 +153,9 @@ namespace YusukeMod.Modules
             bodyComponent._defaultCrosshairPrefab = bodyInfo.crosshair;
             bodyComponent.hideCrosshair = false;
             bodyComponent.preferredPodPrefab = bodyInfo.podPrefab;
+
+            // this at the bottom is where you customise the spawn in state for the first time
+            // bodyComponent.preferredInitialStateType = 
 
             //stats
             bodyComponent.baseMaxHealth = bodyInfo.maxHealth;

@@ -99,7 +99,7 @@ namespace YusukeMod.Survivors.Yusuke
             sortPosition = 100,
 
             crosshair = Asset.LoadCrosshair("Standard"),
-            podPrefab = LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/SurvivorPod"),
+            podPrefab = null,   // set to null to prevent pod spawning animation when starting
 
             maxHealth = 110f,
             healthRegen = 1.5f,
@@ -1026,9 +1026,35 @@ namespace YusukeMod.Survivors.Yusuke
             On.RoR2.CharacterMaster.OnBodyStart += Run_onRunStartGlobal;
             On.RoR2.BulletAttack.ProcessHit += BulletProcessHit;
             On.RoR2.Projectile.ProjectileImpactExplosion.OnProjectileImpact += ProjectilePocessExplosion;
+            //On.RoR2.CharacterModel.Awake += CharacterModel_Awake;
 
 
         }
+
+
+        /*private void CharacterModel_Awake(On.RoR2.CharacterModel.orig_Awake orig, CharacterModel self)
+        {
+            orig(self);
+            LocalUser localuser = LocalUserManager.GetFirstLocalUser();
+            if (localuser != null && localuser.currentNetworkUser != null)
+            {
+                // iterating through all masters within the list to check if they contain a YusukeBody
+                for (int i = CharacterMaster.readOnlyInstancesList.Count - 1; i >= 0; i--)
+                {
+                    CharacterMaster master = CharacterMaster.readOnlyInstancesList[i];
+                    if (master.teamIndex == TeamIndex.Player && master.bodyPrefab == BodyCatalog.FindBodyPrefab("YusukeBody"))
+                    {
+                        // checking if the master belongs to the local player
+                        if (master.playerCharacterMasterController.networkUser == localuser.currentNetworkUser)
+                        {
+                            // maybe add some different anims in this section
+                            Util.PlaySound("Play_VoiceLetsGo2", self.gameObject);
+                        }
+                    }
+
+                }
+            }
+        }*/
 
         private void ProjectilePocessExplosion(On.RoR2.Projectile.ProjectileImpactExplosion.orig_OnProjectileImpact orig, RoR2.Projectile.ProjectileImpactExplosion self, ProjectileImpactInfo impactInfo)
         {
