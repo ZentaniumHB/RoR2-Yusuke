@@ -1026,36 +1026,31 @@ namespace YusukeMod.Survivors.Yusuke
             On.RoR2.CharacterMaster.OnBodyStart += Run_onRunStartGlobal;
             On.RoR2.BulletAttack.ProcessHit += BulletProcessHit;
             On.RoR2.Projectile.ProjectileImpactExplosion.OnProjectileImpact += ProjectilePocessExplosion;
-            //On.RoR2.CharacterModel.Awake += CharacterModel_Awake;
+            On.RoR2.CharacterMaster.Respawn += CharacterMaster_Respawn;
 
 
         }
 
-
-        /*private void CharacterModel_Awake(On.RoR2.CharacterModel.orig_Awake orig, CharacterModel self)
+        private CharacterBody CharacterMaster_Respawn(On.RoR2.CharacterMaster.orig_Respawn orig, CharacterMaster self, Vector3 footPosition, Quaternion rotation, bool wasRevivedMidStage)
         {
-            orig(self);
-            LocalUser localuser = LocalUserManager.GetFirstLocalUser();
-            if (localuser != null && localuser.currentNetworkUser != null)
+            // recreating the character, which applies to revives and spawning into the next stage
+            CharacterBody body = orig(self, footPosition, rotation, wasRevivedMidStage);
+
+            // if respawning from the next stage and not mid stage, then do what is necessary
+            if (wasRevivedMidStage == false)
             {
-                // iterating through all masters within the list to check if they contain a YusukeBody
-                for (int i = CharacterMaster.readOnlyInstancesList.Count - 1; i >= 0; i--)
+                // checking the number of stages, greater than zero is necessary so it won't overlap the very start animation
+                if (Run.instance.stageClearCount > 0) 
                 {
-                    CharacterMaster master = CharacterMaster.readOnlyInstancesList[i];
-                    if (master.teamIndex == TeamIndex.Player && master.bodyPrefab == BodyCatalog.FindBodyPrefab("YusukeBody"))
-                    {
-                        // checking if the master belongs to the local player
-                        if (master.playerCharacterMasterController.networkUser == localuser.currentNetworkUser)
-                        {
-                            // maybe add some different anims in this section
-                            Util.PlaySound("Play_VoiceLetsGo2", self.gameObject);
-                        }
-                    }
-
+                    // play a spawn animation here
+                    Util.PlaySound("Play_VoiceLetsGo2", body.gameObject);
                 }
+                    
             }
-        }*/
+            return body;
+        }
 
+       
         private void ProjectilePocessExplosion(On.RoR2.Projectile.ProjectileImpactExplosion.orig_OnProjectileImpact orig, RoR2.Projectile.ProjectileImpactExplosion self, ProjectileImpactInfo impactInfo)
         {
             
