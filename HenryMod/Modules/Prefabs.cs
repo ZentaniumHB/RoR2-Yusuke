@@ -9,6 +9,7 @@ using RoR2.Skills;
 using System;
 using System.Linq;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Modules.BaseContent.BaseStates;
 
 namespace YusukeMod.Modules
 {
@@ -155,7 +156,7 @@ namespace YusukeMod.Modules
             bodyComponent.preferredPodPrefab = bodyInfo.podPrefab;
 
             // this at the bottom is where you customise the spawn in state for the first time
-            // bodyComponent.preferredInitialStateType = 
+            bodyComponent.preferredInitialStateType.stateType = typeof(YusukeBeginSpawn);
 
             //stats
             bodyComponent.baseMaxHealth = bodyInfo.maxHealth;

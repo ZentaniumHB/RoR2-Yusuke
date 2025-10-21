@@ -22,6 +22,8 @@ using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using Rewired.Utils;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
+using RoR2BepInExPack.GameAssetPaths;
+using YusukeMod.Modules.BaseContent.BaseStates;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -220,9 +222,10 @@ namespace YusukeMod.Survivors.Yusuke
             Prefabs.ClearEntityStateMachines(bodyPrefab);
 
             //the main "Body" state machine has some special properties
-            Prefabs.AddMainEntityStateMachine(bodyPrefab, "Body", typeof(YusukeMain), typeof(EntityStates.SpawnTeleporterState));
+            Prefabs.AddMainEntityStateMachine(bodyPrefab, "Body", typeof(YusukeMain), typeof(YusukeBeginSpawn));
             //if you set up a custom main characterstate, set it up here
             //don't forget to register custom entitystates in your HenryStates.cs
+
 
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
@@ -1037,16 +1040,22 @@ namespace YusukeMod.Survivors.Yusuke
             CharacterBody body = orig(self, footPosition, rotation, wasRevivedMidStage);
 
             // if respawning from the next stage and not mid stage, then do what is necessary
-            if (wasRevivedMidStage == false)
+
+            if (self.GetBodyObject().name.Contains("YusukeBody"))
             {
-                // checking the number of stages, greater than zero is necessary so it won't overlap the very start animation
-                if (Run.instance.stageClearCount > 0) 
+                if (wasRevivedMidStage == false)
                 {
-                    // play a spawn animation here
-                    Util.PlaySound("Play_VoiceLetsGo2", body.gameObject);
+                    // checking the number of stages, greater than zero is necessary so it won't overlap the very start animation
+                    if (Run.instance.stageClearCount > 0)
+                    {
+                        // play a spawn animation here
+                        Util.PlaySound("Play_VoiceLetsGo2", body.gameObject);
+                        //body.GetComponent<EntityStateMachine>().SetNextState(new YusukeBeginSpawn());
+                    }
+
                 }
-                    
             }
+           
             return body;
         }
 

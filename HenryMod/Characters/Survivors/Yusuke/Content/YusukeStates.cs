@@ -5,6 +5,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Modules.BaseContent.BaseStates;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
@@ -47,6 +48,8 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(BlinkDash));
 
             Modules.Content.AddEntityState(typeof(ThrowBomb));
+
+            Modules.Content.AddEntityState(typeof(YusukeBeginSpawn));
         }
     }
 }

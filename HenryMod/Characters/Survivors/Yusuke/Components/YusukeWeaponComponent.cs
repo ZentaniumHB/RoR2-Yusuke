@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using EntityStates.GolemMonster;
+using UnityEngine;
 
 namespace YusukeMod.Survivors.Yusuke.Components
 {
@@ -11,6 +12,10 @@ namespace YusukeMod.Survivors.Yusuke.Components
         private GameObject chargeObject;
 
         private GameObject electricSparksObject;
+
+        private bool hasMazokuRevive = true;
+
+        private bool hasSacredEneryRevive = true;
 
         private void Awake()
         {
@@ -49,6 +54,16 @@ namespace YusukeMod.Survivors.Yusuke.Components
             {
                 electricSparksObject.SetActive(isVisible);
             }
+        }
+
+        public void UseMazokuRevive()
+        {
+            hasMazokuRevive = false;
+        }
+
+        public void UseSacredEnergyRevive()
+        {
+            hasSacredEneryRevive = false;
         }
     }
 }
