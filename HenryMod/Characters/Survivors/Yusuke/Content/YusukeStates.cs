@@ -1,4 +1,5 @@
 ﻿
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
@@ -50,6 +51,11 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(ThrowBomb));
 
             Modules.Content.AddEntityState(typeof(YusukeBeginSpawn));
+            Modules.Content.AddEntityState(typeof(KnockedState));
+            Modules.Content.AddEntityState(typeof(YusukeDeathState));
+            Modules.Content.AddEntityState(typeof(MazokuResurrect));
+            Modules.Content.AddEntityState(typeof(SacredEnergyRelease));
+
         }
     }
 }

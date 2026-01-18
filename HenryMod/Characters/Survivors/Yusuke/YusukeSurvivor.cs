@@ -22,8 +22,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using Rewired.Utils;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
-using RoR2BepInExPack.GameAssetPaths;
-using YusukeMod.Modules.BaseContent.BaseStates;
+using System.Xml.Linq;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -147,6 +146,8 @@ namespace YusukeMod.Survivors.Yusuke
 
         public override ItemDisplaysBase itemDisplays => new YusukeItemDisplays();
 
+        public override Type characterDeathState => typeof(YusukeDeathState);
+
         //set in base classes
         public override AssetBundle assetBundle { get; protected set; }
 
@@ -222,10 +223,9 @@ namespace YusukeMod.Survivors.Yusuke
             Prefabs.ClearEntityStateMachines(bodyPrefab);
 
             //the main "Body" state machine has some special properties
-            Prefabs.AddMainEntityStateMachine(bodyPrefab, "Body", typeof(YusukeMain), typeof(YusukeBeginSpawn));
+            Prefabs.AddMainEntityStateMachine(bodyPrefab, "Body", typeof(YusukeMain), typeof(EntityStates.SpawnTeleporterState));   // setting the main state, the spawning state, and body
             //if you set up a custom main characterstate, set it up here
             //don't forget to register custom entitystates in your HenryStates.cs
-
 
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
@@ -1029,37 +1029,79 @@ namespace YusukeMod.Survivors.Yusuke
             On.RoR2.CharacterMaster.OnBodyStart += Run_onRunStartGlobal;
             On.RoR2.BulletAttack.ProcessHit += BulletProcessHit;
             On.RoR2.Projectile.ProjectileImpactExplosion.OnProjectileImpact += ProjectilePocessExplosion;
-            On.RoR2.CharacterMaster.Respawn += CharacterMaster_Respawn;
+            On.RoR2.HealthComponent.TakeDamageProcess += HealthComponent_TakeDamageProcess;
+            On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
+            //On.RoR2.CharacterMaster.Respawn += CharacterMaster_Respawn;
 
 
         }
 
-        private CharacterBody CharacterMaster_Respawn(On.RoR2.CharacterMaster.orig_Respawn orig, CharacterMaster self, Vector3 footPosition, Quaternion rotation, bool wasRevivedMidStage)
+        private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
         {
-            // recreating the character, which applies to revives and spawning into the next stage
-            CharacterBody body = orig(self, footPosition, rotation, wasRevivedMidStage);
-
-            // if respawning from the next stage and not mid stage, then do what is necessary
-
-            if (self.GetBodyObject().name.Contains("YusukeBody"))
+            float percentageTrigger = 0.15f;
+            /* take damage hook for now, until I find a better way to do this, the problem with this is that it doesn't account for any buffs or debuffs
+             *  so there is a chance that it can return as non lethal but actually is with buffs.
+             */
+            if (self)
             {
-                if (wasRevivedMidStage == false)
+                if (self.body.name.Contains("YusukeBody"))
                 {
-                    // checking the number of stages, greater than zero is necessary so it won't overlap the very start animation
-                    if (Run.instance.stageClearCount > 0)
+                    YusukeWeaponComponent yusukeWeaponComponent = self.body.GetComponent<YusukeWeaponComponent>();
+                    //Log.Info("HEALTH NOW: " + percentageTrigger * self.body.maxHealth);
+                    if (yusukeWeaponComponent)
                     {
-                        // play a spawn animation here
-                        Util.PlaySound("Play_VoiceLetsGo2", body.gameObject);
-                        //body.GetComponent<EntityStateMachine>().SetNextState(new YusukeBeginSpawn());
+                        if (self.health - damageInfo.damage <= 0 && !yusukeWeaponComponent.GetKnockedBoolean())
+                        {
+                            if (yusukeWeaponComponent.GetMazokuRevive() || yusukeWeaponComponent.GetSacredEnergyRevive()) // or other revive (soon)
+                            {
+                                Log.Info("Critical low health, trigger knocked state!");
+                                damageInfo.damage = 0;
+                                yusukeWeaponComponent.SetKnockedState(true);
+
+                            }
+
+                        }
                     }
 
                 }
             }
-           
-            return body;
+
+            orig(self, damageInfo);
         }
 
-       
+        private void HealthComponent_TakeDamageProcess(On.RoR2.HealthComponent.orig_TakeDamageProcess orig, HealthComponent self, DamageInfo damageInfo)
+        {
+
+            orig(self, damageInfo);
+
+        }
+
+        /* private CharacterBody CharacterMaster_Respawn(On.RoR2.CharacterMaster.orig_Respawn orig, CharacterMaster self, Vector3 footPosition, Quaternion rotation, bool wasRevivedMidStage)
+         {
+             // recreating the character, which applies to revives and spawning into the next stage
+             CharacterBody body = orig(self, footPosition, rotation, wasRevivedMidStage);
+
+             // if respawning from the next stage and not mid stage, then do what is necessary
+
+             if (self.GetBodyObject().name.Contains("YusukeBody"))
+             {
+                 if (wasRevivedMidStage == false)
+                 {
+                     // checking the number of stages, greater than zero is necessary so it won't overlap the very start animation
+                     if (Run.instance.stageClearCount > 0)
+                     {
+                         // play a spawn sound here
+                         //Util.PlaySound("Play_VoiceLetsGo2", body.gameObject);
+                         //body.GetComponent<EntityStateMachine>().SetNextState(new YusukeBeginSpawn());
+                     }
+
+                 }
+             }
+
+             return body;
+         }*/
+
+
         private void ProjectilePocessExplosion(On.RoR2.Projectile.ProjectileImpactExplosion.orig_OnProjectileImpact orig, RoR2.Projectile.ProjectileImpactExplosion self, ProjectileImpactInfo impactInfo)
         {
             

@@ -1,4 +1,5 @@
 ﻿using EntityStates.GolemMonster;
+using RoR2BepInExPack.GameAssetPaths;
 using UnityEngine;
 
 namespace YusukeMod.Survivors.Yusuke.Components
@@ -16,6 +17,20 @@ namespace YusukeMod.Survivors.Yusuke.Components
         private bool hasMazokuRevive = true;
 
         private bool hasSacredEneryRevive = true;
+
+        private byte reviveType;
+
+        private bool hasBeenKnocked;
+
+        private bool isInKnockedState;
+
+        // near death enum for different conditions
+        public enum NearDeathIndex
+        {
+            Mazoku,
+            Sacred,
+            Boton
+        }
 
         private void Awake()
         {
@@ -56,6 +71,27 @@ namespace YusukeMod.Survivors.Yusuke.Components
             }
         }
 
+        // get and set
+        public bool GetMazokuRevive()
+        {
+            return hasMazokuRevive;
+        }
+
+        public bool GetSacredEnergyRevive()
+        {
+            return hasSacredEneryRevive;
+        }
+
+        public bool GetKnockedState()
+        {
+            return hasBeenKnocked;
+        }
+
+        public bool GetKnockedBoolean()
+        {
+            return isInKnockedState;
+        }
+
         public void UseMazokuRevive()
         {
             hasMazokuRevive = false;
@@ -65,5 +101,16 @@ namespace YusukeMod.Survivors.Yusuke.Components
         {
             hasSacredEneryRevive = false;
         }
+
+        public void SetKnockedState(bool isKnocked)
+        {
+            hasBeenKnocked = isKnocked;
+        }
+
+        public void SetKnockedBoolean(bool isInStateMachine)
+        {
+            isInKnockedState = isInStateMachine;
+        }
+
     }
 }
