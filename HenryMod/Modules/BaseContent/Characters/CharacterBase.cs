@@ -18,6 +18,9 @@ namespace YusukeMod.Modules.Characters
 
         public virtual CustomRendererInfo[] customRendererInfos { get; }
 
+        // adding custom death state
+        public virtual Type characterDeathState { get; }
+
         public virtual ItemDisplaysBase itemDisplays { get; }
 
         public static T instance { get; private set; }
@@ -50,6 +53,10 @@ namespace YusukeMod.Modules.Characters
 
             bodyPrefab = Modules.Prefabs.CreateBodyPrefab(characterModelObject, bodyInfo);
             prefabCharacterBody = bodyPrefab.GetComponent<CharacterBody>();
+
+            // adding custom death state
+            CharacterDeathBehavior prefabCharacterDeathState = bodyPrefab.GetComponent<CharacterDeathBehavior>();
+            prefabCharacterDeathState.deathState.stateType = characterDeathState;
 
             prefabCharacterModel = Modules.Prefabs.SetupCharacterModel(bodyPrefab, customRendererInfos);
         }

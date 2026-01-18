@@ -13,6 +13,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke.SkillStates;
+using static YusukeMod.Survivors.Yusuke.Components.YusukeWeaponComponent;
 
 namespace YusukeMod.Modules.BaseStates
 {
@@ -165,6 +166,7 @@ namespace YusukeMod.Modules.BaseStates
             CheckFollowUpIntervals();
             TransformProperties();
             CheckPenaltyTimer();
+            CheckNearDeathOptions();
 
             Chat.AddMessage("melee timer: "+meleeRechargeInterval);
             Chat.AddMessage("primary move status: "+isPrimaryReady);
@@ -285,6 +287,41 @@ namespace YusukeMod.Modules.BaseStates
                         
                 }
             }
+            
+        }
+
+        // continuously checking the boolean to trigger
+        private void CheckNearDeathOptions()
+        {
+
+            if (yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedState())
+            {
+                yusukeWeaponComponent.SetKnockedState(false);
+                Log.Info("Setting the KNOCK BACK STATE TO false!");
+                if (yusukeWeaponComponent.GetMazokuRevive())
+                {
+                    yusukeWeaponComponent.UseMazokuRevive();
+                    outer.SetNextState(NextKnockedState((byte)NearDeathIndex.Mazoku));
+                    yusukeWeaponComponent.SetKnockedBoolean(true);
+                }
+                else if (yusukeWeaponComponent.GetSacredEnergyRevive())
+                {
+                    yusukeWeaponComponent.UseSacredEnergyRevive();
+                    outer.SetNextState(NextKnockedState((byte)NearDeathIndex.Sacred));
+                    yusukeWeaponComponent.SetKnockedBoolean(true);
+                }
+                
+
+            }
+        }
+
+        protected virtual EntityState NextKnockedState(byte value)
+        {
+
+            return new KnockedState
+            {
+                NearDeathType = value,
+            };
         }
 
         protected virtual EntityState SwitchBackSkills(int ID)
