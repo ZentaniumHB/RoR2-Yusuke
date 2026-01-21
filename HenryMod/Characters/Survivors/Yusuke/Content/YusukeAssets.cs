@@ -67,6 +67,11 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject mazokuTransformationRaizenStartupEffect;
         public static GameObject maokuTansformationExplosionEffect;
 
+        public static GameObject mazokuResurrectExplosion;
+        public static GameObject mazokuResurrectWind;
+
+        public static GameObject sacredEnergyEffect;
+
         public static GameObject shadowDashSK1;
         public static GameObject shadowDashGrabSK1;
         public static GameObject gutPunchSlowEffect;
@@ -225,6 +230,11 @@ namespace YusukeMod.Survivors.Yusuke
 
             vanishLinesWhite = _assetBundle.LoadEffect("vanishLinesWhite", "vanishLinesWhite", true, false);
             vanishLinesBlack = _assetBundle.LoadEffect("vanishLinesBlack", "vanishLinesBlack", true, false);
+
+            mazokuResurrectExplosion = _assetBundle.LoadEffect("mazokuResurrect", "mazokuResurrect", true, false);
+            mazokuResurrectWind = _assetBundle.LoadEffect("mazokuResurrectWind", "mazokuResurrectWind", true, false);
+
+            sacredEnergyEffect = _assetBundle.LoadEffect("sacredEnergy", "sacredEnergyEffect", true, false);
 
         }
 

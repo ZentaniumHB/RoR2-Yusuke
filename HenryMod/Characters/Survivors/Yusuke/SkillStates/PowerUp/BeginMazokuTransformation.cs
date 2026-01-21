@@ -20,12 +20,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private GameObject mazokuTransformPrefab;
         private GameObject mazokuTransformExplosionPrefab;
 
+        private AimAnimator aimAnim;
+        private Transform modelTransform;
+        private float originalGiveUpDuration;
+
+        private float originalPitchRangeMax;
+        private float originalPitchRangeMin;
+        private float originalYawRangeMin;
+        private float originalYawRangeMax;
+
+        private readonly float largeRangeValue = 9999f;
+
         public override void OnEnter()
         {
             base.OnEnter();
             SetUpEffects();
             // if the transform count is greater than 2 (meaning raizen has passed) then do the other animation
             PlayAnimation("FullBody, Override", "MazokuTransformRaizen", "ThrowBomb.playbackRate", duration);
+
+            modelTransform = GetModelTransform();
+            ChangePitchAndYawRange(true);
+
             EffectManager.SpawnEffect(mazokuTransformPrefab, new EffectData
             {
                 origin = FindModelChild("mainPosition").position,
@@ -43,11 +58,49 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
         }
 
+        // this will temporarily change the pitch and yaw for the transformation cutscene, so the aim yaw won't affect the model when playing the animation
+        private void ChangePitchAndYawRange(bool isInCutscene)
+        {
+            if (modelTransform)
+            {
+                aimAnim = modelTransform.GetComponent<AimAnimator>();
+                if (isInCutscene)
+                {
+                    originalPitchRangeMax = aimAnim.pitchRangeMax;
+                    originalPitchRangeMin = aimAnim.pitchRangeMin;
+                    originalYawRangeMax = aimAnim.yawRangeMax;
+                    originalYawRangeMin = aimAnim.yawRangeMin;
+                    originalGiveUpDuration = aimAnim.giveupDuration;
+
+                    aimAnim.pitchRangeMax = largeRangeValue;
+                    aimAnim.pitchRangeMin = -largeRangeValue;
+                    aimAnim.yawRangeMin = -largeRangeValue;
+                    aimAnim.yawRangeMax = largeRangeValue;
+
+                    aimAnim.giveupDuration = 0f;
+
+                }
+                else
+                {
+                    aimAnim.pitchRangeMax = originalPitchRangeMax;
+                    aimAnim.pitchRangeMin = originalPitchRangeMin;
+                    aimAnim.yawRangeMin = originalYawRangeMin;
+                    aimAnim.yawRangeMax = originalYawRangeMax;
+
+                    aimAnim.giveupDuration = originalGiveUpDuration;
+
+                }
+                aimAnim.AimImmediate();
+            }
+
+        }
+
         public override void FixedUpdate()
         {
             base.FixedUpdate();
 
             animationTimer += GetDeltaTime();
+
             Log.Info("Animation timer: " + animationTimer);
 
             if (animationTimer > startUpDuration)
@@ -77,6 +130,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         public override void OnExit()
         {
             base.OnExit();
+
+            ChangePitchAndYawRange(false);
+
             MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             if (maz != null)
             {

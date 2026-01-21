@@ -93,7 +93,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 {
                     if (characterMotor)
                     {
-                        characterMotor.enabled = false;
+                        characterMotor.velocity = new Vector3(0, 0, 0);
 
                     }
                     hasPlayedAnimation = true;
@@ -147,26 +147,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
         public override void OnExit()
         {
-            if (yusukeHealth) yusukeHealth.health = yusukeHealth.fullHealth;
-
-            if (characterMotor)
-            {
-                characterMotor.enabled = true;
-
-            }
-
-            if (NetworkServer.active)
-            {
-                if (yusukeHealth)
-                {
-                    yusukeHealth.godMode = false;
-                }
-
-            }
-
-            if(yusukeWeapon) yusukeWeapon.SetKnockedBoolean(false);
-
-
             PlayAnimation("FullBody, Override", "BufferEmpty", "Roll.playbackRate", 1f);
             Log.Info("Mazoku revive (after): " + yusukeWeapon.GetMazokuRevive());
             Log.Info("Sacred revive (after): " + yusukeWeapon.GetSacredEnergyRevive());
