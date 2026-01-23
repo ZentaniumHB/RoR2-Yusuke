@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
+using YusukeMod.Survivors.Yusuke.Components;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
@@ -49,7 +50,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
             spiritGunMegaChargeEffectPotentPrefab = YusukeAssets.spiritGunMegaChargePotentEffect;
             chargeWindEffectPrefab = YusukeAssets.chargeWindEffect;
 
-            SwitchAnimationLayer();
+            SwitchAnimationLayer(true);
 
             // starting value, max value and how long to it takes to reach charge limit (in seconds)
             chargeValue = 0.0f;
@@ -98,7 +99,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         }
 
         // the animation switching is done once the YusukeMain state is taken
-        private void SwitchAnimationLayer()
+        private void SwitchAnimationLayer(bool shouldSwitch)
         {
             EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
             if (stateMachine == null)
@@ -111,8 +112,10 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 if (currentStateType == typeof(YusukeMain))
                 {
                     mainState = (YusukeMain)stateMachine.state;
+                    Log.Info("found state, now changging");
                     // goes through the animation layers and switches them within the main state.
-                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, true);
+                    mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, shouldSwitch);
+
 
                 }
 
@@ -122,13 +125,25 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         public override void OnExit()
         {
-            base.OnExit();
+
+            YusukeWeaponComponent yusukeWeaponComponent = characterBody.GetComponent<YusukeWeaponComponent>(); 
+            if(yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedBoolean())
+            {
+                PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                if (spiritGunMegaChargeEffectObject) EntityState.Destroy(spiritGunMegaChargeEffectObject);
+                if (spiritGunMegaChargeEffectPotentObject) EntityState.Destroy(spiritGunMegaChargeEffectPotentObject);
+                if (chargeWindObject) EntityState.Destroy(chargeWindObject);
+
+            }
+
             hasSlowVelocity = false;
             if (NetworkServer.active)
             {
                 base.characterBody.RemoveBuff(YusukeBuffs.spiritMegaSlowDebuff);
                 base.characterBody.RemoveBuff(YusukeBuffs.spiritMegaArmourBuff);
             }
+
+            
 
 
         }

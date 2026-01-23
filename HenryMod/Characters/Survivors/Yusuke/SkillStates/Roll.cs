@@ -11,6 +11,7 @@ using YusukeMod.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -39,10 +40,12 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         private readonly string mainPosition = "mainPosition";
         private EntityState bodyState;
         private SpiritCuffComponent cuffComponent;
+        private YusukeWeaponComponent yusukeWeaponComponent;
 
         public override void OnEnter()
         {
             base.OnEnter();
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             shouldSkip = ListAndCheckAllAvoidedStates();
             cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
             if (shouldSkip)
@@ -189,6 +192,9 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                 }
 
             }
+
+            if (yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedState()) return true;
+
             return false;
            
         }

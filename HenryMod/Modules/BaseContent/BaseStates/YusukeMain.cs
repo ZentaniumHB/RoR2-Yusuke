@@ -621,8 +621,6 @@ namespace YusukeMod.Modules.BaseStates
             needs to overwrite the current body layer animation set (walk, run, jump, etc)*/
         public void SwitchMovementAnimations(int animationLayerIndex, bool isSwitching)
         {
-            
-
             if (animator && isSwitching)
             {
                 animator.SetLayerWeight(animationLayerIndex, 1f);

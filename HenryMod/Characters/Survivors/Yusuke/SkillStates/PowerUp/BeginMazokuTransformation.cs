@@ -2,6 +2,7 @@
 using RoR2;
 using System;
 using UnityEngine;
+using UnityEngine.Networking;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
@@ -23,6 +24,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private AimAnimator aimAnim;
         private Transform modelTransform;
         private float originalGiveUpDuration;
+        HealthComponent yusukeHealth;
 
         private float originalPitchRangeMax;
         private float originalPitchRangeMin;
@@ -30,6 +32,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private float originalYawRangeMax;
 
         private readonly float largeRangeValue = 9999f;
+        public BlastAttack blastAttack;
 
         public override void OnEnter()
         {
@@ -37,6 +40,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             SetUpEffects();
             // if the transform count is greater than 2 (meaning raizen has passed) then do the other animation
             PlayAnimation("FullBody, Override", "MazokuTransformRaizen", "ThrowBomb.playbackRate", duration);
+
+            yusukeHealth = characterBody.GetComponent<HealthComponent>();
+            if (NetworkServer.active)
+            {
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = true;
+                }
+
+            }
+
+            if (characterMotor)
+            {
+                characterMotor.enabled = false;
+
+            }
 
             modelTransform = GetModelTransform();
             ChangePitchAndYawRange(true);
@@ -46,6 +65,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                 origin = FindModelChild("mainPosition").position,
                 scale = 1f
             }, transmit: true);
+        }
+
+        private void CreateBlastAttack()
+        {
+            blastAttack = new BlastAttack();
+            blastAttack.damageType = DamageType.Generic;
+            blastAttack.attacker = base.gameObject;
+            blastAttack.inflictor = base.gameObject;
+            blastAttack.teamIndex = TeamComponent.GetObjectTeam(blastAttack.attacker);
+            blastAttack.baseDamage = damageStat * YusukeStaticValues.transformationExplosionDamageCoefficient;
+            blastAttack.procCoefficient = 1.0f;
+            blastAttack.radius = 100f;
+            blastAttack.position = transform.position;
+            blastAttack.bonusForce = Vector3.up;
+            blastAttack.baseForce = 14000f;
+            blastAttack.falloffModel = BlastAttack.FalloffModel.None;
+            blastAttack.attackerFiltering = AttackerFiltering.NeverHitSelf;
+            blastAttack.crit = base.RollCrit();
+
+            blastAttack.Fire();
+
         }
 
         private void SetUpEffects()
@@ -124,6 +164,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                     origin = FindModelChild("mainPosition").position,
                     scale = 1f
                 }, transmit: true);
+
+                CreateBlastAttack();
+
             }
         }
 
@@ -137,6 +180,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             if (maz != null)
             {
                 maz.hasTransformed = true;
+            }
+
+            if (characterMotor)
+            {
+                characterMotor.enabled = true;
+
+            }
+
+            if (NetworkServer.active)
+            {
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = false;
+                }
+
             }
 
             // AFTER switch to the other animation set (mazoku)

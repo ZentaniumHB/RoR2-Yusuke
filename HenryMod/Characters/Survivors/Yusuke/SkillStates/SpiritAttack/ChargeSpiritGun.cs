@@ -53,7 +53,6 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
             SwitchAnimationLayer();
 
-            Log.Info("attack ID: " + attackID);
             cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
             // starting value, max value and how fast to increment
             chargeValue = 0.0f;

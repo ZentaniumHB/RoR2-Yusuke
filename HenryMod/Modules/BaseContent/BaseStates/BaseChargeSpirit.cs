@@ -2,9 +2,11 @@
 using RoR2;
 using RoR2.Skills;
 using RoR2.UI;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking.Types;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -21,12 +23,24 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         public float chargeValue;
         public float chargeIncrement;
         public float chargeLimit;
+        private YusukeWeaponComponent yusukeWeaponComponent;
 
         public override void OnEnter()
         {
             base.OnEnter();
+            yusukeWeaponComponent = characterBody.GetComponent<YusukeWeaponComponent>();
             cuffComponent = characterBody.GetComponent<SpiritCuffComponent>();
 
+        }
+
+        public override void FixedUpdate()
+        {
+            base.FixedUpdate();
+            if (yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedBoolean())
+            {
+                outer.SetNextStateToMain();
+                return;
+            }
         }
         public override void OnExit()
         {

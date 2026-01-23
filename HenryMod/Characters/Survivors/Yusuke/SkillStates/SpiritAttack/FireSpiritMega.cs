@@ -169,7 +169,6 @@ namespace YusukeMod.SkillStates
                     mainState.SwitchMovementAnimations((int)AnimationLayerIndex.MegaCharge, false);
 
                 }
-
             }
         }
 
@@ -196,10 +195,6 @@ namespace YusukeMod.SkillStates
             if (!this.hasFired)
             {
                 this.hasFired = true;
-
-                
-
-
 
                 PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
 

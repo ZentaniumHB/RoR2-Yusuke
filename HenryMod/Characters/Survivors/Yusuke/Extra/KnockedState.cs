@@ -6,11 +6,14 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Networking.NetworkSystem;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 using static Rewired.ComponentControls.Effects.RotateAroundAxis;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 using static YusukeMod.Survivors.Yusuke.Components.YusukeWeaponComponent;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Extra
@@ -34,11 +37,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
         YusukeWeaponComponent yusukeWeapon;
         private Transform baseBoneTransform;
 
+        private Animator animator = null;
+
+
         public override void OnEnter()
         {
             base.OnEnter();
 
             Log.Info("Entered knockback state ");
+
+            animator = GetModelAnimator();
+            RemoveOtherAnimationLayers();
+
             yusukeWeapon = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             vector = Vector3.up * 10f;
             if(characterMotor)
@@ -73,11 +83,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
         }
 
+        private void RemoveOtherAnimationLayers()
+        {
+            animator.SetLayerWeight((int)AnimationLayerIndex.GunCharge, 0f);
+            animator.SetLayerWeight((int)AnimationLayerIndex.ShotgunCharge, 0f);
+            animator.SetLayerWeight((int)AnimationLayerIndex.WaveCharge, 0f);
+            animator.SetLayerWeight((int)AnimationLayerIndex.MegaCharge, 0f);
+        }
+
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-
-            //if(!hasLanded) SpinOut();
 
             if (yusukeHealth) yusukeHealth.health = 1;
 
@@ -131,19 +147,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             }
         }
 
-        private void SpinOut()
-        {
-
-            exponent = Mathf.Lerp(spinMaxSpeed, spinMinSpeed, exponent * GetDeltaTime());
-
-            // lerp will slowly increase to the max value in exponent time
-            float currentValue = Mathf.Lerp(spinMinSpeed, spinMaxSpeed, 2);
-
-            Quaternion finalRotation = Quaternion.AngleAxis(currentValue, Vector3.right);
-            characterDirection.forward = finalRotation * characterDirection.forward;
-
-            
-        }
 
         public override void OnExit()
         {

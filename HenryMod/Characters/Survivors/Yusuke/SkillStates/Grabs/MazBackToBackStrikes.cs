@@ -765,7 +765,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public override void OnExit()
         {
             base.OnExit();
-            
+
+            PlayAnimation("FullBody, Override", "BufferEmpty", "Roll.playbackRate", launchAnimationSpeed);
             characterMotor.enabled = true;
             characterDirection.enabled = true;
 
