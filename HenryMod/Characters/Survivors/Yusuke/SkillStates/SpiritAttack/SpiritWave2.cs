@@ -20,6 +20,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
@@ -121,6 +122,7 @@ namespace YusukeMod.SkillStates
         private float recoupTime;
         private bool hasRecoup;
         private PivotRotation pivotRotation;
+        private YusukeWeaponComponent yusukeWeaponComponent;
 
         // effects 
         public GameObject spiritWaveChargeEffectObject;
@@ -162,6 +164,7 @@ namespace YusukeMod.SkillStates
 
             knockbackController = new KnockbackController();
             stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            yusukeWeaponComponent = characterBody.GetComponent<YusukeWeaponComponent>();
 
             duration = Mathf.Lerp(minDuration, maxDuration, charge);
             Log.Info("Duration: " + duration);
@@ -307,6 +310,17 @@ namespace YusukeMod.SkillStates
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+            if (yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedBoolean())
+            {
+                PlayAnimation("BothHands, Override", "BufferEmpty", "ShootGun.playbackRate", 1f);
+                outer.SetNextState(new RevertSkills
+                {
+                    moveID = 4,
+                });
+                return;
+
+            }
 
             characterMotor.disableAirControlUntilCollision = true;
             UpdateDashSpeed(chargedMaxSpeed, chargedFinalSpeed);

@@ -13,6 +13,7 @@ using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.KnockbackStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 {
@@ -68,6 +69,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         private bool hasSelectionBeenMade;
         public const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         private PivotRotation pivotRotation;
 
         // effect prefab
@@ -97,6 +100,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             dashBoomContinuousPrefab = YusukeAssets.dashBoomContinuousEffect;
             throwSwingEffectPrefab = YusukeAssets.throwSwingSingleEffect;
             throwWindPrefab = YusukeAssets.throwWindEffect;
+
+            yusukeWeaponComponent = characterBody.GetComponent<YusukeWeaponComponent>();
 
 
             UpdateDashSpeed(maxInitialSpeed, finalSpeed);
@@ -131,6 +136,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+            if(yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedBoolean())
+            {
+                swingController.Remove();
+                outer.SetNextStateToMain();
+            }
+            
 
             dashTime += GetDeltaTime();
             if (!targetFound)

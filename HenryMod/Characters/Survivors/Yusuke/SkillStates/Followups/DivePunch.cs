@@ -127,7 +127,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 knockbackController = new KnockbackController();
 
-                yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+                yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                 yusukeWeaponComponent.SetFollowUpBoolean(true);
 
                 EditAttackEffects();
@@ -158,6 +158,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         {
             base.OnExit();
 
+            if(ID != 0)
+            {
+                RevertAndRemoveEnemyComponents();
+            }
+
             PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);
 
             characterMotor.enabled = true;
@@ -168,7 +173,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             Vector3 velocityPercentage = currentVelocity * velocityDivider;
             characterMotor.velocity = velocityPercentage;
 
-            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeWeaponComponent.SetFollowUpBoolean(false);
 
         }
@@ -179,6 +184,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
             if (ID != 0)
             {
+
+                if (yusukeWeaponComponent && yusukeWeaponComponent.GetKnockedBoolean())
+                {
+                    RevertAndRemoveEnemyComponents();
+                    outer.SetNextState(new RevertSkills
+                    {
+                        moveID = ID
+
+                    });
+                    return;
+                }
+
+
                 if(!beginDive && !SkipDive) DashTowardsEnemy();
 
                 if (beginDive)

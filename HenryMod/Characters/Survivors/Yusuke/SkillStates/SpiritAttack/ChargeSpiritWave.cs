@@ -9,6 +9,7 @@ using YusukeMod.Survivors.Yusuke.SkillStates;
 using static YusukeMod.Modules.BaseStates.YusukeMain;
 using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.SkillStates
 {
@@ -89,7 +90,15 @@ namespace YusukeMod.SkillStates
         public override void OnExit()
         {
             base.OnExit();
+
+            YusukeWeaponComponent yusukeWeaponComponent = characterBody.GetComponent<YusukeWeaponComponent>();
+            if (yusukeWeaponComponent.GetKnockedBoolean())
+            {
+                if (spiritWaveChargeEffectObject) EntityState.Destroy(spiritWaveChargeEffectObject);
+                if (spiritWaveChargeEffectPotentObject) EntityState.Destroy(spiritWaveChargeEffectPotentObject);
+            }
             
+
         }
 
         public override void FixedUpdate()
