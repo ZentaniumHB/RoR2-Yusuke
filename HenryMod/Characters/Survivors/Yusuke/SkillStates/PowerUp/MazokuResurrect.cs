@@ -13,9 +13,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
     internal class MazokuResurrect : BaseSkillState
     {
 
-        private float duration = 6.5f;
-        private float startExplosion = 4.3f;
-        private bool hasSpawnedExplosionEffect;
+        private float duration = 7f;
+        private float animationTimer;
+        private float startExplosion = 4.6f;
+        private bool hasCreatedExplosionBlast;
 
         YusukeWeaponComponent yusukeWeapon;
         HealthComponent yusukeHealth;
@@ -33,6 +34,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         private float originalYawRangeMax;
 
         private readonly float largeRangeValue = 9999f;
+
+        public BlastAttack blastAttack;
 
         public override void OnEnter()
         {
@@ -69,6 +72,31 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
             mazokuResurrectExplosionPrefab.AddComponent<DestroyOnTimer>().duration = duration;
             mazokuResurrectWindPrefab.AddComponent<DestroyOnTimer>().duration = duration;
+        }
+
+        private void CreateBlastAttack()
+        {
+            if (!hasCreatedExplosionBlast)
+            {
+                hasCreatedExplosionBlast = true;
+                blastAttack = new BlastAttack();
+                blastAttack.damageType = DamageType.Generic;
+                blastAttack.attacker = base.gameObject;
+                blastAttack.inflictor = base.gameObject;
+                blastAttack.teamIndex = TeamComponent.GetObjectTeam(blastAttack.attacker);
+                blastAttack.baseDamage = damageStat * YusukeStaticValues.transformationExplosionDamageCoefficient;
+                blastAttack.procCoefficient = 1.0f;
+                blastAttack.radius = 100f;
+                blastAttack.position = transform.position;
+                blastAttack.bonusForce = Vector3.up;
+                blastAttack.baseForce = 14000f;
+                blastAttack.falloffModel = BlastAttack.FalloffModel.None;
+                blastAttack.attackerFiltering = AttackerFiltering.NeverHitSelf;
+                blastAttack.crit = base.RollCrit();
+
+                blastAttack.Fire();
+            }
+
         }
 
         // this will temporarily change the pitch and yaw for the transformation cutscene, so the aim yaw won't affect the model when playing the animation
@@ -112,7 +140,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         {
             base.FixedUpdate();
 
+            animationTimer += GetDeltaTime();
             characterMotor.velocity = new Vector3(0, 0, 0);
+            if(animationTimer > startExplosion)
+            {
+                CreateBlastAttack();
+            }
             if (isAuthority && fixedAge >= duration)
             {
                 outer.SetNextStateToMain();
@@ -138,11 +171,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                 if (yusukeHealth)
                 {
                     yusukeHealth.godMode = false;
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
                 }
 
             }
 
             if (yusukeWeapon) yusukeWeapon.SetKnockedBoolean(false);
+            
 
             base.OnExit();
 

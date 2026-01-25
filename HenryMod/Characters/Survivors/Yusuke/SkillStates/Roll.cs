@@ -12,6 +12,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using YusukeMod.Survivors.Yusuke.Components;
+using static YusukeMod.Modules.BaseStates.YusukeMain;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -249,7 +250,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             base.OnExit();
-
+            animator.SetLayerWeight((int)AnimationLayerIndex.GunCharge, 0f);
+            animator.SetLayerWeight((int)AnimationLayerIndex.ShotgunCharge, 0f);
             characterMotor.disableAirControlUntilCollision = false;
         }
 

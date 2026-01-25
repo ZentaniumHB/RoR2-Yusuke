@@ -193,6 +193,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                 if (yusukeHealth)
                 {
                     yusukeHealth.godMode = false;
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
                 }
 
             }
