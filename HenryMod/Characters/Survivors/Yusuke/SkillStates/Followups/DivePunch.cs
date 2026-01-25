@@ -85,6 +85,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         public GameObject dashBoomPrefab;
         public GameObject hitImpactEffectPrefab;
         public GameObject punchBarragePrefab;
+        public GameObject punchBarrageObject;
+        public GameObject punchBarrageObjectAir;
         public GameObject heavyHitEffectPrefab;
         public GameObject heavyHitEffectFollowPrefab;
         public GameObject finalHitEffectPrefab;
@@ -98,7 +100,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
         private YusukeWeaponComponent yusukeWeaponComponent;
         private bool hasPlayedRapidPunchAnimation;
-
+        
         public override void OnEnter()
         {
             base.OnEnter();     
@@ -129,8 +131,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
                 yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                 yusukeWeaponComponent.SetFollowUpBoolean(true);
-
-                EditAttackEffects();
+                EditAttackEffects();          
             }
             
 
@@ -142,7 +143,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             hitImpactEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
             
             float duration = punchReset * (maxPunches-1);
-            punchBarragePrefab.AddComponent<DestroyOnTimer>().duration = duration+0.2f;
+            //punchBarragePrefab.AddComponent<DestroyOnTimer>().duration = duration+0.2f;
+            if (!punchBarrageObject) punchBarrageObject = YusukePlugin.CreateEffectObject(punchBarragePrefab, FindModelChild(divePunchCenter));
+            if (!punchBarrageObjectAir) punchBarrageObjectAir = YusukePlugin.CreateEffectObject(punchBarragePrefab, FindModelChild(dashCenter));
+            punchBarrageObject.SetActive(false);
+            punchBarrageObjectAir.SetActive(false);
+
             dashBoomPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
 
             heavyHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
@@ -162,6 +168,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             {
                 RevertAndRemoveEnemyComponents();
             }
+
+            if (punchBarrageObject) EntityState.Destroy(punchBarrageObject);
+            if (punchBarrageObjectAir) EntityState.Destroy(punchBarrageObjectAir);
 
             PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);
 
@@ -208,6 +217,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         PlayAnimation("FullBody, Override", "DivePunch", "Roll.playbackRate", 0.5f);
                         EffectManager.SimpleMuzzleFlash(hitImpactEffectPrefab, gameObject, divePunchCenter, false);
                         EffectManager.SimpleMuzzleFlash(heavyHitEffectFollowPrefab, gameObject, divePunchCenter, false);
+
+                        if (NetworkServer.active)
+                        {
+                            characterBody.AddBuff(JunkContent.Buffs.IgnoreFallDamage);
+                        }
+
                         playAnim = true;
                     }
 
@@ -285,6 +300,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             enemyMachine.SetState(stunState);
                         }
                     }
+                    characterBody.RemoveBuff(JunkContent.Buffs.IgnoreFallDamage);
                 }
             }
         }
@@ -311,7 +327,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 // in addition, if it takes yusuke too long to get to the enemy, it will cancel and restock the move.
                 if (!target.healthComponent.alive || dashTimer > dashMaxTimer) 
                 {
-                    if (target.healthComponent.alive) DivePunchController.Remove();
+                    if (target.healthComponent.alive) DivePunchController.Remove(); 
                     outer.SetNextState(new RevertSkills
                     {
                         moveID = 4
@@ -497,12 +513,21 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                 scale = 8f
             }, transmit: true);
 
-            if(!hasAppliedPunchEffect) 
+            if (!hasAppliedPunchEffect)
             {
                 hasAppliedPunchEffect = true;
                 Log.Info("Spawning punch");
-                EffectManager.SimpleMuzzleFlash(punchBarragePrefab, gameObject, divePunchCenter, false);
-                
+
+                if (SkipDive)
+                {
+                    punchBarrageObjectAir.SetActive(true);
+                }
+                else
+                {
+                    punchBarrageObject.SetActive(true);
+                }
+                //EffectManager.SimpleMuzzleFlash(punchBarragePrefab, gameObject, divePunchCenter, false);
+
             }
 
             attack = new OverlapAttack
@@ -568,7 +593,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
             if (!isFinalPunchAnimationActive)
             {
-                isFinalPunchAnimationActive = true; 
+                isFinalPunchAnimationActive = true;
+                if (punchBarrageObject) EntityState.Destroy(punchBarrageObject);
+                if (punchBarrageObjectAir) EntityState.Destroy(punchBarrageObjectAir);
+
                 if (NetworkServer.active)
                 {
                     if (!SkipDive)

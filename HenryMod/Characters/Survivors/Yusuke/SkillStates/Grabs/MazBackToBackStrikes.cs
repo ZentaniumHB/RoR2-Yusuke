@@ -185,6 +185,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
             if (demonShotgunEffect != null) demonShotgunObject = YusukePlugin.CreateEffectObject(demonShotgunEffect, FindModelChild("HandR"));
             demonShotgunObject.SetActive(false);
+            CreateGutPunchEffects();
+            
+
+        }
+
+        private void CreateGutPunchEffects()
+        {
+            if (!gutPunchSlowObject) gutPunchSlowObject = YusukePlugin.CreateEffectObject(gutPunchSlowPrefab, FindModelChild(gutPunchCenter));
+            if (!gutPunchFastObject) gutPunchFastObject = YusukePlugin.CreateEffectObject(gutPunchFastPrefab, FindModelChild(gutPunchCenter));
+            gutPunchFastObject.SetActive(false);
+            gutPunchSlowObject.SetActive(false);
 
         }
 
@@ -231,6 +242,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             {
                 hasPlayedShadowDash = true;
                 EffectManager.SimpleMuzzleFlash(shadowDashGrabEffectPrefab, gameObject, dashCenter, true);
+                gutPunchSlowObject.SetActive(true);
             }
 
 
@@ -331,15 +343,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             }
         }
 
-        private void SpawnGutPunchEffect(bool isSpedUp)
+        private void SwitchGutPunchEffect(bool isSpedUp)
         {
             if (!isSpedUp)
             {
-                if (!gutPunchSlowObject) gutPunchSlowObject = YusukePlugin.CreateEffectObject(gutPunchSlowPrefab, FindModelChild(gutPunchCenter));
+                gutPunchSlowObject.SetActive(true);
+                gutPunchFastObject.SetActive(false);
             }
             else
             {
-                if(!gutPunchFastObject) gutPunchFastObject = YusukePlugin.CreateEffectObject(gutPunchFastPrefab, FindModelChild(gutPunchCenter));
+                gutPunchSlowObject.SetActive(false);
+                gutPunchFastObject.SetActive(true);
             }
         }
 
@@ -398,8 +412,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
 
         private void RemovePunchEffects()
         {
-            if(gutPunchFastObject) EntityState.Destroy(gutPunchFastObject);
+            if(gutPunchFastObject) EntityState.Destroy(gutPunchFastObject); 
             if(gutPunchSlowObject) EntityState.Destroy(gutPunchSlowObject);
+            if(demonShotgunObject) EntityState.Destroy(demonShotgunObject);
+
         }
 
         // knockback properties
@@ -623,13 +639,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
             consecutiveDuration += GetDeltaTime();
             Log.Info("consecutive: " + consecutiveDuration);
 
-            SpawnGutPunchEffect(false);
+            //SwitchGutPunchEffect(false);
             // the punches will increase its speed if 2 seconds passes. 
             if (!hasIncreaseAttackSpeed && consecutiveDuration > 2)
             {
                 hasIncreaseAttackSpeed = true;
                 hasPlayedGutPunch = false;
-                SpawnGutPunchEffect(true);
+                SwitchGutPunchEffect(true);
                 demonShotgunObject.SetActive(true);
                 attackInterval /= 2;
                 
@@ -766,7 +782,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs
         {
             base.OnExit();
 
-            PlayAnimation("FullBody, Override", "BufferEmpty", "Roll.playbackRate", launchAnimationSpeed);
+            if (!hasKickedEnemy && hasAttackEnded) {
+                PlayAnimation("FullBody, Override", "BufferEmpty", "Roll.playbackRate", launchAnimationSpeed);
+            }
+            
             characterMotor.enabled = true;
             characterDirection.enabled = true;
 

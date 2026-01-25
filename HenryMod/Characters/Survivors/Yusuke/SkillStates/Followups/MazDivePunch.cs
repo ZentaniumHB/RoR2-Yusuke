@@ -107,6 +107,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
         //effects 
         public GameObject hitImpactEffectPrefab;
         public GameObject punchBarragePrefab;
+
+        public GameObject punchBarrageObject;
+        public GameObject punchBarrageObjectAir;
+
         public GameObject heavyHitEffectPrefab;
         public GameObject heavyHitEffectFollowPrefab;
         public GameObject finalHitEffectPrefab;
@@ -122,6 +126,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
 
 
         private YusukeWeaponComponent yusukeWeaponComponent;
+        
 
         public override void OnEnter()
         {
@@ -167,7 +172,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             hitImpactEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1;
 
             float duration = punchReset * (maxPunches - 1);
-            punchBarragePrefab.AddComponent<DestroyOnTimer>().duration = duration + 0.1f;
+            //punchBarragePrefab.AddComponent<DestroyOnTimer>().duration = duration + 0.1f;
+            if (!punchBarrageObject) punchBarrageObject = YusukePlugin.CreateEffectObject(punchBarragePrefab, FindModelChild(divePunchCenter));
+            if (!punchBarrageObjectAir) punchBarrageObjectAir = YusukePlugin.CreateEffectObject(punchBarragePrefab, FindModelChild(dashCenter));
+            punchBarrageObject.SetActive(false);
+            punchBarrageObjectAir.SetActive(false);
 
             heavyHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
             heavyHitEffectFollowPrefab.AddComponent<DestroyOnTimer>().duration = 2f;
@@ -185,6 +194,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             base.OnExit();
 
             // this is needed since the animations here has no transition connection, without it there is a chance that an animation will loop forever, unless interrupted again
+
+            if (punchBarrageObject) EntityState.Destroy(punchBarrageObject);
+            if (punchBarrageObjectAir) EntityState.Destroy(punchBarrageObjectAir);
+
             PlayAnimation("FullBody, Override", "BufferEmpty", "ThrowBomb.playbackRate", 1f);   
             characterMotor.enabled = true;
             characterDirection.enabled = true;
@@ -219,6 +232,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                     EffectManager.SimpleMuzzleFlash(hitImpactEffectPrefab, gameObject, divePunchCenter, false);
                     EffectManager.SimpleMuzzleFlash(heavyHitEffectFollowPrefab, gameObject, divePunchCenter, false);
                     EffectManager.SimpleMuzzleFlash(stompEffectPrefab, gameObject, divePunchCenter, false);
+
+                    if (NetworkServer.active)
+                    {
+                        characterBody.AddBuff(JunkContent.Buffs.IgnoreFallDamage);
+                    }
 
                     playAnim = true;
                 }
@@ -312,6 +330,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                             enemyMachine.SetState(stunState);
                         }
                     }
+                    characterBody.RemoveBuff(JunkContent.Buffs.IgnoreFallDamage);
 
                 }
             }
@@ -572,8 +591,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             if (!hasAppliedPunchEffect)
             {
                 hasAppliedPunchEffect = true;
-                EffectManager.SimpleMuzzleFlash(punchBarragePrefab, gameObject, divePunchCenter, false);
-
+                //EffectManager.SimpleMuzzleFlash(punchBarragePrefab, gameObject, divePunchCenter, false);
+                if (SkipDive)
+                {
+                    punchBarrageObjectAir.SetActive(true);
+                }
+                else
+                {
+                    punchBarrageObject.SetActive(true);
+                }
 
             }
 
@@ -666,7 +692,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
             // this boolean will prevent the if statement in the fixedUpate method running, which would cause conflict with the other animations
             if (!isFinalPunchAnimationActive)
             {
-                isFinalPunchAnimationActive = true; 
+                isFinalPunchAnimationActive = true;
+
+                if (punchBarrageObject) EntityState.Destroy(punchBarrageObject);
+                if (punchBarrageObjectAir) EntityState.Destroy(punchBarrageObjectAir);
+
                 if (NetworkServer.active)
                 {
                     if (!SkipDive)

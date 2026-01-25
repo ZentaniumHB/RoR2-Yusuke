@@ -202,7 +202,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             hitImpactEffect = _assetBundle.LoadEffect("hitImpact", "hitImpact", true, false);
             punchBarrageFastEffect = _assetBundle.LoadEffect("punchBarrageFast", "punchBarrageFast", true, false);
-            punchBarrageSlowEffect = _assetBundle.LoadEffect("punchBarrageSlow", "punchBarrageSlow", true, false);
+            punchBarrageSlowEffect = _assetBundle.LoadEffect("punchBarrageSlow", "punchBarrageSlow", true, true);
 
             heavyHitRingEffect = _assetBundle.LoadEffect("heavyHitRing", "heavyHitRing", false, false);
             heavyHitRingFollowingEffect = _assetBundle.LoadEffect("heavyHItRingFollow", "heavyHItRingFollow", true, false);
