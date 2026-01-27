@@ -19,15 +19,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public HUD hud = null;
         public GameObject SpiritCuffGauge;
         public GameObject MazokuGauge;
+        public GameObject SacredGuage;
+        public GameObject SacredMaxGuageImage;
+        public GameObject SacredBlueGuage;
+        public Transform springCanvas;
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
 
         private bool hasCheckedUtility;
         public bool hasWaveUtility;
         public Image spiritCuffFill;
         public Image mazokuFill;
+        public Image sacredFill;
+
+        public Image sacredMaxFillBlue;
 
         private float currentMazokuAmmount;
         private float currentAmount;
+        private float currentSacredAmount;
+        private float currentSacredBlueAmount;
 
         public bool activateUI;
 
@@ -38,6 +47,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         private Color mazokuBorderColour;
 
         private bool hasMazokuSetup;
+        private bool hasSacredSetup;
 
         public void Start()
         {
@@ -54,6 +64,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             // finding the bottomleftCluster (section that holds the health, level and buff/debuff infomation
             Transform bottomLeftCluster = hud.transform.Find("MainContainer").Find("MainUIArea").Find("SpringCanvas")
                  .Find("BottomLeftCluster");
+            springCanvas = hud.transform.Find("MainContainer").Find("MainUIArea").Find("SpringCanvas");
 
             if (bottomLeftCluster != null)
             {
@@ -80,12 +91,36 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 Log.Info("bottomLeftCluster does not exits.");
             }
 
+            AddSacredGuage();
+
             MazokuGauge.SetActive(true);
-            
+            SacredGuage.SetActive(true);
 
 
         }
 
+        private void AddSacredGuage()
+        {
+            if (springCanvas)
+            {
+                Log.Info("Setting sacred guage");
+                Transform bottomRightScale = springCanvas.Find("BottomRightCluster/Scaler");
+                if (bottomRightScale)
+                {
+                    SacredGuage = UnityEngine.GameObject.Instantiate(YusukeAssets.SacredGuage, bottomRightScale);
+                    SacredGuage.transform.localPosition = new Vector3(-96f, 202f, -102f);
+                    SacredGuage.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+                }
+                else
+                {
+                    Log.Info("bottom right scaler Does not exits");
+                }
+                
+
+            }
+            
+
+        }
 
         public void FixedUpdate()
         {
@@ -95,6 +130,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if (characterBody)
             {
                 if (!hasMazokuSetup) SetUpMazoku();
+                if (!hasSacredSetup) SetUpSacred();
                 if (!hasCheckedUtility)
                 {
                     hasCheckedUtility = true;
@@ -138,7 +174,33 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 UpdateCuffGauge();
             }
             UpdateMazokuGuage();
+            UpdateSacredGuage();
 
+
+        }
+
+        private void SetUpSacred()
+        {
+            hasSacredSetup = true;
+            Transform childTransform = SacredGuage.transform.Find("SacredCharge");
+            if (childTransform)
+            {
+                sacredFill = childTransform.GetComponent<Image>();
+            }
+
+            childTransform = SacredGuage.transform.Find("SacredMaxFillBlue");
+            if (childTransform)
+            {
+                sacredMaxFillBlue = childTransform.GetComponent<Image>();
+                SacredBlueGuage = childTransform.gameObject;
+            }
+            childTransform = SacredGuage.transform.Find("SacredMaxFill");
+            if (childTransform)
+            {
+                SacredMaxGuageImage = childTransform.gameObject;
+            }
+            SacredMaxGuageImage.SetActive(false);
+            SacredBlueGuage.SetActive(false);
 
         }
 
@@ -216,12 +278,39 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             }
         }
 
+        private void UpdateSacredGuage()
+        {
+            SacredComponent sacredComponent = characterBody.gameObject.GetComponent<SacredComponent>();
+            if ((bool)sacredComponent)
+            {
+                // retrieves the value that needs to be added to the fill
+                
+                float finalFill = sacredComponent.currentSacredValue / sacredComponent.maxSacredValue;
+                UpdateFill(finalFill, 3);
+                //Log.Info("Current sacred value: " + finalFill);
+                sacredFill.fillAmount = currentSacredAmount;
+                if (currentSacredAmount >= 1f)
+                {
+                    //spiritCuffFill.color = Color.yellow;
+                }
+                else
+                {
+                    //if (currentAmount <= 1f && !.hasReleased) spiritCuffFill.color = cuffGuageColour;
+                }
+            }
+            else
+            {
+                Log.Info("SacredComponent does not exist");
+            }
+        }
+
         private void UpdateFill(float finalFill, int bar)
         {
             
             if(bar == 1) currentMazokuAmmount = finalFill;
             if(bar == 2) currentAmount = finalFill;
-
+            if(bar == 3) currentSacredAmount = finalFill;
+            if(bar == 4) currentSacredBlueAmount = finalFill;
 
 
         }

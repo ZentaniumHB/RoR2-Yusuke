@@ -201,6 +201,7 @@ namespace YusukeMod.Survivors.Yusuke
             bodyPrefab.AddComponent<SingleTracking>().TurnOff();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
+            bodyPrefab.AddComponent<SacredComponent>();
 
             bodyPrefab.AddComponent<PivotRotation>();   // visual pivot rotation for the animations and vfx
             LoadAdditionalSprites();
@@ -1258,17 +1259,22 @@ namespace YusukeMod.Survivors.Yusuke
                                 {
                                     // increasing the mazoku value (using the increase value float instaed as it will cause a stack overflow when trying to trigger the method in here.
                                     MazokuComponent mazokuComponent = master.GetComponent<MazokuComponent>();
+                                    
                                     if (damageReport.victimIsBoss)
                                     {
                                         mazokuComponent.increaseValue = 100f; //10f
+                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 15f;
 
-                                    }else if (damageReport.victimIsElite)
+                                    }
+                                    else if (damageReport.victimIsElite)
                                     {
                                         mazokuComponent.increaseValue = 100f; //5f
+                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 7.5f;
                                     }
                                     else
                                     {
                                         mazokuComponent.increaseValue = 100f; //1f
+                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 1.5f;
                                     }
                                     
                                     
@@ -1287,12 +1293,21 @@ namespace YusukeMod.Survivors.Yusuke
         private void GlobalEventManager_OnHitEnemy(On.RoR2.GlobalEventManager.orig_OnHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, GameObject victim)
         {
             orig(self, damageInfo, victim);
-            // do something whenever an enemy gets hit
-            //throw new NotImplementedException();
-            if(damageInfo != null)
+            /*if (damageInfo.attacker != null && damageInfo != null)
             {
-               // Log.Info("Object that hit enemy: " + damageInfo.inflictor.);
-            }
+                if (damageInfo.attacker.name.Contains("YusukeBody"))
+                {
+                    SacredComponent sacredComponent = damageInfo.attacker.gameObject.GetComponent<SacredComponent>();
+                    YusukeWeaponComponent YusukeWeaponComponent = damageInfo.attacker.gameObject.GetComponent<YusukeWeaponComponent>();
+
+                    if (YusukeWeaponComponent) Log.Info("YusukeWeaponComp exists");
+                    if (sacredComponent) Log.Info("sacredComponent exists");
+                    if (YusukeWeaponComponent && sacredComponent && YusukeWeaponComponent.GetSacredEnergyReleased())
+                    {
+                        sacredComponent.IncreaseSacredGauge(1);
+                    }
+                }
+            }*/
         }
 
         private void RecalculateStatsAPI_GetStatCoefficients(CharacterBody sender, R2API.RecalculateStatsAPI.StatHookEventArgs args)

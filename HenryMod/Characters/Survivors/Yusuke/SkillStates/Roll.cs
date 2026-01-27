@@ -250,8 +250,8 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
         {
             if (cameraTargetParams) cameraTargetParams.fovOverride = -1f;
             base.OnExit();
-            animator.SetLayerWeight((int)AnimationLayerIndex.GunCharge, 0f);
-            animator.SetLayerWeight((int)AnimationLayerIndex.ShotgunCharge, 0f);
+            //animator.SetLayerWeight((int)AnimationLayerIndex.GunCharge, 0f);
+            //animator.SetLayerWeight((int)AnimationLayerIndex.ShotgunCharge, 0f);
             characterMotor.disableAirControlUntilCollision = false;
         }
 

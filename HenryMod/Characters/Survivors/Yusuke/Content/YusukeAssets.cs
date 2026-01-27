@@ -117,6 +117,7 @@ namespace YusukeMod.Survivors.Yusuke
         //HUD
         public static GameObject SpiritCuffGauge;
         public static GameObject MazokuGauge;
+        internal static GameObject SacredGuage;
 
         private static AssetBundle _assetBundle;
 
@@ -589,7 +590,7 @@ namespace YusukeMod.Survivors.Yusuke
             Log.Info("Setting the UI OBJECT in Assets");
             SpiritCuffGauge = _assetBundle.LoadAsset<GameObject>("SpiritCuffGauge");
             MazokuGauge = _assetBundle.LoadAsset<GameObject>("MazokuGauge");
-
+            SacredGuage = _assetBundle.LoadAsset<GameObject>("SacredGauge");
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using EntityStates.GolemMonster;
 using RoR2BepInExPack.GameAssetPaths;
 using UnityEngine;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.Components
 {
@@ -17,6 +18,8 @@ namespace YusukeMod.Survivors.Yusuke.Components
         private bool hasMazokuRevive = true;
 
         private bool hasSacredEneryRevive = true;
+
+        private bool hasSacredEnergyReleased = false;
 
         private byte reviveType;
 
@@ -91,6 +94,10 @@ namespace YusukeMod.Survivors.Yusuke.Components
         {
             return isInKnockedState;
         }
+        public bool GetSacredEnergyReleased()
+        {
+            return hasSacredEnergyReleased;
+        }
 
         public void UseMazokuRevive()
         {
@@ -110,6 +117,14 @@ namespace YusukeMod.Survivors.Yusuke.Components
         public void SetKnockedBoolean(bool isInStateMachine)
         {
             isInKnockedState = isInStateMachine;
+        }
+
+        public void SetSacredEnergyRelease(bool hasSacredEnergyRelease)
+        {
+            hasSacredEnergyReleased = hasSacredEnergyRelease;
+
+            SacredComponent sacredComponent = gameObject.GetComponent<SacredComponent>();
+            if(sacredComponent) sacredComponent.hasReleaseSacredEnergy = true;
         }
 
     }

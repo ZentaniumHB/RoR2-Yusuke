@@ -75,7 +75,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             }
             currentSpiritValue = Mathf.Clamp(currentSpiritValue + value, 0f, maxSpiritCuffValue);
             previousValue = currentSpiritValue;
-            Log.Info("Previous value: "+previousValue);
+            Log.Info("current sacred value: "+previousValue);
             return true;
         }
 

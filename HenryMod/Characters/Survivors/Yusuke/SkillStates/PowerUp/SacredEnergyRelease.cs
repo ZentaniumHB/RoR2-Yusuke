@@ -13,14 +13,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
         private float duration = 1f;
 
-        YusukeWeaponComponent yusukeWeapon;
+        YusukeWeaponComponent yusukeWeaponComponent;
         HealthComponent yusukeHealth;
 
         public override void OnEnter()
         {
             base.OnEnter();
 
-            yusukeWeapon = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeHealth = characterBody.GetComponent<HealthComponent>();
 
         }
@@ -56,7 +56,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
             }
 
-            if (yusukeWeapon) yusukeWeapon.SetKnockedBoolean(false);
+            if (yusukeWeaponComponent) yusukeWeaponComponent.SetKnockedBoolean(false);
+            if (yusukeWeaponComponent) yusukeWeaponComponent.SetSacredEnergyRelease(true);
 
             base.OnExit();
 
