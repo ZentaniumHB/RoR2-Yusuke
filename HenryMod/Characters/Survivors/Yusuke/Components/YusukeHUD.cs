@@ -315,6 +315,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
 
         }
 
+        public void DisplaySacredMaxGuageImage(bool isDisplayed)
+        {
+            SacredMaxGuageImage.SetActive(isDisplayed);
+        }
+
+        public void DisplaySacredMaxGuageBlueFlowImage(bool isDisplayed)
+        {
+            SacredBlueGuage.SetActive(isDisplayed);
+        }
+
+
 
     }
 }

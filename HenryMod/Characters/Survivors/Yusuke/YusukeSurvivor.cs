@@ -1043,6 +1043,15 @@ namespace YusukeMod.Survivors.Yusuke
             /* take damage hook for now, until I find a better way to do this, the problem with this is that it doesn't account for any buffs or debuffs
              *  so there is a chance that it can return as non lethal but actually is with buffs.
              */
+            
+
+            orig(self, damageInfo);
+        }
+
+        private void HealthComponent_TakeDamageProcess(On.RoR2.HealthComponent.orig_TakeDamageProcess orig, HealthComponent self, DamageInfo damageInfo)
+        {
+
+            orig(self, damageInfo);
             if (self)
             {
                 if (self.body.name.Contains("YusukeBody"))
@@ -1066,14 +1075,6 @@ namespace YusukeMod.Survivors.Yusuke
 
                 }
             }
-
-            orig(self, damageInfo);
-        }
-
-        private void HealthComponent_TakeDamageProcess(On.RoR2.HealthComponent.orig_TakeDamageProcess orig, HealthComponent self, DamageInfo damageInfo)
-        {
-
-            orig(self, damageInfo);
 
         }
 
@@ -1263,21 +1264,15 @@ namespace YusukeMod.Survivors.Yusuke
                                     if (damageReport.victimIsBoss)
                                     {
                                         mazokuComponent.increaseValue = 100f; //10f
-                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 15f;
-
                                     }
                                     else if (damageReport.victimIsElite)
                                     {
                                         mazokuComponent.increaseValue = 100f; //5f
-                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 7.5f;
                                     }
                                     else
                                     {
                                         mazokuComponent.increaseValue = 100f; //1f
-                                        //if (YusukeWeaponComponent.GetSacredEnergyReleased()) sacredComponent.increaseValue = 1.5f;
                                     }
-                                    
-                                    
 
                                 }
                             }
