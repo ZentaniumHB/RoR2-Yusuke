@@ -283,6 +283,7 @@ Transform:
   - {fileID: 6656989114761460549}
   - {fileID: 5725637008884496797}
   - {fileID: 3898398270604665069}
+  - {fileID: 7204909157391276393}
   m_Father: {fileID: 7586734840729833169}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 95, y: 0, z: 0}
@@ -648,6 +649,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6902173129275114989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7204909157391276393}
+  m_Layer: 0
+  m_Name: overdrive12HookUppercutHitBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7204909157391276393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6902173129275114989}
+  m_LocalRotation: {x: -0.7372774, y: -0, z: 4.2632564e-14, w: 0.67559016}
+  m_LocalPosition: {x: 0, y: 1.83, z: -2.27}
+  m_LocalScale: {x: 5, y: 6, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1753320924735157511}
+  m_RootOrder: 15
+  m_LocalEulerAnglesHint: {x: -95, y: 0, z: 0}
 --- !u!1 &6929868422838026996
 GameObject:
   m_ObjectHideFlags: 0
@@ -1060,7 +1092,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.261693
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -1070,7 +1102,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.4146464
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d89b752d6d6490046aa21637b8ba4cb5,
         type: 3}
@@ -4078,6 +4110,18 @@ MonoBehaviour:
     transform: {fileID: 5118550681896363227}
   - name: divePunchHitBox
     transform: {fileID: 681376858697909290}
+  - name: overdriveShotgunSingleHitbox
+    transform: {fileID: 2320758929653170825}
+  - name: overdriveShotgunFInalHitbox
+    transform: {fileID: 9071385451456631678}
+  - name: overdriveWaveHitbox
+    transform: {fileID: 6656989114761460549}
+  - name: mazokuExplosionHitbox
+    transform: {fileID: 5725637008884496797}
+  - name: overdrive12HookFinalHit
+    transform: {fileID: 3898398270604665069}
+  - name: overdrive12HookUppercutHitBox
+    transform: {fileID: 7204909157391276393}
   - name: ModelFace
     transform: {fileID: 8942438420085797724}
   - name: HairLocation

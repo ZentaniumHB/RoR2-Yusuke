@@ -86,6 +86,8 @@ namespace YusukeMod.Modules.BaseStates
         private GameObject spiritCuffObject;
         private GameObject spiritCuffEffectPrefab;
 
+        private SacredComponent sacredComponent;
+
         private YusukeWeaponComponent yusukeWeaponComponent;
 
         private string playbackRateParam = "animInterrupt.playbackRate";
@@ -113,7 +115,7 @@ namespace YusukeMod.Modules.BaseStates
             isSecondaryReady = true;
             mazokuComponent = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             spiritCuffComponent = characterBody.gameObject.GetComponent<SpiritCuffComponent>();
-            
+            sacredComponent = characterBody.gameObject.GetComponent<SacredComponent>();
             yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
 
             // used to control the spirit cuff effect
@@ -235,6 +237,18 @@ namespace YusukeMod.Modules.BaseStates
                 }
             }
 
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                if(sacredComponent && sacredComponent.previousValue == sacredComponent.maxSacredValue)
+                {
+                    if (!mazokuComponent.hasTransformed)
+                    {
+                        outer.SetNextState(new SwitchSkills { switchID = (int)SwitchSkills.SwitchSkillIndex.OverdriveSwitch });
+                    }
+                    
+                }
+            }
+
 
             if(mazokuComponent != null)
             {
@@ -328,7 +342,7 @@ namespace YusukeMod.Modules.BaseStates
         {
             return new SwitchSkills
             {
-                switchID = ID,
+                switchID = (int)SwitchSkills.SwitchSkillIndex.MazokuRevert,
             };
         }
 

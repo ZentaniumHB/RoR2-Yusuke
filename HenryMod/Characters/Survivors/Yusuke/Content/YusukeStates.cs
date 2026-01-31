@@ -3,10 +3,12 @@ using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Modules.BaseContent.BaseStates;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.SkillStates;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 
@@ -17,7 +19,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static void Init()
         {
             Modules.Content.AddEntityState(typeof(SlashCombo));
-
+            Modules.Content.AddEntityState(typeof(PunchCombo));
 
             Modules.Content.AddEntityState(typeof(ChargeSpiritGun));
             Modules.Content.AddEntityState(typeof(ChargeSpiritGunPrimary));
@@ -56,6 +58,14 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(MazokuResurrect));
             Modules.Content.AddEntityState(typeof(SacredEnergyRelease));
 
+            Modules.Content.AddEntityState(typeof(OverdriveSpiritSnipe));
+            Modules.Content.AddEntityState(typeof(OverdriveSpiritShotgunAA12));
+            Modules.Content.AddEntityState(typeof(OverdriveSpiritWaveImpactFist));
+            Modules.Content.AddEntityState(typeof(Overdrive12Hooks));
+            Modules.Content.AddEntityState(typeof(OverdriveSpiritFlow));
+
+            Modules.Content.AddEntityState(typeof(SwitchSkills));
+            Modules.Content.AddEntityState(typeof(YusukeMain));
         }
     }
 }

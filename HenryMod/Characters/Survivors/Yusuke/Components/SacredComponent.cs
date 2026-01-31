@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RoR2BepInExPack.GameAssetPaths;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -7,6 +8,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
 {
     internal class SacredComponent : MonoBehaviour
     {
+        // enum based on whether the sacred meter decreases over time or empties completely
+        public enum OverdriveType
+        {
+            STANDARD,
+            TIMED
+        }
+
         public float chargeIncrement;
         public float baseChargeDuration = 3.0f;    // time it take for the component to charge in seconds
 
@@ -107,9 +115,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             return true;
         }
 
-        public void UseOverdriveAbility()
+        public void UseOverdriveAbility(byte type)
         {
+            if(type == (byte)OverdriveType.STANDARD)
+            {
 
+            }
+            else
+            {
+                
+            }
         }
 
 

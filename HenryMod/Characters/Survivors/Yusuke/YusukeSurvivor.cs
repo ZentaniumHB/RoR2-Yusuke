@@ -23,6 +23,7 @@ using Rewired.Utils;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using System.Xml.Linq;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -85,6 +86,12 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef demonDash;
         internal static SkillDef swingCombo;
         internal static SkillDef demonGunMega;
+
+        internal static SkillDef overdriveSpiritSnipe;
+        internal static SkillDef overdriveSpiritShotgunAA12;
+        internal static SkillDef overdriveSpiritWaveImpactFist;
+        internal static SkillDef overdriveSpiritFlow;
+        internal static SkillDef overdrive12Hook;
 
         //HUD
         internal static HUD hud = null;
@@ -215,6 +222,12 @@ namespace YusukeMod.Survivors.Yusuke
 
             Prefabs.SetupHitBoxGroup(characterModelObject, "MeleeGroup", "meleeHitBox");
             Prefabs.SetupHitBoxGroup(characterModelObject, "divePunchGroup", "divePunchHitBox");
+
+            Prefabs.SetupHitBoxGroup(characterModelObject, "overdriveShotgunSingleGroup", "overdriveShotgunSingleHitbox");
+            Prefabs.SetupHitBoxGroup(characterModelObject, "overdriveShotgunFinalGroup", "overdriveShotgunFInalHitbox");
+            Prefabs.SetupHitBoxGroup(characterModelObject, "overdriveWaveGroup", "overdriveWaveHitbox");
+            Prefabs.SetupHitBoxGroup(characterModelObject, "mazokuExplosionGroup", "mazokuExplosionHitbox");
+            Prefabs.SetupHitBoxGroup(characterModelObject, "overdrive12HookUppercutGroup", "overdrive12HookUppercutHitBox");
         }
 
         public override void InitializeEntityStateMachines()
@@ -231,6 +244,7 @@ namespace YusukeMod.Survivors.Yusuke
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon");
             Prefabs.AddEntityStateMachine(bodyPrefab, "Weapon2");
             Prefabs.AddEntityStateMachine(bodyPrefab, "MazokuWeapon");
+            Prefabs.AddEntityStateMachine(bodyPrefab, "Overdrive");
         }
 
         #region skills
@@ -248,6 +262,7 @@ namespace YusukeMod.Survivors.Yusuke
             // creating follow up skills 
             CreateFollowUpSkills();
             CreateMazokuSkills();
+            CreateOverdriveSkills();
 
         }
 
@@ -912,6 +927,171 @@ namespace YusukeMod.Survivors.Yusuke
                 canceledFromSprinting = false,
                 cancelSprintingOnActivation = false,
                 forceSprintDuringState = false
+
+            });
+
+        }
+
+
+        private void CreateOverdriveSkills()
+        {
+            YusukeSurvivor.overdriveSpiritSnipe = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeOverdriveSpiritSnipe",
+                skillNameToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITSNIPE_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITSNIPE_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritSnipe)),
+                activationStateMachineName = "Overdrive",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 200f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.overdriveSpiritShotgunAA12 = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeOverdriveSpiritShotgunAA12",
+                skillNameToken = YUSUKE_PREFIX + "OVERDRIVE_SHOTGUNAA12_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "OVERDRIVE_SHOTGUNAA12_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritShotgunAA12)),
+                activationStateMachineName = "Overdrive",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 200f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.overdriveSpiritWaveImpactFist = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeOverdriveSpiritWaveImpactFist",
+                skillNameToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITWAVE_IMPACT_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITWAVE_IMPACT_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritWaveImpactFist)),
+                activationStateMachineName = "Overdrive",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 200f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.overdriveSpiritFlow = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeOverdriveSpiritFlow",
+                skillNameToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITFLOW_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "OVERDRIVE_SPIRITFLOW_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritFlow)),
+                activationStateMachineName = "Overdrive",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 200f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
+
+            });
+
+            YusukeSurvivor.overdrive12Hook = Skills.CreateSkillDef(new SkillDefInfo
+            {
+                skillName = "YusukeOverdrive12Hooks",
+                skillNameToken = YUSUKE_PREFIX + "OVERDRIVE_12HOOKS_NAME",
+                skillDescriptionToken = YUSUKE_PREFIX + "OVERDRIVE_12HOOKS_DESCRIPTION",
+                keywordTokens = new string[] { "KEYWORD_AGILE" },
+                skillIcon = assetBundle.LoadAsset<Sprite>("0"),
+
+                activationState = new EntityStates.SerializableEntityStateType(typeof(Overdrive12Hooks)),
+                activationStateMachineName = "Overdrive",
+                interruptPriority = EntityStates.InterruptPriority.Death,
+
+                baseRechargeInterval = 200f,
+                baseMaxStock = 1,
+
+                rechargeStock = 1,
+                requiredStock = 1,
+                stockToConsume = 1,
+
+                resetCooldownTimerOnUse = false,
+                fullRestockOnAssign = true,
+                dontAllowPastMaxStocks = false,
+                mustKeyPress = false,
+                beginSkillCooldownOnSkillEnd = true,
+
+                isCombatSkill = true,
+                canceledFromSprinting = false,
+                cancelSprintingOnActivation = false,
+                forceSprintDuringState = false,
 
             });
 

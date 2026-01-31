@@ -206,7 +206,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             // use of an ID is needed to decide which move gets swapped in
             return new SwitchSkills
             {
-                switchID = ID,
+                switchID = (int)SwitchSkills.SwitchSkillIndex.MazokuSwitch,
             };
         }
 

@@ -11,6 +11,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 {
     internal class SwitchSkills : BaseSkillState
     {
+        // enum for the skill switching
+        public enum SwitchSkillIndex
+        {
+            MazokuSwitch,
+            MazokuRevert,
+            OverdriveSwitch
+        }
 
         private EntityStateMachine stateMachine;
         const string prefix = YusukeSurvivor.YUSUKE_PREFIX;
@@ -21,8 +28,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
         public override void OnEnter()
         {
             // depending on the ID determins the switch
-            if(switchID == 1) SwitchToMazokuSkills();
-            if(switchID == 2) RevertMazokuSkills();
+            if(switchID == (int)SwitchSkillIndex.MazokuSwitch) SwitchToMazokuSkills();
+            if(switchID == (int)SwitchSkillIndex.MazokuRevert) RevertMazokuSkills();
+            if(switchID == (int)SwitchSkillIndex.OverdriveSwitch) SwitchOverdriveSkills();
+
         }
 
         public override void FixedUpdate()
@@ -145,5 +154,70 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 
             switchedSkill = true;
         }
+
+
+        private void SwitchOverdriveSkills()
+        {
+            switch (skillLocator.primary.skillNameToken)
+            {
+                case prefix + "PRIMARY_SLASH_NAME":
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.overdrive12Hook, GenericSkill.SkillOverridePriority.Contextual); 
+                    break;
+                case prefix + "OVERDRIVE_12HOOKS_NAME":
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.overdrive12Hook, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primaryMelee, GenericSkill.SkillOverridePriority.Contextual); 
+                    break;
+                case prefix + "PRIMARY_GUN_NAME":
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritSnipe, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "OVERDRIVE_SPIRITSNIPE_NAME":
+                    skillLocator.primary.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritSnipe, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.primary.SetSkillOverride(gameObject, YusukeSurvivor.primarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+            }
+            switch (skillLocator.secondary.skillNameToken)
+            {
+                case prefix + "SECONDARY_GUN_NAME":
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritSnipe, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "OVERDRIVE_SPIRITSNIPE_NAME":
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritSnipe, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritGun, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "SECONDARY_SHOTGUN_NAME":
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritShotgunAA12, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "OVERDRIVE_SHOTGUNAA12_NAME":
+                    skillLocator.secondary.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritShotgunAA12, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.secondary.SetSkillOverride(gameObject, YusukeSurvivor.secondarySpiritShotgun, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+            }
+            switch (skillLocator.utility.skillNameToken)
+            {
+                case prefix + "UTILITY_SLIDEDASH_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityDash, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritFlow, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "OVERDRIVE_SPIRITFLOW_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritFlow, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.utilityDash, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "UTILITY_WAVE_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritWaveImpactFist, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+                case prefix + "OVERDRIVE_SPIRITWAVE_IMPACT_NAME":
+                    skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritWaveImpactFist, GenericSkill.SkillOverridePriority.Contextual);
+                    skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
+                    break;
+            }
+
+            switchedSkill = true;
+        }
+
     }
 }
