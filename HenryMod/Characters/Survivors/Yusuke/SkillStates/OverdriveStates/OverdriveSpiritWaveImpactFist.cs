@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
@@ -34,11 +35,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private bool attackComplete;
         private bool hasFired;
 
-        
+        private GameObject overdriveWaveFinishPrefab;
+        private GameObject overdriveSpiritWaveBeginPrefab;
+        private GameObject finalHitEffectPrefab;
+        private bool hasCreatedWaveCharge;
+
+        private readonly string mainPosition = "mainPosition";
+        private readonly string muzzleCenter = "muzzleCenter";
+        private readonly string handRPosition = "HandR";
 
         public override void OnEnter()
         {
             base.OnEnter();
+            SetUpEffects();
             PlayAnimation("FullBody, Override", "OverdriveSpiritWaveImpactFistBegin", "Slide.playbackRate", duration);
             aimDirection = GetAimRay().direction;
             if (characterDirection) 
@@ -53,8 +62,24 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 characterMotor.enabled = false;
 
             }
+        }
 
+        private void SetUpEffects()
+        {
+            overdriveWaveFinishPrefab = YusukeAssets.overdriveWaveFinishEffect;
+            overdriveWaveFinishPrefab.AddComponent<DestroyOnTimer>().duration = 5f;
 
+            overdriveSpiritWaveBeginPrefab = YusukeAssets.overdriveSpiritWaveBeginEffect;
+            overdriveSpiritWaveBeginPrefab.AddComponent<DestroyOnTimer>().duration = impactTime - 0.5f;
+
+            finalHitEffectPrefab = YusukeAssets.finalHitEffect;
+            finalHitEffectPrefab.AddComponent<DestroyOnTimer>().duration = 1f;
+
+            EffectComponent component = overdriveSpiritWaveBeginPrefab.GetComponent<EffectComponent>();
+            if (component)
+            {
+                component.parentToReferencedTransform = true;
+            }
 
         }
 
@@ -64,6 +89,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
             overdriveTimeDuration += GetDeltaTime();
             Log.Info("overdrivetime: " + overdriveTimeDuration);
+
+            if (overdriveTimeDuration > 0.5f) CreateSpiritWaveCharge();
 
             if (overdriveTimeDuration > impactTime) CreateImpactWave();
 
@@ -78,6 +105,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 
             }
 
+        }
+
+        private void CreateSpiritWaveCharge()
+        {
+            if (!hasCreatedWaveCharge)
+            {
+                hasCreatedWaveCharge = true;
+                EffectManager.SimpleMuzzleFlash(overdriveSpiritWaveBeginPrefab, gameObject, handRPosition, false);
+            }
         }
 
         private void CreateImpactWave()
@@ -101,6 +137,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 attack.impactSound = impactSound;
                 attack.Fire();
                 Log.Info("Fired attack");
+
+                EffectManager.SimpleMuzzleFlash(overdriveWaveFinishPrefab, gameObject, mainPosition, true);
+                EffectManager.SimpleMuzzleFlash(finalHitEffectPrefab, gameObject, muzzleCenter, true);
+
+                PlayAnimation("FullBody, Override", "OverdriveSpiritWaveImpactFistFinish", "Slide.playbackRate", duration);
             }
             
 
@@ -109,7 +150,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         public override void OnExit()
         {
             base.OnExit();
- 
 
             if (characterDirection)
             {

@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using YusukeMod.Survivors.Yusuke.Components;
 using UnityEngine;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 {
@@ -26,14 +27,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
         private AimAnimator aimAnim;
         private Transform modelTransform;
-        private float originalGiveUpDuration;
-
-        private float originalPitchRangeMax;
-        private float originalPitchRangeMin;
-        private float originalYawRangeMin;
-        private float originalYawRangeMax;
-
-        private readonly float largeRangeValue = 9999f;
+        private PitchYawControl pitchYawControl;
 
         public BlastAttack blastAttack;
 
@@ -45,7 +39,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             yusukeHealth = characterBody.GetComponent<HealthComponent>();
 
             modelTransform = GetModelTransform();
-            ChangePitchAndYawRange(true);
 
             SetUpEffects();
 
@@ -60,6 +53,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                 origin = FindModelChild("mainPosition").position,
                 scale = 1f
             }, transmit: true);
+
+            pitchYawControl = new PitchYawControl();
+            pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
 
             PlayAnimation("FullBody, Override", "MazokuResurrect", "Roll.playbackRate", duration);
 
@@ -100,41 +96,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         }
 
         // this will temporarily change the pitch and yaw for the transformation cutscene, so the aim yaw won't affect the model when playing the animation
-        private void ChangePitchAndYawRange(bool isInCutscene)
-        {
-            if (modelTransform)
-            {
-                aimAnim = modelTransform.GetComponent<AimAnimator>();
-                if (isInCutscene)
-                {
-                    originalPitchRangeMax = aimAnim.pitchRangeMax;
-                    originalPitchRangeMin = aimAnim.pitchRangeMin;
-                    originalYawRangeMax = aimAnim.yawRangeMax;
-                    originalYawRangeMin = aimAnim.yawRangeMin;
-                    originalGiveUpDuration = aimAnim.giveupDuration;
 
-                    aimAnim.pitchRangeMax = largeRangeValue;
-                    aimAnim.pitchRangeMin = -largeRangeValue;
-                    aimAnim.yawRangeMin = -largeRangeValue;
-                    aimAnim.yawRangeMax = largeRangeValue;
-
-                    aimAnim.giveupDuration = 0f;
-
-                }
-                else
-                {
-                    aimAnim.pitchRangeMax = originalPitchRangeMax;
-                    aimAnim.pitchRangeMin = originalPitchRangeMin;
-                    aimAnim.yawRangeMin = originalYawRangeMin;
-                    aimAnim.yawRangeMax = originalYawRangeMax;
-
-                    aimAnim.giveupDuration = originalGiveUpDuration;
-
-                }
-                aimAnim.AimImmediate();
-            }
-                
-        }
 
         public override void FixedUpdate()
         {
@@ -156,7 +118,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
         public override void OnExit()
         {
 
-            ChangePitchAndYawRange(false);
+            pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
 
             if (yusukeHealth) yusukeHealth.health = yusukeHealth.fullHealth;
 

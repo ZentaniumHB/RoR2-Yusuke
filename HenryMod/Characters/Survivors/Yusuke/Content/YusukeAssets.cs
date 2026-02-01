@@ -7,6 +7,7 @@ using R2API;
 using UnityEngine.AddressableAssets;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using On;
+using RoR2BepInExPack.GameAssetPaths;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -92,6 +93,13 @@ namespace YusukeMod.Survivors.Yusuke
 
         public static GameObject vanishLinesWhite;
         public static GameObject vanishLinesBlack;
+
+        public static GameObject overdriveSpiritGunSniperBeginEffect;
+
+        public static GameObject overdriveSpiritWaveBeginEffect;
+        public static GameObject overdriveWaveFinishEffect;
+        public static GameObject overdriveShotgunSingleShotEffect;
+        public static GameObject overdriveShotgunFinalShotEffect;
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -237,6 +245,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             sacredEnergyEffect = _assetBundle.LoadEffect("sacredEnergy", "sacredEnergyEffect", true, false);
 
+            
         }
 
         private static void CreateSpiritEnergyEffects()
@@ -268,6 +277,15 @@ namespace YusukeMod.Survivors.Yusuke
             demonGunMuzzleFlashEffect = _assetBundle.LoadEffect("demonGunMuzzleFlash", "demonGunMuzzleFlash", true, false);
 
             demonShotgunChargeEffect = _assetBundle.LoadEffect("spiritDemonShotGunEffect", "spiritDemonShotGunEffect", true, true);
+
+
+            overdriveSpiritGunSniperBeginEffect = _assetBundle.LoadEffect("overdriveSpiritGunSniperBegin", "overdriveSpiritGunSniperBegin", true, false);
+
+            overdriveShotgunSingleShotEffect = _assetBundle.LoadEffect("overdriveShotgunSingleShot", "overdriveShotgunSingleShot", true, false);
+            overdriveShotgunFinalShotEffect = _assetBundle.LoadEffect("overdriveShotgunFinalShot", "overdriveShotgunFinalShot", true, false);
+
+            overdriveWaveFinishEffect = _assetBundle.LoadEffect("overdriveWaveFinish", "overdriveWaveFinish", false, false);
+            overdriveSpiritWaveBeginEffect = _assetBundle.LoadEffect("overdriveSpiritWaveBeginParticle", "overdriveSpiritWaveBeginParticle", true, false);
 
         }
 
