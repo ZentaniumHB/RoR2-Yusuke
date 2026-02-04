@@ -241,7 +241,7 @@ namespace YusukeMod.Modules.BaseStates
             {
                 if(sacredComponent && sacredComponent.previousValue == sacredComponent.maxSacredValue)
                 {
-                    if (!mazokuComponent.hasTransformed)
+                    if (!mazokuComponent.hasTransformed && !yusukeWeaponComponent.GetOverdriveState())
                     {
                         outer.SetNextState(new SwitchSkills { switchID = (int)SwitchSkills.SwitchSkillIndex.OverdriveSwitch });
                     }
