@@ -12,5 +12,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         public const float transformationExplosionDamageCoefficient = 24f;
 
+        public const float overdriveShotgunDamageCoefficient = 10f;
+
     }
 }

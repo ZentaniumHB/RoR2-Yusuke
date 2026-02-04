@@ -944,7 +944,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritSnipe)),
-                activationStateMachineName = "Overdrive",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 200f,
@@ -976,7 +976,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritShotgunAA12)),
-                activationStateMachineName = "Overdrive",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 200f,
@@ -1008,7 +1008,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritWaveImpactFist)),
-                activationStateMachineName = "Overdrive",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 200f,
@@ -1040,7 +1040,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(OverdriveSpiritFlow)),
-                activationStateMachineName = "Overdrive",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 200f,
@@ -1072,7 +1072,7 @@ namespace YusukeMod.Survivors.Yusuke
                 skillIcon = assetBundle.LoadAsset<Sprite>("0"),
 
                 activationState = new EntityStates.SerializableEntityStateType(typeof(Overdrive12Hooks)),
-                activationStateMachineName = "Overdrive",
+                activationStateMachineName = "Weapon",
                 interruptPriority = EntityStates.InterruptPriority.Death,
 
                 baseRechargeInterval = 200f,

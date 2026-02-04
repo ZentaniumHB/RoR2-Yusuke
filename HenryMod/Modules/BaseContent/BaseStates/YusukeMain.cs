@@ -209,7 +209,7 @@ namespace YusukeMod.Modules.BaseStates
                 {
                     if (mazokuComponent.previousValue == mazokuComponent.maxMazokuValue)
                     {
-                        if (isGrounded)
+                        if (isGrounded && !yusukeWeaponComponent.GetOverDriveSkillsActivity())
                         {
                             if(penaltyTimer <= 0)
                             {
@@ -360,7 +360,7 @@ namespace YusukeMod.Modules.BaseStates
 
         private bool CheckForInputs()
         {
-            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.jump.down || inputBank.sprint.down || yusukeWeaponComponent.GetFollowUpBoolean())
+            if (inputBank.skill1.down || inputBank.skill2.down || inputBank.skill3.down || inputBank.skill4.down || inputBank.jump.down || inputBank.sprint.down || yusukeWeaponComponent.GetFollowUpBoolean() || yusukeWeaponComponent.GetOverdriveState())
                 return true;
             else
                 return false;

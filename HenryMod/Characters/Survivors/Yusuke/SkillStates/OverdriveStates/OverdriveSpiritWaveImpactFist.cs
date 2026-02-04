@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 
@@ -38,17 +39,25 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private GameObject overdriveWaveFinishPrefab;
         private GameObject overdriveSpiritWaveBeginPrefab;
         private GameObject finalHitEffectPrefab;
+
+        private AimAnimator aimAnim;
+        private Transform modelTransform;
+        private PitchYawControl pitchYawControl;
+
         private bool hasCreatedWaveCharge;
 
         private readonly string mainPosition = "mainPosition";
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string handRPosition = "HandR";
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         public override void OnEnter()
         {
             base.OnEnter();
             SetUpEffects();
             PlayAnimation("FullBody, Override", "OverdriveSpiritWaveImpactFistBegin", "Slide.playbackRate", duration);
+            //Util.PlaySound("Play_VoiceOverdriveWave", gameObject);
             aimDirection = GetAimRay().direction;
             if (characterDirection) 
             {
@@ -62,6 +71,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 characterMotor.enabled = false;
 
             }
+
+            modelTransform = GetModelTransform();
+            pitchYawControl = new PitchYawControl();
+            pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
+
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+            yusukeWeaponComponent.SetOverdriveState(true);
         }
 
         private void SetUpEffects()
@@ -151,6 +167,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         {
             base.OnExit();
 
+            if(yusukeWeaponComponent)yusukeWeaponComponent.SetOverdriveState(false);
+            pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
+
             if (characterDirection)
             {
                 characterDirection.enabled = true;
@@ -159,6 +178,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             if (characterMotor)
             {
                 characterMotor.enabled = true;
+                characterMotor.velocity = new Vector3(0, 0, 0);
 
             }
         }

@@ -23,7 +23,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
         private AimAnimator aimAnim;
         private Transform modelTransform;
-        HealthComponent yusukeHealth;
+        private HealthComponent yusukeHealth;
         private PitchYawControl pitchYawControl;
 
         public BlastAttack blastAttack;
@@ -140,7 +140,6 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
             base.OnExit();
 
             pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
-            //ChangePitchAndYawRange(false);
 
             MazokuComponent maz = characterBody.master.gameObject.GetComponent<MazokuComponent>();
             if (maz != null)

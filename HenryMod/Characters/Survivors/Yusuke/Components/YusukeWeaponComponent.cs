@@ -21,11 +21,15 @@ namespace YusukeMod.Survivors.Yusuke.Components
 
         private bool hasSacredEnergyReleased = false;
 
+        private bool isOverdriveSkillSetEnabled;
+
         private byte reviveType;
 
         private bool hasBeenKnocked;
 
         private bool isInKnockedState;
+
+        private bool isInOverdriveState;
 
         // near death enum for different conditions
         public enum NearDeathIndex
@@ -99,6 +103,16 @@ namespace YusukeMod.Survivors.Yusuke.Components
             return hasSacredEnergyReleased;
         }
 
+        public bool GetOverdriveState()
+        {
+            return isInOverdriveState;
+        }
+
+        public bool GetOverDriveSkillsActivity()
+        {
+            return isOverdriveSkillSetEnabled;
+        }
+
         public void UseMazokuRevive()
         {
             hasMazokuRevive = false;
@@ -125,6 +139,16 @@ namespace YusukeMod.Survivors.Yusuke.Components
 
             SacredComponent sacredComponent = gameObject.GetComponent<SacredComponent>();
             if(sacredComponent) sacredComponent.hasReleaseSacredEnergy = true;
+        }
+
+        public void SetOverdriveState(bool isOverdriveStateActive)
+        {
+            isInOverdriveState = isOverdriveStateActive;
+        }
+
+        public void SetOverDriveSkillsActivity(bool isEnabled)
+        {
+            isOverdriveSkillSetEnabled = isEnabled;
         }
 
     }

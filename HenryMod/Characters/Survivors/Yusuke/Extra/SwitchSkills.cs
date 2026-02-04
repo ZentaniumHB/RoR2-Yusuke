@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine.Networking.Types;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Survivors.Yusuke;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 {
@@ -25,10 +26,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
         private bool switchedSkill;
         public int switchID;
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         public override void OnEnter()
         {
             // depending on the ID determins the switch
-            if(switchID == (int)SwitchSkillIndex.MazokuSwitch) SwitchToMazokuSkills();
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+            if (switchID == (int)SwitchSkillIndex.MazokuSwitch) SwitchToMazokuSkills();
             if(switchID == (int)SwitchSkillIndex.MazokuRevert) RevertMazokuSkills();
             if(switchID == (int)SwitchSkillIndex.OverdriveSwitch) SwitchOverdriveSkills();
 
@@ -214,6 +218,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                     skillLocator.utility.UnsetSkillOverride(gameObject, YusukeSurvivor.overdriveSpiritWaveImpactFist, GenericSkill.SkillOverridePriority.Contextual);
                     skillLocator.utility.SetSkillOverride(gameObject, YusukeSurvivor.utilityWave, GenericSkill.SkillOverridePriority.Contextual);
                     break;
+            }
+
+            // triggers for the mazoku component, so there is no confliction. Otherwise I can just do it manually within the YusukeMain state instead of here.
+            if (yusukeWeaponComponent)
+            {
+                if (!yusukeWeaponComponent.GetOverDriveSkillsActivity())
+                {
+                    yusukeWeaponComponent.SetOverDriveSkillsActivity(true);
+                }
+                else
+                {
+                    yusukeWeaponComponent.SetOverDriveSkillsActivity(false);
+                }
             }
 
             switchedSkill = true;
