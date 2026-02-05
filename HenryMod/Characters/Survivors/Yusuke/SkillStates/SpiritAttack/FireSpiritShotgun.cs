@@ -187,7 +187,7 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
                         smartCollision = true,
                         procChainMask = default,
                         procCoefficient = procCoefficient,
-                        radius = 1f,
+                        radius = YusukeStaticValues.shotgunPelletRadius,
                         sniper = false,
                         stopperMask = LayerIndex.CommonMasks.bullet,
                         weapon = null,

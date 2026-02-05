@@ -226,10 +226,14 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
                 if (!yusukeWeaponComponent.GetOverDriveSkillsActivity())
                 {
                     yusukeWeaponComponent.SetOverDriveSkillsActivity(true);
+                    characterBody.GetComponent<SpiritSnipeTracking>().TurnOn();    
+                    characterBody.GetComponent<Hook12Tracking>().TurnOn();    
                 }
                 else
                 {
                     yusukeWeaponComponent.SetOverDriveSkillsActivity(false);
+                    characterBody.GetComponent<SpiritSnipeTracking>().TurnOff();
+                    characterBody.GetComponent<Hook12Tracking>().TurnOff();
                 }
             }
 

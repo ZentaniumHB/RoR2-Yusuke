@@ -10,6 +10,8 @@ namespace YusukeMod.Survivors.Yusuke
 
         public const float bombDamageCoefficient = 16f;
 
+        public const float shotgunPelletRadius = 2f;
+
         public const float transformationExplosionDamageCoefficient = 24f;
 
         public const float overdriveShotgunDamageCoefficient = 10f;

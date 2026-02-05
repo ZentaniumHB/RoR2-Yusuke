@@ -302,7 +302,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Followups
                         smartCollision = true,
                         procChainMask = default,
                         procCoefficient = procCoefficient,
-                        radius = 0.75f,
+                        radius = YusukeStaticValues.shotgunPelletRadius,
                         sniper = false,
                         stopperMask = LayerIndex.CommonMasks.bullet,
                         tracerEffectPrefab = spiritTracerEffect,

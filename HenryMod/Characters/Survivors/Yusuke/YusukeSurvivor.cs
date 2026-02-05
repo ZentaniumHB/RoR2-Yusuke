@@ -206,6 +206,8 @@ namespace YusukeMod.Survivors.Yusuke
             AddHitboxes();
             bodyPrefab.AddComponent<YusukeWeaponComponent>();
             bodyPrefab.AddComponent<SingleTracking>().TurnOff();
+            bodyPrefab.AddComponent<Hook12Tracking>().TurnOff();
+            bodyPrefab.AddComponent<SpiritSnipeTracking>().TurnOff();
             bodyPrefab.AddComponent<YusukeHUD>();
             bodyPrefab.AddComponent<SpiritCuffComponent>();
             bodyPrefab.AddComponent<SacredComponent>();
