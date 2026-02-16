@@ -12,6 +12,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
     {
 
         private float duration = 1f;
+        private float overdriveTimeDuration;
+        private float overdriveFullDuration = 5f;
 
         public override void OnEnter()
         {
@@ -23,16 +25,20 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         {
             base.FixedUpdate();
 
+            overdriveTimeDuration += GetDeltaTime();
+
             if (isAuthority && fixedAge >= duration)
             {
-                outer.SetNextStateToMain();
+                if (overdriveTimeDuration > overdriveFullDuration)
+                {
+                    outer.SetNextStateToMain();
+                }
             }
 
         }
 
         public override void OnExit()
         {
-
             base.OnExit();
         }
 

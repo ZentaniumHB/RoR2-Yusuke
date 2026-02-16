@@ -958,7 +958,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = false,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -990,7 +990,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = false,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -1022,7 +1022,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = false,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -1054,7 +1054,7 @@ namespace YusukeMod.Survivors.Yusuke
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = false,
                 beginSkillCooldownOnSkillEnd = true,
 
@@ -1086,9 +1086,9 @@ namespace YusukeMod.Survivors.Yusuke
 
                 resetCooldownTimerOnUse = false,
                 fullRestockOnAssign = true,
-                dontAllowPastMaxStocks = false,
+                dontAllowPastMaxStocks = true,
                 mustKeyPress = false,
-                beginSkillCooldownOnSkillEnd = true,
+                beginSkillCooldownOnSkillEnd = false,
 
                 isCombatSkill = true,
                 canceledFromSprinting = false,
