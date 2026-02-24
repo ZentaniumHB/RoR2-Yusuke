@@ -2,20 +2,212 @@
 using RoR2;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
+using YusukeMod.Survivors.Yusuke.SkillStates;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
-    internal class OverdriveSpiritSnipe : BaseSkillState
+    public class OverdriveSpiritSnipe : BaseSkillState
     {
 
         private float duration = 1f;
+        private bool shouldReturn;
+        private Vector3 forwardDirection;
+
+
+        private readonly SphereSearch sphereSearch = new SphereSearch();
+        private SpiritSnipeTracking snipeTracking;
+        private HurtBox enemyHurtBox;
+        private CharacterBody enemyBody;
+        private bool hasTargetBeenFound;
+
+        private float overdriveTimeDuration;
+        private float overdriveSnipeStartUp = 3f;
+        private float overdriveFreezeMax = 5f;
+        private float overdriveFullDuration = 5.0f;
+        private float overdriveParticleStartUp = 5.0f;
+
+        private GameObject overdriveSpiritSniperBeginPrefab;
+        private GameObject heavyHitEffectPrefab;
+        private GameObject spiritGunMuzzleFlashPrefab;
+
+        private List<HurtBox> totalEnemies;
+
+        private YusukeWeaponComponent yusukeWeaponComponent;
+        private Transform modelTransform;
+        private PitchYawControl pitchYawControl;
+        private AimAnimator aimAnim;
+        private Vector3 aimDirection;
+        private bool hasPlayedAnimation;
+
+        public static float damageCoefficient = YusukeStaticValues.overdriveSpiritSnipeDamageCoefficient;
+        public GameObject overdriveSpiritSniperTracerEffect = YusukeAssets.overdriveSpiritSniperEffect;
+        public GameObject spiritShotGunExplosionHitEffect = YusukeAssets.spiritShotGunHitEffect;
+
+        public static float procCoefficient = 1f;
+        public static float baseDuration = 0.6f;
+        //delay on firing is usually ass-feeling. only set this if you know what you're doing
+        public static float firePercentTime = 0.0f;
+        public static float force = 800f;
+        public static float recoil = 3f;
+        public static float range = 256f;
+
+        private readonly string fingerTipString = "fingerTipR";
+        private readonly string muzzleCenter = "muzzleCenter";
 
         public override void OnEnter()
         {
             base.OnEnter();
+
+            totalEnemies = new List<HurtBox>();
+            if (!isGrounded)
+            {
+                Chat.AddMessage("Need to be grounded for the OVERDRIVE: SPIRIT SNIPE");
+                Log.Warning("Need to be grounded for the OVERDRIVE: SPIRIT SNIPE");
+                shouldReturn = true;
+
+            }
+            else
+            {
+                SetUpEffects();
+                forwardDirection = GetAimRay().direction;
+
+                snipeTracking = gameObject.GetComponent<SpiritSnipeTracking>();
+                enemyHurtBox = snipeTracking.GetTrackingTarget();
+
+                if (enemyHurtBox)
+                {
+                    enemyBody = enemyHurtBox.healthComponent.body;
+
+                    if (enemyBody)
+                    {
+                        if (CheckIfEnemyisAlive())
+                        {
+                            hasTargetBeenFound = true;
+                        }
+                        else
+                        {
+                            shouldReturn = true;
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    Log.Error("No enemy found. ");
+                    shouldReturn = true;
+                }
+
+                if (hasTargetBeenFound)
+                {
+                    Log.Info("Sniping them.");
+                    PlayAnimation("FullBody, Override", "OverdriveSpiritgunSniperBegin", "Slide.playbackRate", duration);
+                    //Util.PlaySound("Play_SoundOverdrive12Hooks", gameObject);
+
+                    EffectManager.SimpleMuzzleFlash(overdriveSpiritSniperBeginPrefab, gameObject, fingerTipString, true);
+
+                    aimDirection = (enemyBody.transform.position - transform.position).normalized;
+                    if (characterDirection)
+                    {
+                        characterDirection.forward = aimDirection;
+                        characterDirection.enabled = false;
+                    }
+
+                    if (characterMotor)
+                    {
+                        characterMotor.velocity = new Vector3(0, 0, 0);
+                        characterMotor.enabled = false;
+
+                    }
+
+                    modelTransform = GetModelTransform();
+                    pitchYawControl = new PitchYawControl();
+                    pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
+
+                    yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+                    yusukeWeaponComponent.SetOverdriveState(true);
+
+                    yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+                    yusukeWeaponComponent.SetOverdriveState(true);
+                    ScanUsingSphere();
+                    
+
+                }
+
+            }
+
+        }
+
+        private void StunThem(float overdriveFreezeMax, HurtBox enemyBox)
+        {
+            enemyBox.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(overdriveFreezeMax);
+            EntityStateMachine component = enemyBox.healthComponent.body.GetComponent<EntityStateMachine>();
+            if (component)
+            {
+                OverdriveTemporarySlow state = new OverdriveTemporarySlow
+                {
+                    duration = overdriveFreezeMax
+                };
+                component.SetState(state);
+            }
+            
+        }
+
+        private void ScanUsingSphere()
+        {
+            
+            BullseyeSearch search = new BullseyeSearch
+            {
+                teamMaskFilter = TeamMask.GetEnemyTeams(characterBody.teamComponent.teamIndex),
+                filterByLoS = false,
+                searchOrigin = characterBody.corePosition,
+                searchDirection = UnityEngine.Random.onUnitSphere,
+                sortMode = BullseyeSearch.SortMode.Distance,
+                maxDistanceFilter = snipeTracking.GetMaxTrackingDistance() + 10f,
+                maxAngleFilter = 360f
+            };
+
+            search.RefreshCandidates();
+            search.FilterOutGameObject(characterBody.gameObject);
+
+            List<HurtBox> target = search.GetResults().ToList<HurtBox>();
+            foreach (HurtBox enemyTarget in target)
+            {
+                if (enemyTarget.healthComponent && enemyTarget.healthComponent.body)
+                {
+                    // stun and freeze within radius
+                    StunThem(overdriveFreezeMax, enemyTarget);
+                }
+            }
+
+        }
+
+        private bool CheckIfEnemyisAlive()
+        {
+            if (enemyBody && enemyBody.healthComponent && enemyBody.healthComponent.alive)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void SetUpEffects()
+        {
+            overdriveSpiritSniperBeginPrefab = YusukeAssets.overdriveSpiritGunSniperBeginEffect;
+            overdriveSpiritSniperBeginPrefab.AddComponent<DestroyOnTimer>().duration = overdriveSnipeStartUp;
+
 
         }
 
@@ -23,16 +215,105 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         {
             base.FixedUpdate();
 
-            if (isAuthority && fixedAge >= duration)
+
+            if (shouldReturn)
             {
-                outer.SetNextStateToMain();
+                ReturnToMain();
             }
+            else
+            {
+                overdriveTimeDuration += GetDeltaTime();
+                overdriveFreezeMax -= GetDeltaTime();
+
+                if (overdriveTimeDuration > overdriveSnipeStartUp - 1)
+                {
+
+                }
+
+                if (overdriveTimeDuration > overdriveSnipeStartUp && !hasPlayedAnimation)
+                {
+                    hasPlayedAnimation = true;
+                    PlayAnimation("FullBody, Override", "OverdriveSpiritgunSniperFinish", "Slide.playbackRate", duration);
+                    ShootTarget();
+                }
+
+                if (isAuthority && fixedAge >= duration)
+                {
+                    if (overdriveTimeDuration > overdriveFullDuration) outer.SetNextStateToMain();
+                }
+            }
+
+        }
+
+        private void ReturnToMain()
+        {
+            skillLocator.primary.AddOneStock();
+            outer.SetNextStateToMain();
+            return;
+        }
+
+        private void ShootTarget()
+        {
+            characterBody.AddSpreadBloom(1.5f);
+            EffectManager.SimpleMuzzleFlash(spiritGunMuzzleFlashPrefab, gameObject, muzzleCenter, false);
+            Util.PlaySound("HenryShootPistol", gameObject);
+
+            Ray aimRay = GetAimRay();
+
+
+            new BulletAttack
+            {
+                bulletCount = 1,
+                aimVector = aimDirection,
+                origin = aimRay.origin,     // or FindModelChild(fingerTipString).position;
+                damage = damageCoefficient * damageStat,
+                damageColorIndex = DamageColorIndex.Default,
+                damageType = DamageType.SlowOnHit,
+                falloffModel = BulletAttack.FalloffModel.None,
+                maxDistance = range,
+                force = force,
+                hitMask = LayerIndex.CommonMasks.bullet,
+                minSpread = 0f,
+                maxSpread = 0f,
+                isCrit = true,
+                owner = gameObject,
+                muzzleName = muzzleCenter,
+                smartCollision = true,
+                procChainMask = default,
+                procCoefficient = procCoefficient,
+                radius = YusukeStaticValues.shotgunPelletRadius,
+                sniper = false,
+                stopperMask = LayerIndex.CommonMasks.bullet,
+                weapon = null,
+                tracerEffectPrefab = overdriveSpiritSniperTracerEffect,
+                spreadPitchScale = 1f,
+                spreadYawScale = 1f,
+                queryTriggerInteraction = QueryTriggerInteraction.UseGlobal,
+                hitEffectPrefab = spiritShotGunExplosionHitEffect,
+
+            }.Fire();
+
 
         }
 
         public override void OnExit()
         {
             base.OnExit();
+
+            if (yusukeWeaponComponent) yusukeWeaponComponent.SetOverdriveState(false);
+            pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
+
+            if (characterDirection)
+            {
+                characterDirection.enabled = true;
+            }
+
+            if (characterMotor)
+            {
+                characterMotor.enabled = true;
+                characterMotor.velocity = new Vector3(0, 0, 0);
+
+            }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

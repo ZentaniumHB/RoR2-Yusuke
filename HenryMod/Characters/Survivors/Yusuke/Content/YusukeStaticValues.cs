@@ -16,5 +16,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         public const float overdriveShotgunDamageCoefficient = 10f;
 
+        public const float overdriveSpiritSnipeDamageCoefficient = 36f;
+
     }
 }

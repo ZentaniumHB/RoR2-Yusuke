@@ -18,7 +18,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
         private float duration = 1f;
         private float overdriveTimeDuration;
-        private float overdriveFullDuration = 9.5f;
+        private float overdriveFullDuration = 9f;
         private float initialSwing = 0.7f;
         private float initialFinalSwing = 6f;
         private float swingTimer = 0f;
@@ -40,10 +40,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private Rigidbody enemyRigidBody;
 
         private Vector3 forwardDirection;
-        private Ray yDistanceRay;
+        /*private Ray yDistanceRay;
         private RaycastHit hit;
         private float maxDistance;
-        private bool hasSnappedToGround;
+        private bool hasSnappedToGround;*/
         private readonly string vanishLineLocation = "Chest";
         private readonly string muzzleCenter = "muzzleCenter";
         private readonly string dashCenter = "dashCenter";
@@ -167,6 +167,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
                     yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                     yusukeWeaponComponent.SetOverdriveState(true);
+
+                    if (NetworkServer.active)
+                    {
+                        characterBody.AddTimedBuff(JunkContent.Buffs.IgnoreFallDamage, 1f);
+                    }
+
                 }
 
                 
@@ -322,6 +328,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                     if (overdriveTimeDuration > 0.2)
                     {
                         characterMotor.velocity = Vector3.zero;
+                        if (characterMotor && characterDirection)
+                        {
+                            characterMotor.enabled = false;
+                            characterDirection.enabled = false;
+                        }
                     }
                     else
                     {

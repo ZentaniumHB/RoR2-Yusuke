@@ -10,7 +10,7 @@ using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Extra
 {
-    internal class SwitchSkills : BaseSkillState
+    public class SwitchSkills : BaseSkillState
     {
         // enum for the skill switching
         public enum SwitchSkillIndex
@@ -36,12 +36,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             if(switchID == (int)SwitchSkillIndex.MazokuRevert) RevertMazokuSkills();
             if(switchID == (int)SwitchSkillIndex.OverdriveSwitch) SwitchOverdriveSkills();
 
+            GoBackToMain();
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if (switchedSkill) outer.SetNextStateToMain();
+            //if (switchedSkill) outer.SetNextStateToMain();
         }
 
         private void SwitchToMazokuSkills()
@@ -240,5 +241,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             switchedSkill = true;
         }
 
+
+
+        private void GoBackToMain()
+        {
+            if (switchedSkill) outer.SetNextStateToMain();
+        }
     }
 }

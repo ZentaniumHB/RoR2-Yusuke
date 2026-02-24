@@ -23,6 +23,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
 
         protected float duration = 0.4f;
 
+        protected float fallDamageBuffDuration = 3f;
+
         protected float dashStopWatch;
 
         protected float armourBuffDuration = 3f;
@@ -93,6 +95,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates
                 {
                     characterBody.AddTimedBuff(YusukeBuffs.armorBuff, armourBuffDuration * duration);
                     characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, hiddenInvincibilityDuration * duration);
+                    characterBody.AddTimedBuff(JunkContent.Buffs.IgnoreFallDamage, fallDamageBuffDuration);
                 }
 
                 yusukeWeaponComponent.ShowChargeObject(false);

@@ -47,6 +47,7 @@ namespace YusukeMod.Survivors.Yusuke
 
         public static GameObject spiritgunBeamEffect;
 
+
         // other effects
         public static GameObject dashStartSmallEffect;
         public static GameObject dashStartMaxEffect;
@@ -100,6 +101,8 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject overdriveWaveFinishEffect;
         public static GameObject overdriveShotgunSingleShotEffect;
         public static GameObject overdriveShotgunFinalShotEffect;
+
+        public static GameObject overdriveSpiritSniperEffect; 
 
         //explosion effects
         public static GameObject bombExplosionEffect;
@@ -167,6 +170,7 @@ namespace YusukeMod.Survivors.Yusuke
             demonShotgunTracerEffect.GetComponent<LineRenderer>().endColor = new Color32(255, 0, 0, 178);    // light red
             demonShotgunTracerEffect.GetComponent<LineRenderer>().widthMultiplier = 0.8f; // sizing
 
+
             /*Tracer spiritTracer = spiritShotGunTracer.AddComponent<Tracer>();
             spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(1);
             spiritTracer.headTransform = spiritShotGunTracer.transform.GetChild(2);
@@ -191,6 +195,34 @@ namespace YusukeMod.Survivors.Yusuke
             meleeSwingEffect2 = _assetBundle.LoadEffect("meleeSwing2Effect", true);
             meleeSwingEffect3 = _assetBundle.LoadEffect("meleeSwing3Effect", true);
             meleeSwingEffect4 = _assetBundle.LoadEffect("meleeSwing4Effect", true);
+
+
+            overdriveSpiritSniperEffect = _assetBundle.LoadEffect("OverdriveSnipeTracer", "OverdriveSnipeTracer", true, false);
+
+            /*overdriveSpiritSniperEffect = Asset.CloneTracer("TracerGolem", "overdriveSpiritSniperTracer");
+            overdriveSpiritSniperEffect.GetComponent<LineRenderer>().startColor = new Color32(152, 255, 255, 255);   // light cyan
+            overdriveSpiritSniperEffect.GetComponent<LineRenderer>().endColor = new Color32(0, 128, 255, 255);    // blue*/
+
+            overdriveSpiritSniperEffect.AddComponent<LineRenderer>();
+            Tracer spiritTracer = overdriveSpiritSniperEffect.AddComponent<Tracer>();
+            spiritTracer.headTransform = overdriveSpiritSniperEffect.transform.GetChild(0);
+            spiritTracer.tailTransform = overdriveSpiritSniperEffect.transform.GetChild(1);
+            spiritTracer.startPos = overdriveSpiritSniperEffect.transform.GetChild(2).GetChild(0).position;  
+            spiritTracer.beamObject = overdriveSpiritSniperEffect.transform.GetChild(2).gameObject;
+            spiritTracer.speed = 340f;
+            spiritTracer.length = 25f;
+            spiritTracer.beamDensity = 10f;
+
+            BeamPointsFromTransforms beamPoint = overdriveSpiritSniperEffect.AddComponent<BeamPointsFromTransforms>();
+            beamPoint.target = overdriveSpiritSniperEffect.GetComponent<LineRenderer>();
+            Transform[] transforms = new Transform[2];
+            transforms[0] = overdriveSpiritSniperEffect.transform.GetChild(1);
+            transforms[1] = overdriveSpiritSniperEffect.transform.GetChild(2);
+            beamPoint.pointTransforms = transforms;
+
+            Modules.Content.CreateAndAddEffectDef(overdriveSpiritSniperEffect);
+
+
         }
 
         private static void CreateHitAndOtherEffect()

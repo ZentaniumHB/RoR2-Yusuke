@@ -71,5 +71,10 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking
             return targetResults;
         }
 
+        public float GetMaxTrackingDistance()
+        {
+            return maxTrackingDistance;
+        }
+
     }
 }
