@@ -53,7 +53,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
 
 
             modelTransform = GetModelTransform();
-            pitchYawControl = new PitchYawControl();
+            pitchYawControl = gameObject.GetComponent<PitchYawControl>();
             pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
             //ChangePitchAndYawRange(true);
 

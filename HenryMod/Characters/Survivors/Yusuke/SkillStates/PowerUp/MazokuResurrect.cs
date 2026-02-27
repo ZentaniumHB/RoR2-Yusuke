@@ -54,7 +54,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp
                 scale = 1f
             }, transmit: true);
 
-            pitchYawControl = new PitchYawControl();
+            pitchYawControl = gameObject.GetComponent<PitchYawControl>();
             pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
 
             PlayAnimation("FullBody, Override", "MazokuResurrect", "Roll.playbackRate", duration);

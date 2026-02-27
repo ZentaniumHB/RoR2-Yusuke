@@ -92,7 +92,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             }
 
             modelTransform = GetModelTransform();
-            pitchYawControl = new PitchYawControl();
+            pitchYawControl = gameObject.GetComponent<PitchYawControl>();
             pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
             shotGunFireStopwatch = shotgunFireResetTime;
             hasFiredFinalShot = false;

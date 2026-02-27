@@ -32,17 +32,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
         {
             // depending on the ID determins the switch
             yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
-            if (switchID == (int)SwitchSkillIndex.MazokuSwitch) SwitchToMazokuSkills();
+            if(switchID == (int)SwitchSkillIndex.MazokuSwitch) SwitchToMazokuSkills();
             if(switchID == (int)SwitchSkillIndex.MazokuRevert) RevertMazokuSkills();
-            if(switchID == (int)SwitchSkillIndex.OverdriveSwitch) SwitchOverdriveSkills();
+            //if(switchID == (int)SwitchSkillIndex.OverdriveSwitch) SwitchOverdriveSkills();
 
-            GoBackToMain();
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
             //if (switchedSkill) outer.SetNextStateToMain();
+            GoBackToMain();
         }
 
         private void SwitchToMazokuSkills()
@@ -160,8 +160,9 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             switchedSkill = true;
         }
 
+        // COMMENTING THIS OUT AS IT'S POSSIBLE THAT IT IS NO LONGER NEEDED
 
-        private void SwitchOverdriveSkills()
+        /*private void SwitchOverdriveSkills()
         {
             switch (skillLocator.primary.skillNameToken)
             {
@@ -239,7 +240,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Extra
             }
 
             switchedSkill = true;
-        }
+        }*/
 
 
 

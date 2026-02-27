@@ -34,6 +34,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private float overdriveFreezeMax = 5f;
         private float overdriveFullDuration = 5.0f;
         private float overdriveParticleStartUp = 5.0f;
+        private float pitchStartUp = 2.0f;
+
 
         private GameObject overdriveSpiritSniperBeginPrefab;
         private GameObject heavyHitEffectPrefab;
@@ -45,6 +47,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private Transform modelTransform;
         private PitchYawControl pitchYawControl;
         private AimAnimator aimAnim;
+        private Animator animator;
         private Vector3 aimDirection;
         private bool hasPlayedAnimation;
 
@@ -59,9 +62,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         public static float force = 800f;
         public static float recoil = 3f;
         public static float range = 256f;
-
+        
         private readonly string fingerTipString = "fingerTipR";
         private readonly string muzzleCenter = "muzzleCenter";
+
+        private bool hasRevertedPitch;
 
         public override void OnEnter()
         {
@@ -130,8 +135,12 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                     }
 
                     modelTransform = GetModelTransform();
-                    pitchYawControl = new PitchYawControl();
-                    pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);
+                    pitchYawControl = gameObject.GetComponent<PitchYawControl>();
+                    animator = modelLocator.modelTransform.gameObject.GetComponent<Animator>();
+                    // DELETE IF NEEDED
+
+                    aimAnim = modelLocator.modelTransform.gameObject.GetComponent<AimAnimator>();
+                    pitchYawControl.ChangePitchAndYawRange(true, modelTransform, aimAnim);  // changing the pitch/yaw to large value
 
                     yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                     yusukeWeaponComponent.SetOverdriveState(true);
@@ -149,13 +158,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
         private void StunThem(float overdriveFreezeMax, HurtBox enemyBox)
         {
-            enemyBox.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(overdriveFreezeMax);
+            enemyBox.healthComponent.GetComponent<SetStateOnHurt>()?.SetStunInternal(overdriveFreezeMax + 1);
             EntityStateMachine component = enemyBox.healthComponent.body.GetComponent<EntityStateMachine>();
             if (component)
             {
                 OverdriveTemporarySlow state = new OverdriveTemporarySlow
                 {
-                    duration = overdriveFreezeMax
+                    duration = overdriveFreezeMax + 1
                 };
                 component.SetState(state);
             }
@@ -225,8 +234,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 overdriveTimeDuration += GetDeltaTime();
                 overdriveFreezeMax -= GetDeltaTime();
 
-                if (overdriveTimeDuration > overdriveSnipeStartUp - 1)
+                if (inputBank) inputBank.aimDirection = aimDirection;
+
+                if (overdriveTimeDuration > pitchStartUp)
                 {
+                    if (!hasRevertedPitch)
+                    {
+                        //hasRevertedPitch = true;
+                        RevertPitch(); 
+                    }
 
                 }
 
@@ -235,6 +251,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                     hasPlayedAnimation = true;
                     PlayAnimation("FullBody, Override", "OverdriveSpiritgunSniperFinish", "Slide.playbackRate", duration);
                     ShootTarget();
+                    //aimAnim.enabled = false;
                 }
 
                 if (isAuthority && fixedAge >= duration)
@@ -244,6 +261,13 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             }
 
         }
+
+        // attempts to slowly decrease the pitch/yaw value to its original
+        private void RevertPitch()
+        {
+            pitchYawControl.RestorePitch(modelTransform, aimAnim, 1);
+        }
+
 
         private void ReturnToMain()
         {
@@ -300,13 +324,25 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         {
             base.OnExit();
 
+            
             if (yusukeWeaponComponent) yusukeWeaponComponent.SetOverdriveState(false);
-            pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
+
+            // DELETE IF NEEDED
+            aimAnim = modelLocator.modelTransform.gameObject.GetComponent<AimAnimator>();
+            //pitchYawControl.RestorePitch(modelTransform, aimAnim);
+            aimAnim.enabled = true;
+
+            if (!shouldReturn)
+            {
+                pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
+                pitchYawControl.ResetElapsedTime(); // resets the time for next time usage.
+            }
 
             if (characterDirection)
             {
                 characterDirection.enabled = true;
             }
+
 
             if (characterMotor)
             {

@@ -213,6 +213,7 @@ namespace YusukeMod.Survivors.Yusuke
             bodyPrefab.AddComponent<SacredComponent>();
 
             bodyPrefab.AddComponent<PivotRotation>();   // visual pivot rotation for the animations and vfx
+            bodyPrefab.AddComponent<PitchYawControl>();
             LoadAdditionalSprites();
             //anything else here
         }
