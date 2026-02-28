@@ -284,11 +284,25 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if ((bool)sacredComponent)
             {
                 // retrieves the value that needs to be added to the fill
-                
-                float finalFill = sacredComponent.currentSacredValue / sacredComponent.maxSacredValue;
-                UpdateFill(finalFill, 3);
-                //Log.Info("Current sacred value: " + finalFill);
-                sacredFill.fillAmount = currentSacredAmount;
+
+                float finalFill;
+
+                if (sacredComponent.startReverse)
+                {
+                    finalFill = sacredComponent.currentSacredValue / sacredComponent.maxSacredValue;
+                    UpdateFill(finalFill, 3);
+                    sacredMaxFillBlue.fillAmount = currentSacredAmount;
+                }
+                else
+                {
+                    finalFill = sacredComponent.currentSacredValue / sacredComponent.maxSacredValue;
+                    UpdateFill(finalFill, 3);
+                    //Log.Info("Current sacred value: " + finalFill);
+                    sacredFill.fillAmount = currentSacredAmount;
+                    
+                }
+
+
                 if (currentSacredAmount >= 1f)
                 {
                     //spiritCuffFill.color = Color.yellow;
@@ -315,6 +329,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
 
         }
 
+        // determins when to display the correct icon.
         public void DisplaySacredMaxGuageImage(bool isDisplayed)
         {
             SacredMaxGuageImage.SetActive(isDisplayed);
@@ -323,9 +338,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public void DisplaySacredMaxGuageBlueFlowImage(bool isDisplayed)
         {
             SacredBlueGuage.SetActive(isDisplayed);
+            sacredFill.fillAmount = 0f;
         }
-
-
 
     }
 }

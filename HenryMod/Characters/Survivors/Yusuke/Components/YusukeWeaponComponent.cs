@@ -31,6 +31,8 @@ namespace YusukeMod.Survivors.Yusuke.Components
 
         private bool isInOverdriveState;
 
+        private bool isFlowStateActive;
+
         // near death enum for different conditions
         public enum NearDeathIndex
         {
@@ -113,6 +115,11 @@ namespace YusukeMod.Survivors.Yusuke.Components
             return isOverdriveSkillSetEnabled;
         }
 
+        public bool GetFlowState()
+        {
+            return isFlowStateActive;
+        }
+
         public void UseMazokuRevive()
         {
             hasMazokuRevive = false;
@@ -149,6 +156,11 @@ namespace YusukeMod.Survivors.Yusuke.Components
         public void SetOverDriveSkillsActivity(bool isEnabled)
         {
             isOverdriveSkillSetEnabled = isEnabled;
+        }
+
+        public void SetFlowState(bool isEnabled)
+        {
+            isFlowStateActive = isEnabled;
         }
 
     }

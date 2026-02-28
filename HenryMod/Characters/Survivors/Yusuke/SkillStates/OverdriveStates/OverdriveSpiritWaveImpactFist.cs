@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
+using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
@@ -51,6 +53,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private readonly string handRPosition = "HandR";
 
         private YusukeWeaponComponent yusukeWeaponComponent;
+        private HealthComponent yusukeHealth;
 
         public override void OnEnter()
         {
@@ -78,6 +81,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
             yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeWeaponComponent.SetOverdriveState(true);
+
+            yusukeHealth = characterBody.GetComponent<HealthComponent>();
+            if (NetworkServer.active)
+            {
+                characterBody.AddTimedBuff(JunkContent.Buffs.IgnoreFallDamage, 1f);
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = true;
+
+                }
+
+            }
         }
 
         private void SetUpEffects()
@@ -179,6 +194,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             {
                 characterMotor.enabled = true;
                 characterMotor.velocity = new Vector3(0, 0, 0);
+
+            }
+            gameObject.GetComponent<SacredComponent>().UseOverdriveAbility((byte)OverdriveType.STANDARD);
+            if (NetworkServer.active)
+            {
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = false;
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
+                }
 
             }
         }

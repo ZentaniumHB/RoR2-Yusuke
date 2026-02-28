@@ -101,6 +101,7 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject overdriveWaveFinishEffect;
         public static GameObject overdriveShotgunSingleShotEffect;
         public static GameObject overdriveShotgunFinalShotEffect;
+        public static GameObject overdriveSpiritFlowEffect;
 
         public static GameObject overdriveSpiritSniperEffect; 
 
@@ -319,6 +320,8 @@ namespace YusukeMod.Survivors.Yusuke
 
             overdriveWaveFinishEffect = _assetBundle.LoadEffect("overdriveWaveFinish", "overdriveWaveFinish", false, false);
             overdriveSpiritWaveBeginEffect = _assetBundle.LoadEffect("overdriveSpiritWaveBeginParticle", "overdriveSpiritWaveBeginParticle", true, false);
+
+            overdriveSpiritFlowEffect = _assetBundle.LoadEffect("overdriveSpiritFlow", "overdriveSpiritFlow", true, false);
 
         }
 

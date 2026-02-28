@@ -9,6 +9,8 @@ using UnityEngine.Networking;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke;
+using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
@@ -70,6 +72,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
         private YusukeWeaponComponent yusukeWeaponComponent;
 
+        private HealthComponent yusukeHealth;
+
         public override void OnEnter()
         {
             base.OnEnter();
@@ -100,6 +104,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
             yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeWeaponComponent.SetOverdriveState(true);
+
+            yusukeHealth = characterBody.GetComponent<HealthComponent>();
+            if (NetworkServer.active)
+            {
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = true;
+                }
+
+            }
 
         }
 
@@ -312,6 +326,18 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 characterMotor.velocity = new Vector3(0, 0, 0);
 
             }
+
+            if (NetworkServer.active)
+            {
+                if (yusukeHealth)
+                {
+                    yusukeHealth.godMode = false;
+                    characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
+                }
+
+            }
+
+            gameObject.GetComponent<SacredComponent>().UseOverdriveAbility((byte)OverdriveType.STANDARD);
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

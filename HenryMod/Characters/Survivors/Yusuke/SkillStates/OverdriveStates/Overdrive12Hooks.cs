@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 using static RoR2.SolusWing.SolusWingPodAI.Simulation.SimulationState;
+using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
@@ -64,6 +66,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private GameObject heavyHitEffectPrefab;
 
         private YusukeWeaponComponent yusukeWeaponComponent;
+        private HealthComponent yusukeHealth;
         
 
         public override void OnEnter()
@@ -168,9 +171,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                     yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                     yusukeWeaponComponent.SetOverdriveState(true);
 
+                    yusukeHealth = characterBody.GetComponent<HealthComponent>();
                     if (NetworkServer.active)
                     {
                         characterBody.AddTimedBuff(JunkContent.Buffs.IgnoreFallDamage, 1f);
+                        if (yusukeHealth)
+                        {
+                            yusukeHealth.godMode = true;
+                            
+                        }
+                        
                     }
 
                 }
@@ -498,6 +508,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
             yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeWeaponComponent.SetOverdriveState(false);
+
+
+            if (!shouldReturn) 
+            {   
+                gameObject.GetComponent<SacredComponent>().UseOverdriveAbility((byte)OverdriveType.STANDARD);
+                if (NetworkServer.active)
+                {
+                    if (yusukeHealth)
+                    {
+                        yusukeHealth.godMode = false;
+                        characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
+                    }
+
+                }
+
+            } 
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

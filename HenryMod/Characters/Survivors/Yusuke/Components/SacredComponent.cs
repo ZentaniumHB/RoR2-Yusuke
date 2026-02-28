@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.Components
 {
@@ -26,15 +27,22 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         public bool hasReleaseSacredEnergy = false;
         public bool isSacredInUse = false;
         public bool hasSacredEnergy;
-        private float decreaseValue = 2f;
+        private float decreaseValue = 10f;
         public bool startReverse;
 
         private bool hasDisplayedMaxIcon;
+        private bool hasDisplayedMaxBlueIcon;
+        private bool hasHiddenMaxIcon;
+        private bool hasHiddenMaxBlueIcon;
+
         YusukeHUD yusukeHud;
+        YusukeWeaponComponent yusukeWeaponComponent;
 
         public void Start()
         {
             yusukeHud = gameObject.GetComponent<YusukeHUD>();
+            yusukeWeaponComponent = gameObject.GetComponent<YusukeWeaponComponent>();
+
             if(yusukeHud)
             {
                 Log.Info("[SACRED ENERGY COMPONENT] - Yusuke HUD has been found. ");
@@ -50,20 +58,26 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if(hasReleaseSacredEnergy && !isSacredInUse) IncreaseSacredGauge(1);
             if (hasSacredEnergy)
             {
-                SwitchIcon();
-                //Log.Info("currentSpiritValue " + currentSpiritValue);
-                /*currentSacredValue = Mathf.Clamp(currentSacredValue - (decreaseValue * Time.deltaTime), 0f, maxSacredValue);
-                previousValue = currentSacredValue;*/
+                SwitchToMaxIcon();
+                if (startReverse)
+                {
+                    //Log.Info("currentSpiritValue " + currentSpiritValue);
+                    HideMaxIcon();
+                    currentSacredValue = Mathf.Clamp(currentSacredValue - (decreaseValue * Time.deltaTime), 0f, maxSacredValue);
+                    previousValue = currentSacredValue;
+                    
+                }
+
             }
             if (previousValue <= 0)
             {
-                currentSacredValue = 0;
-                previousValue = currentSacredValue;
-                hasSacredEnergy = false;
+                ResetValues();
+                HideMaxBlueIcon();
+
             }
         }
 
-        private void SwitchIcon()
+        private void SwitchToMaxIcon()
         {
             if (!hasDisplayedMaxIcon)
             {
@@ -73,6 +87,49 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                     yusukeHud.DisplaySacredMaxGuageImage(true);
                 }
  
+            }
+        }
+
+        private void SwitchToMaxBlueIcon()
+        {
+            if (!hasDisplayedMaxBlueIcon)
+            {
+                hasDisplayedMaxBlueIcon = true;
+                if (yusukeHud)
+                {
+                    yusukeWeaponComponent.SetFlowState(true);
+                    yusukeHud.DisplaySacredMaxGuageBlueFlowImage(true);
+                }
+
+            }
+        }
+
+        
+
+        private void HideMaxIcon()
+        {
+            if (!hasHiddenMaxIcon)
+            {
+                hasHiddenMaxIcon = true;
+                if (yusukeHud)
+                {
+                    yusukeHud.DisplaySacredMaxGuageImage(false);
+                }
+
+            }
+        }
+
+        private void HideMaxBlueIcon()
+        {
+            if (!hasHiddenMaxBlueIcon)
+            {
+                hasHiddenMaxBlueIcon = true;
+                if (yusukeHud)
+                {
+                    yusukeHud.DisplaySacredMaxGuageBlueFlowImage(false);
+                    yusukeWeaponComponent.SetFlowState(false);
+                }
+
             }
         }
 
@@ -106,12 +163,16 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 
             }
 
-            chargeIncrement = maxSacredValue / baseChargeDuration * Time.deltaTime; 
-            chargeValue += chargeIncrement;
-            currentSacredValue = Mathf.Clamp(chargeValue, 0.0f, maxSacredValue);
+            if (startReverse == false)
+            {
+                chargeIncrement = maxSacredValue / baseChargeDuration * Time.deltaTime;
+                chargeValue += chargeIncrement;
+                currentSacredValue = Mathf.Clamp(chargeValue, 0.0f, maxSacredValue);
 
-            previousValue = currentSacredValue;
-            //Log.Info("Previous value: " + currentSacredValue);
+                previousValue = currentSacredValue;
+
+            }
+
             return true;
         }
 
@@ -119,14 +180,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
         {
             if(type == (byte)OverdriveType.STANDARD)
             {
-
+                HideMaxIcon();
+                ResetValues();
             }
             else
             {
-                
+                SwitchToMaxBlueIcon();
+                startReverse = true;
             }
         }
 
-
+        private void ResetValues()
+        {
+            currentSacredValue = 0;
+            chargeValue = 0;
+            previousValue = currentSacredValue;
+            hasSacredEnergy = false;
+            startReverse = false;
+            hasDisplayedMaxIcon = false;
+            hasDisplayedMaxBlueIcon = false;
+            hasHiddenMaxIcon = false;
+            hasDepletedSacredMeter = false;
+        }
     }
 }

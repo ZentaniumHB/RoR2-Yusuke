@@ -6,12 +6,14 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke.SkillStates;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
@@ -67,6 +69,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
         private readonly string muzzleCenter = "muzzleCenter";
 
         private bool hasRevertedPitch;
+        private HealthComponent yusukeHealth;
 
         public override void OnEnter()
         {
@@ -148,7 +151,19 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                     yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                     yusukeWeaponComponent.SetOverdriveState(true);
                     ScanUsingSphere();
-                    
+
+                    yusukeHealth = characterBody.GetComponent<HealthComponent>();
+                    if (NetworkServer.active)
+                    {
+                        characterBody.AddTimedBuff(JunkContent.Buffs.IgnoreFallDamage, 1f);
+                        if (yusukeHealth)
+                        {
+                            yusukeHealth.godMode = true;
+
+                        }
+
+                    }
+
 
                 }
 
@@ -336,6 +351,17 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             {
                 pitchYawControl.ChangePitchAndYawRange(false, modelTransform, aimAnim);
                 pitchYawControl.ResetElapsedTime(); // resets the time for next time usage.
+                gameObject.GetComponent<SacredComponent>().UseOverdriveAbility((byte)OverdriveType.STANDARD);
+
+                if (NetworkServer.active)
+                {
+                    if (yusukeHealth)
+                    {
+                        yusukeHealth.godMode = false;
+                        characterBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 1f * duration);
+                    }
+
+                }
             }
 
             if (characterDirection)
@@ -343,13 +369,15 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 characterDirection.enabled = true;
             }
 
-
             if (characterMotor)
             {
                 characterMotor.enabled = true;
                 characterMotor.velocity = new Vector3(0, 0, 0);
 
             }
+
+
+
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
