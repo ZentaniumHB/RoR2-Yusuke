@@ -72,7 +72,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if (previousValue <= 0)
             {
                 ResetValues();
-                HideMaxBlueIcon();
+                if(hasReleaseSacredEnergy) HideMaxBlueIcon();
 
             }
         }
@@ -124,10 +124,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             if (!hasHiddenMaxBlueIcon)
             {
                 hasHiddenMaxBlueIcon = true;
+                yusukeWeaponComponent.SetFlowState(false);
                 if (yusukeHud)
                 {
                     yusukeHud.DisplaySacredMaxGuageBlueFlowImage(false);
-                    yusukeWeaponComponent.SetFlowState(false);
+
                 }
 
             }
@@ -200,7 +201,8 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
             hasDisplayedMaxIcon = false;
             hasDisplayedMaxBlueIcon = false;
             hasHiddenMaxIcon = false;
-            hasDepletedSacredMeter = false;
+            hasHiddenMaxBlueIcon = false;
+
         }
     }
 }

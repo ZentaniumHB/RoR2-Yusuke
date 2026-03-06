@@ -176,7 +176,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack
                     position = aimRay.origin,
                     rotation = Util.QuaternionSafeLookRotation(aimRay.direction),
                     owner = base.gameObject,
-                    damage = damageStat * damageCoefficient,
+                    damage = damageStat * damageCoefficient, 
                     damageTypeOverride = value,
                     force = force,
                     crit = Util.CheckRoll(critStat, base.characterBody.master),

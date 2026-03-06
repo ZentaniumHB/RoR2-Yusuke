@@ -92,6 +92,7 @@ namespace YusukeMod.Survivors.Yusuke
         internal static SkillDef overdriveSpiritWaveImpactFist;
         internal static SkillDef overdriveSpiritFlow;
         internal static SkillDef overdrive12Hook;
+        internal static SkillDef flowDodge;
 
         //HUD
         internal static HUD hud = null;
@@ -214,6 +215,7 @@ namespace YusukeMod.Survivors.Yusuke
 
             bodyPrefab.AddComponent<PivotRotation>();   // visual pivot rotation for the animations and vfx
             bodyPrefab.AddComponent<PitchYawControl>();
+            bodyPrefab.AddComponent<FlowImageMeshTrail>().enabled = false;
             LoadAdditionalSprites();
             //anything else here
         }
@@ -1222,11 +1224,29 @@ namespace YusukeMod.Survivors.Yusuke
 
         private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
         {
-            float percentageTrigger = 0.15f;
+            
             /* take damage hook for now, until I find a better way to do this, the problem with this is that it doesn't account for any buffs or debuffs
              *  so there is a chance that it can return as non lethal but actually is with buffs.
              */
-            
+            if (self)
+            {
+                if (self.body)
+                {
+                    if (self.body.name.Contains("YusukeBody"))
+                    {
+                        YusukeWeaponComponent yusukeWeaponComponent = self.body.GetComponent<YusukeWeaponComponent>();
+                        if (yusukeWeaponComponent && yusukeWeaponComponent.GetFlowState() && !yusukeWeaponComponent.GetDodgeState() && !yusukeWeaponComponent.GetKnockedState())
+                        {
+
+                            yusukeWeaponComponent.SetDodgeBool(true);
+                            damageInfo.rejected = true;
+                            damageInfo.damage = 0;
+                        }
+
+                    }
+
+                }
+            }
 
             orig(self, damageInfo);
         }

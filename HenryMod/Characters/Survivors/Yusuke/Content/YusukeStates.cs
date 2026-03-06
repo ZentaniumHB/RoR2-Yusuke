@@ -63,9 +63,11 @@ namespace YusukeMod.Survivors.Yusuke
             Modules.Content.AddEntityState(typeof(OverdriveSpiritWaveImpactFist));
             Modules.Content.AddEntityState(typeof(Overdrive12Hooks));
             Modules.Content.AddEntityState(typeof(OverdriveSpiritFlow));
+            Modules.Content.AddEntityState(typeof(FlowDodge));
 
             Modules.Content.AddEntityState(typeof(SwitchSkills));
             Modules.Content.AddEntityState(typeof(YusukeMain));
+
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
+using YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.PowerUp;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.SpiritAttack;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
@@ -333,11 +334,18 @@ namespace YusukeMod.Modules.BaseStates
                 
 
             }
+
+            if(yusukeWeaponComponent && yusukeWeaponComponent.GetDodgeBool() && !yusukeWeaponComponent.GetDodgeState())
+            {
+                Log.Info("Going to dodge. Dodge bool is true");
+                yusukeWeaponComponent.SetDodgeBool(false);
+                outer.SetNextState( new FlowDodge() );
+
+            }
         }
 
         protected virtual EntityState NextKnockedState(byte value)
         {
-
             return new KnockedState
             {
                 NearDeathType = value,
@@ -351,6 +359,9 @@ namespace YusukeMod.Modules.BaseStates
                 switchID = (int)SwitchSkills.SwitchSkillIndex.MazokuRevert,
             };
         }
+
+
+
 
         public override void OnExit()
         {

@@ -8,6 +8,9 @@ namespace YusukeMod.Survivors.Yusuke
 
         public static readonly Color yusukeBuffColour = new Color(0.0f, 0.4f, 0.2f);
 
+        public static readonly Color overdriveSlowColour = new Color(0.0f, 1.0f, 1.0f);
+
+
         // armor buff gained during roll
         public static BuffDef armorBuff;
 
@@ -16,6 +19,9 @@ namespace YusukeMod.Survivors.Yusuke
 
         // Armour 
         public static BuffDef spiritMegaArmourBuff;
+
+        // Armour 
+        public static BuffDef overdriveSlowBuff;
 
 
 
@@ -39,6 +45,11 @@ namespace YusukeMod.Survivors.Yusuke
                 false,
                 false);
 
+            overdriveSlowBuff = Modules.Content.CreateAndAddBuff("SpiritMegaSlowDebuff",
+                LegacyResourcesAPI.Load<BuffDef>("BuffDefs/Slow50").iconSprite,
+                overdriveSlowColour,
+                false,
+                true);
         }
     }
 }

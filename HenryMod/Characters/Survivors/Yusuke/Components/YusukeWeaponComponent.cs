@@ -33,6 +33,11 @@ namespace YusukeMod.Survivors.Yusuke.Components
 
         private bool isFlowStateActive;
 
+        private bool isRightDodgeDirection;
+
+        private bool canDodge;
+        private bool isDodging;
+
         // near death enum for different conditions
         public enum NearDeathIndex
         {
@@ -120,6 +125,21 @@ namespace YusukeMod.Survivors.Yusuke.Components
             return isFlowStateActive;
         }
 
+        public bool GetDodgeBool()
+        {
+            return canDodge;
+        }
+
+        public bool GetDodgeState()
+        {
+            return isDodging;
+        }
+
+        public bool GetDodgeDirection()
+        {
+            return isRightDodgeDirection;
+        }
+
         public void UseMazokuRevive()
         {
             hasMazokuRevive = false;
@@ -161,6 +181,28 @@ namespace YusukeMod.Survivors.Yusuke.Components
         public void SetFlowState(bool isEnabled)
         {
             isFlowStateActive = isEnabled;
+        }
+
+        public void SetDodgeBool(bool isCurrentlyDodging)
+        {
+            canDodge = isCurrentlyDodging;
+        }
+
+        public void SetDodgeState(bool isEnabled)
+        {
+            isDodging = isEnabled;
+        }
+
+        public void SwapDodgeDirection()
+        {
+            if (isRightDodgeDirection)
+            {
+                isRightDodgeDirection = false;
+            }
+            else
+            {
+                isRightDodgeDirection = true;
+            }
         }
 
     }

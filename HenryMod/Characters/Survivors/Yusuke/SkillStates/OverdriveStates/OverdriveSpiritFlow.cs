@@ -13,7 +13,7 @@ using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
-    internal class OverdriveSpiritFlow : BaseSkillState
+    public class OverdriveSpiritFlow : BaseSkillState
     {
 
         private float duration = 1f;

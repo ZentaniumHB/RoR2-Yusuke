@@ -8,6 +8,7 @@ using UnityEngine.AddressableAssets;
 using YusukeMod.Characters.Survivors.Yusuke.Extra;
 using On;
 using RoR2BepInExPack.GameAssetPaths;
+using YusukeMod.Characters.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -102,6 +103,8 @@ namespace YusukeMod.Survivors.Yusuke
         public static GameObject overdriveShotgunSingleShotEffect;
         public static GameObject overdriveShotgunFinalShotEffect;
         public static GameObject overdriveSpiritFlowEffect;
+        public static Material flowMaterial;
+
 
         public static GameObject overdriveSpiritSniperEffect; 
 
@@ -132,6 +135,7 @@ namespace YusukeMod.Survivors.Yusuke
         internal static GameObject SacredGuage;
 
         private static AssetBundle _assetBundle;
+        public static GameObject flowObjEffect;
 
         public static void Init(AssetBundle assetBundle)
         {
@@ -220,6 +224,8 @@ namespace YusukeMod.Survivors.Yusuke
             transforms[0] = overdriveSpiritSniperEffect.transform.GetChild(1);
             transforms[1] = overdriveSpiritSniperEffect.transform.GetChild(2);
             beamPoint.pointTransforms = transforms;
+
+            flowMaterial = Materials.LoadMaterial(_assetBundle, "matFlowImage");
 
             Modules.Content.CreateAndAddEffectDef(overdriveSpiritSniperEffect);
 
@@ -322,6 +328,10 @@ namespace YusukeMod.Survivors.Yusuke
             overdriveSpiritWaveBeginEffect = _assetBundle.LoadEffect("overdriveSpiritWaveBeginParticle", "overdriveSpiritWaveBeginParticle", true, false);
 
             overdriveSpiritFlowEffect = _assetBundle.LoadEffect("overdriveSpiritFlow", "overdriveSpiritFlow", true, false);
+
+            flowObjEffect = _assetBundle.LoadEffect("flowImage", "flowImage", false, false);
+            flowObjEffect.AddComponent<FlowImageMesh>();
+
 
         }
 

@@ -3,6 +3,7 @@ using RoR2;
 using UnityEngine;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using System;
+using YusukeMod.Survivors.Yusuke.Components;
 
 namespace YusukeMod.Survivors.Yusuke.SkillStates
 {
@@ -18,53 +19,64 @@ namespace YusukeMod.Survivors.Yusuke.SkillStates
 
         private GameObject hitImpactEffectPrefab = YusukeAssets.hitImpactEffect;
 
+        private YusukeWeaponComponent yusukeWeaponComponent;
+
         private readonly string dashCenter = "dashCenter";
 
         public override void OnEnter()
         {
             cuffComponent = gameObject.GetComponent<SpiritCuffComponent>();
+            yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
+
+            if(yusukeWeaponComponent && yusukeWeaponComponent.GetDodgeState())
+            {
+                outer.SetNextStateToMain();
+                return;
+            }
+            else
+            {
+                hitboxGroupName = "MeleeGroup";
+
+                damageType = DamageType.Generic;
+                damageCoefficient = YusukeStaticValues.swordDamageCoefficient;
+                procCoefficient = 1f;
+                pushForce = 300f;
+                bonusForce = Vector3.zero;
+                baseDuration = 1f;
+
+                //0-1 multiplier of baseduration, used to time when the hitbox is out (usually based on the run time of the animation)
+                //for example, if attackStartPercentTime is 0.5, the attack will start hitting halfway through the ability. if baseduration is 3 seconds, the attack will start happening at 1.5 seconds
+                attackStartPercentTime = 0.2f;
+                attackEndPercentTime = 0.4f;
+
+                //this is the point at which the attack can be interrupted by itself, continuing a combo
+                earlyExitPercentTime = 0.6f;
+
+                hitStopDuration = 0.012f;
+                attackRecoil = 0.5f;
+                hitHopVelocity = 4f;
+
+                swingSoundString = "HenrySwordSwing";
+                hitSoundString = "";
+                muzzleString = "mainPosition";
+                playbackRateParam = "Slash.playbackRate";
 
 
-            hitboxGroupName = "MeleeGroup";
+                swingEffectPrefab = YusukeAssets.swordSwingEffect;
 
-            damageType = DamageType.Generic;
-            damageCoefficient = YusukeStaticValues.swordDamageCoefficient;
-            procCoefficient = 1f;
-            pushForce = 300f;
-            bonusForce = Vector3.zero;
-            baseDuration = 1f;
+                meleeSwingEffect1Prefab = YusukeAssets.meleeSwingEffect1;
+                meleeSwingEffect2Prefab = YusukeAssets.meleeSwingEffect2;
+                meleeSwingEffect3Prefab = YusukeAssets.meleeSwingEffect3;
+                meleeSwingEffect4Prefab = YusukeAssets.meleeSwingEffect4;
 
-            //0-1 multiplier of baseduration, used to time when the hitbox is out (usually based on the run time of the animation)
-            //for example, if attackStartPercentTime is 0.5, the attack will start hitting halfway through the ability. if baseduration is 3 seconds, the attack will start happening at 1.5 seconds
-            attackStartPercentTime = 0.2f;
-            attackEndPercentTime = 0.4f;
+                hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
 
-            //this is the point at which the attack can be interrupted by itself, continuing a combo
-            earlyExitPercentTime = 0.6f;
+                impactSound = YusukeAssets.swordHitSoundEvent.index;
 
-            hitStopDuration = 0.012f;
-            attackRecoil = 0.5f;
-            hitHopVelocity = 4f;
+                EditEffects();
 
-            swingSoundString = "HenrySwordSwing";
-            hitSoundString = "";
-            muzzleString = "mainPosition";
-            playbackRateParam = "Slash.playbackRate";
-
-
-            swingEffectPrefab = YusukeAssets.swordSwingEffect;
-
-            meleeSwingEffect1Prefab = YusukeAssets.meleeSwingEffect1;
-            meleeSwingEffect2Prefab = YusukeAssets.meleeSwingEffect2;
-            meleeSwingEffect3Prefab = YusukeAssets.meleeSwingEffect3;
-            meleeSwingEffect4Prefab = YusukeAssets.meleeSwingEffect4;
-
-            hitEffectPrefab = YusukeAssets.swordHitImpactEffect;
-
-            impactSound = YusukeAssets.swordHitSoundEvent.index;
-
-            EditEffects();
-
+                
+            }
             base.OnEnter();
         }
 
