@@ -10,6 +10,7 @@ using YusukeMod.Survivors.Yusuke.Components;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using static YusukeMod.Characters.Survivors.Yusuke.Components.SacredComponent;
+using YusukeMod.Modules.BaseStates;
 
 namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 {
@@ -29,6 +30,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
         private AimAnimator aimAnim;
         HealthComponent yusukeHealth;
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
@@ -57,6 +59,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
             yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
             yusukeWeaponComponent.SetOverdriveState(true);
+            RevertOverdriveSkils();
 
 
             yusukeHealth = characterBody.GetComponent<HealthComponent>();
@@ -74,6 +77,27 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
                 origin = FindModelChild("mainPosition").position,
                 scale = 1f
             }, transmit: true);
+        }
+
+
+        private void RevertOverdriveSkils()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchBackFromOverdriveToRegularSkills();
+
+                }
+
+            }
         }
 
         private void SetUpEffects()

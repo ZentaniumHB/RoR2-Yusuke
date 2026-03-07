@@ -24,6 +24,7 @@ using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Grabs;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates;
 using System.Xml.Linq;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates;
+using EntityStates;
 
 namespace YusukeMod.Survivors.Yusuke
 {
@@ -1237,10 +1238,34 @@ namespace YusukeMod.Survivors.Yusuke
                         YusukeWeaponComponent yusukeWeaponComponent = self.body.GetComponent<YusukeWeaponComponent>();
                         if (yusukeWeaponComponent && yusukeWeaponComponent.GetFlowState() && !yusukeWeaponComponent.GetDodgeState() && !yusukeWeaponComponent.GetKnockedState())
                         {
-
                             yusukeWeaponComponent.SetDodgeBool(true);
-                            damageInfo.rejected = true;
-                            damageInfo.damage = 0;
+
+                            //if there is no state (as in no move is being charged or playing out) then the flow state will prevent damage.
+                            EntityState state = EntityStateMachine.FindByCustomName(self.body.gameObject, "Weapon").state;
+                            string stateName = state.GetType().Name.ToString();
+
+                            Log.Info("The current state name found in flow" + stateName);
+                            if (state.GetType() == null || state.GetType() == typeof(Idle))
+                            {
+                                damageInfo.rejected = true;
+                                damageInfo.damage = 0;
+                            }
+
+                            state = EntityStateMachine.FindByCustomName(self.body.gameObject, "Body").state;
+                            if (state.GetType() == null)
+                            {
+                                damageInfo.rejected = true;
+                                damageInfo.damage = 0;
+                            }
+
+                            state = EntityStateMachine.FindByCustomName(self.body.gameObject, "Weapon2").state;
+                            if (state.GetType() == null)
+                            {
+                                damageInfo.rejected = true;
+                                damageInfo.damage = 0;
+                            }
+
+
                         }
 
                     }

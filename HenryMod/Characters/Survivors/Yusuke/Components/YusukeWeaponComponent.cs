@@ -110,6 +110,7 @@ namespace YusukeMod.Survivors.Yusuke.Components
             return hasSacredEnergyReleased;
         }
 
+        // gets overdriveSkill is currently being used
         public bool GetOverdriveState()
         {
             return isInOverdriveState;
@@ -168,6 +169,7 @@ namespace YusukeMod.Survivors.Yusuke.Components
             if(sacredComponent) sacredComponent.hasReleaseSacredEnergy = true;
         }
 
+        // sets whether an overdriveSkill is currently being used
         public void SetOverdriveState(bool isOverdriveStateActive)
         {
             isInOverdriveState = isOverdriveStateActive;

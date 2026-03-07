@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using YusukeMod.Characters.Survivors.Yusuke.Components;
 using YusukeMod.Characters.Survivors.Yusuke.SkillStates.Tracking;
+using YusukeMod.Modules.BaseStates;
 using YusukeMod.Survivors.Yusuke;
 using YusukeMod.Survivors.Yusuke.Components;
 using static RoR2.SolusWing.SolusWingPodAI.Simulation.SimulationState;
@@ -67,7 +68,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
         private YusukeWeaponComponent yusukeWeaponComponent;
         private HealthComponent yusukeHealth;
-        
+        private YusukeMain mainState;
 
         public override void OnEnter()
         {
@@ -170,6 +171,7 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
 
                     yusukeWeaponComponent = characterBody.gameObject.GetComponent<YusukeWeaponComponent>();
                     yusukeWeaponComponent.SetOverdriveState(true);
+                    RevertOverdriveSkils();
 
                     yusukeHealth = characterBody.GetComponent<HealthComponent>();
                     if (NetworkServer.active)
@@ -190,6 +192,28 @@ namespace YusukeMod.Characters.Survivors.Yusuke.SkillStates.OverdriveStates
             }
 
         }
+
+
+        private void RevertOverdriveSkils()
+        {
+            EntityStateMachine stateMachine = characterBody.GetComponent<EntityStateMachine>();
+            if (stateMachine == null)
+            {
+                Log.Error("No State machine found");
+            }
+            else
+            {
+                Type currentStateType = stateMachine.state.GetType();
+                if (currentStateType == typeof(YusukeMain))
+                {
+                    mainState = (YusukeMain)stateMachine.state;
+                    mainState.SwitchBackFromOverdriveToRegularSkills();
+
+                }
+
+            }
+        }
+
 
         private void StunEnemy()
         {

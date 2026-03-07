@@ -746,6 +746,15 @@ namespace YusukeMod.Modules.BaseStates
 
         }
 
+        public void SwitchBackFromOverdriveToRegularSkills()
+        {
+            if (yusukeWeaponComponent.GetOverdriveState())
+            {
+                SwitchOverdriveSkills();
+            }
+            
+        }
+
 
 
     }

@@ -68,6 +68,11 @@ namespace YusukeMod.Characters.Survivors.Yusuke.Components
                 Log.Info("Pool does not exists");
             }
 
+            if (hairObject)
+            {
+                hairObject = _emh_HairPrefab.gameObject;
+            }
+
             // Matching and baking the skinnedmeshrenderer based on the animation its at (looks for the skinmesh and the face mesh).
             foreach (SkinnedMeshRenderer skinMesh in skinnedMeshRenderers)
             {
